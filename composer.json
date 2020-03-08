@@ -1,0 +1,17 @@
+{
+    "name": "artabramov/echidna",
+    "description": "Primitive microframework.",
+    "homepage": "http://echidna.io",
+    "type": "Microframework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Art Abramov",
+            "email": "notdepot@gmail.com",
+            "role": "Original Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0"
+    }
+}
