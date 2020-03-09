@@ -1,6 +1,6 @@
 <?php
 
-namespace Echidna;
+namespace Artabramov\Echidna;
 
 class User
 {
