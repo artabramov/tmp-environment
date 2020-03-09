@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Artabramov\\Echidna\\": "src"
+            "Artabramov\\Echidna\\": "src/"
         }
     }
 }
