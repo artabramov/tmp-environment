@@ -29,10 +29,10 @@ class Usermeta
         } elseif(!is_string($meta_key) || mb_strlen($meta_key, 'utf-8') < 2 || mb_strlen($meta_key, 'utf-8') > 40 || !preg_match("/^[a-z0-9_]{1,40}$/", $meta_key)) {
             $error = 'Meta key is incorrect. It must be a string from 2 to 40 symbols and contains lowercase latin symbols and underline only.';
 
-        } elseif(!isset($meta_value)) {
-            $error = 'Meta value is incorrect. It can must be isset.';
+        //} elseif(!isset($meta_value)) {
+        //    $error = 'Meta value is incorrect. It can must be isset.';
 
-        } elseif(!is_string($meta_value) || mb_strlen($meta_value, 'utf-8') > 255) {
+        } elseif(!empty($meta_value) && (!is_string($meta_value) || mb_strlen($meta_value, 'utf-8') > 255)) {
             $error = 'Meta value is incorrect. It must be a string no longer than 255 symbols.';
 
         } else {
