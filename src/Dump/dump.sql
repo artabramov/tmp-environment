@@ -5,49 +5,48 @@ CREATE DATABASE IF NOT EXISTS slim CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS slim.users (
     id              BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    created_date    DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
+    date            DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
     user_status     VARCHAR(40)  NOT NULL, # pending | approved | trash
     user_login      VARCHAR(40)  NOT NULL,
-    user_hash       VARCHAR(40)  NOT NULL,
-    user_hash_date  DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00', # Дата создания текущего пароля
     user_token      VARCHAR(40)  NOT NULL,
     user_token_date DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00', # Дата создания текущего токена
     user_email      VARCHAR(255) NOT NULL,
     user_phone      VARCHAR(20)  NOT NULL,
+    user_hash       VARCHAR(40)  NOT NULL,
+    user_hash_date  DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00', # Дата создания текущего пароля
 
     PRIMARY KEY id              (id),
-            KEY created_date    (created_date),
+            KEY date            (date),
             KEY user_status     (user_status),
             KEY user_login      (user_login),
-            KEY user_hash       (user_hash),
-            KEY user_hash_date  (user_hash_date),
             KEY user_token      (user_token),
             KEY user_token_date (user_token_date),
             KEY user_email      (user_email),
-            KEY user_phone      (user_phone)
+            KEY user_phone      (user_phone),
+            KEY user_hash       (user_hash),
+            KEY user_hash_date  (user_hash_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE IF NOT EXISTS slim.userdata (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    created_date DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
-    creator_id   BIGINT(20)   NOT NULL,
-    data_key     VARCHAR(40)  NOT NULL,
-    data_value   VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS slim.usermeta (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
+    user_id    BIGINT(20)   NOT NULL,
+    meta_key   VARCHAR(40)  NOT NULL,
+    meta_value VARCHAR(255) NOT NULL,
         
-    PRIMARY KEY id           (id),
-            KEY created_date (created_date),
-            KEY creator_id   (creator_id),
-            KEY data_key     (data_key),
-            KEY data_value   (data_value)
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY meta_key   (meta_key),
+            KEY meta_value (meta_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE IF NOT EXISTS slim.posts (
     id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    created_date  DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
-    updated_date  DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
-    creator_id    BIGINT(20)   NOT NULL,
+    date          DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
+    user_id       BIGINT(20)   NOT NULL,
     parent_id     BIGINT(20)   NOT NULL,
 
     post_type     VARCHAR(40)  NOT NULL, # task | event
@@ -81,9 +80,8 @@ CREATE TABLE IF NOT EXISTS slim.posts (
 
 CREATE TABLE IF NOT EXISTS slim.members (
     id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
-    created_date DATETIME    NOT NULL DEFAULT '0000-00-00 00:00:00',
-    updated_date DATETIME    NOT NULL DEFAULT '0000-00-00 00:00:00',
-    creator_id   BIGINT(20)  NOT NULL,
+    date         DATETIME    NOT NULL DEFAULT '0000-00-00 00:00:00',
+    user_id      BIGINT(20)  NOT NULL,
     parent_id    BIGINT(20)  NOT NULL,
 
     member_id    BIGINT(20)  NOT NULL, 
