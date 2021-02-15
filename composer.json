@@ -1,0 +1,27 @@
+{
+    "name": "artabramov/echidna",
+    "description": "Echidna is simple backend core for RESTful web applications.",
+    "homepage": "http://echidna.io",
+    "type": "restful",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Art Abramov",
+            "email": "notdepot@gmail.com",
+            "role": "Original Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0",
+        "illuminate/database": "~5.1",
+        "phpmailer/phpmailer": "^6.1",
+        "monolog/monolog": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "artabramov\\Echidna\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require-dev": {}
+}
