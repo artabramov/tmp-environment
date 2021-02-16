@@ -9,26 +9,22 @@ class User
     private $id;
     private $date;
     private $status;
-    private $token;
-    private $email;
-    private $login;
-    private $hash;
-    private $restored;
+    private $user_token;
+    private $user_email;
+    private $user_hash;
     private $meta;
 
 
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
-        $this->db       = $db;
-        $this->error    = '';
-        $this->id       = 0;
-        $this->date     = '0000-00-00 00:00:00';
-        $this->status   = '';
-        $this->token    = '';
-        $this->email    = '';
-        $this->login    = '';
-        $this->hash     = '';
-        $this->restored = '0000-00-00 00:00:00';
-        $this->meta     = [];
+        $this->db         = $db;
+        $this->error      = '';
+        $this->id         = 0;
+        $this->date       = '0000-00-00 00:00:00';
+        $this->status     = '';
+        $this->user_token = '';
+        $this->user_email = '';
+        $this->user_hash  = '';
+        $this->meta       = [];
     }
 
 
@@ -36,7 +32,7 @@ class User
         if( isset( $this->$key )) {
             $this->$key = $value;
         } else {
-            $this->usermeta[ $key ] = $value;
+            $this->meta[ $key ] = $value;
         }
     }
 
@@ -46,32 +42,26 @@ class User
             return $this->$key;
         } elseif( isset( $this->usermeta[ $key ] )) {
             return $this->usermeta[ $key ];
+        } else {
+            return null;
         }
     }
 
 
-    public function has( string $key ) {
-
-    }
-
-
-    public function token_create() {
+    public function create_token() {
         do {
-            $token = sha1( bin2hex( random_bytes( 64 )));
-            if( $this->exists( [['token', '=', $token]] )) {
+            $user_token = sha1( bin2hex( random_bytes( 64 )));
+            if( $this->is_exists( [['user_token', '=', $user_token]] )) {
                 $repeat = true;
             } else {
                 $repeat = false;
             }
         } while( $repeat );
-        return $token;
+        return $user_token;
     }
 
 
-    private function exists( array $args ) {
-        if( empty( $args )) {
-            return false;
-        }
+    private function is_exists( array $args ) {
         $user = $this->db->table('users')->select('id');
         foreach( $args as $where ) {
             $user = $user->where( $where[0], $where[1], $where[2] );
@@ -81,7 +71,7 @@ class User
     }
 
 
-    public function pass_create() {
+    public function create_pass() {
         $user_pass = '';
         for( $i = 0; $i < 6; $i++ ) {
             $user_pass .= mt_rand( 0,9 );
@@ -90,47 +80,39 @@ class User
     }
 
 
-    public function hash_get( $value ) {
+    public function get_hash( $value ) {
         return sha1( $value );
     }
 
 
-    public function create() {
+    public function create_user() {
 
         $this->error = '';
 
-        if( empty( $this->email )) {
+        if( empty( $this->user_email )) {
             $this->error = 'User email is empty';
 
-        } elseif( mb_strlen( $this->email, 'utf-8' ) > 255 ) {
+        } elseif( mb_strlen( $this->user_email, 'utf-8' ) > 255 ) {
             $this->error = 'User email is is too long';
 
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->email )) {
+        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->user_email )) {
             $this->error = 'User email is incorrect';
 
-        } elseif( $this->exists( [['email', '=', $this->email]] )) {
+        } elseif( $this->is_exists( [['user_email', '=', $this->user_email]] )) {
             $this->error = 'User email is occupied';
 
-
-
-            
-
         } else {
-
             $this->id = $this->db->table('users')->insertGetId([
-                'date'     => $this->db::raw('now()'),
-                'status'   => $this->status,
-                'token'    => $this->token,
-                'email'    => trim( strtolower( $this->email )),
-                'hash'     => $this->hash,
-                'restored' => $this->restored
+                'date'       => $this->db::raw('now()'),
+                'status'     => $this->status,
+                'user_token' => $this->user_token,
+                'user_email' => trim( strtolower( $this->user_email )),
+                'user_hash'  => $this->user_hash
             ]);
 
             if( empty( $this->id ) ) {
                 $this->error = 'User insertion error';
             }
         }
-
-        //return empty( $this->error );
     }
 }
