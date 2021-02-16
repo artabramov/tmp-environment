@@ -15,6 +15,7 @@
         "php": ">=7.4.0",
         "illuminate/database": "~5.1",
         "phpmailer/phpmailer": "^6.1",
+        "kunalvarma05/dropbox-php-sdk": "^0.2.1",
         "monolog/monolog": "^2.0"
     },
     "autoload": {
