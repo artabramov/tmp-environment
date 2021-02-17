@@ -93,7 +93,7 @@ class User
     }
 
 
-    public function create_user( string $user_email, string $user_hash ) {
+    public function user_create( string $user_email, string $user_hash ) {
 
         $user_email = trim( strtolower( $user_email ));
 
@@ -181,6 +181,29 @@ class User
             $this->user_hash   = $user->user_hash;
 
         }
-
     }
+
+
+    public function user_exit( string $user_token ) {
+
+        $user_token = trim( $user_token );
+
+        if( empty( $user_token )) {
+            $this->error = 'User token is empty';
+
+        } elseif( mb_strlen( $user_token, 'utf-8' ) != 40 ) {
+            $this->error = 'User token must be 40 characters';
+
+        } elseif( !$this->is_exists( [['user_token', '=', $user_token], ['user_status', '<>', 'trash']] )) {
+            $this->error = "User token is incorrect or user has been deleted";
+
+        } else {
+
+            $this->db
+            ->table('users')
+            ->where([ ['user_token', '=', $user_token] ])
+            ->update([ 'user_token' => $this->create_token() ]);
+        }
+    }
+
 }
