@@ -93,33 +93,41 @@ class User
     }
 
 
-    public function create_user() {
+    public function create_user( string $user_email, string $user_hash ) {
 
-        $this->error = '';
+        $user_email = trim( strtolower( $user_email ));
 
-        if( empty( $this->user_email )) {
+        $this->clear();
+
+        if( empty( $user_email )) {
             $this->error = 'User email is empty';
 
-        } elseif( mb_strlen( $this->user_email, 'utf-8' ) > 255 ) {
+        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
             $this->error = 'User email is is too long';
 
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->user_email )) {
+        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
             $this->error = 'User email is incorrect';
 
-        } elseif( $this->is_exists( [['user_email', '=', $this->user_email]] )) {
+        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
             $this->error = 'User email is occupied';
+
+        } elseif( empty( $user_hash )) {
+            $this->error = 'User hash is empty';
+
+        } elseif( mb_strlen( $user_hash, 'utf-8' ) != 40 ) {
+            $this->error = 'User hash must be 40 characters';
 
         } else {
 
-            $this->id = $this->db->table('users')->insertGetId([
+            $user_id = $this->db->table('users')->insertGetId([
                 'date'        => $this->db::raw('now()'),
-                'user_status' => $this->user_status,
-                'user_token'  => $this->user_token,
-                'user_email'  => trim( strtolower( $this->user_email )),
-                'user_hash'   => $this->user_hash
+                'user_status' => 'pending',
+                'user_token'  => $this->create_token(),
+                'user_email'  => $user_email,
+                'user_hash'   => $user_hash
             ]);
 
-            if( empty( $this->id ) ) {
+            if( empty( $user_id ) ) {
                 $this->error = 'User insertion error';
             }
         }
