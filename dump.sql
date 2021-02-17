@@ -3,19 +3,19 @@ SET sql_mode = '';
 
 # Пользователи
 CREATE TABLE IF NOT EXISTS project.users (
-    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status     VARCHAR(40)  NOT NULL, # pending / approved / trash
-    user_token VARCHAR(40)  NOT NULL, # Уникальный токен
-    user_email VARCHAR(255) NOT NULL, # Электронная почта
-    user_hash  VARCHAR(40)  NOT NULL, # Одноразовый пароль для авторизации
+    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_status VARCHAR(40)  NOT NULL, # pending / approved / trash
+    user_token  VARCHAR(40)  NOT NULL, # Уникальный токен
+    user_email  VARCHAR(255) NOT NULL, # Электронная почта
+    user_hash   VARCHAR(40)  NOT NULL, # Одноразовый пароль для авторизации
 
-    PRIMARY KEY id         (id),
-            KEY date       (date),
-            KEY status     (status),
-    UNIQUE  KEY user_token (user_token),
-    UNIQUE  KEY user_email (user_email),
-            KEY user_hash  (user_hash)
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY user_status (user_status),
+    UNIQUE  KEY user_token  (user_token),
+    UNIQUE  KEY user_email  (user_email),
+            KEY user_hash   (user_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -23,15 +23,15 @@ CREATE TABLE IF NOT EXISTS project.users (
 CREATE TABLE IF NOT EXISTS project.groups (
     id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status       VARCHAR(40)  NOT NULL, # private / public / trash
     user_id      BIGINT(20)   NOT NULL, # Создатель группы
+    group_status VARCHAR(40)  NOT NULL, # private / public / trash
     group_name   VARCHAR(255) NOT NULL, # Название группы
 
-    PRIMARY KEY id         (id),
-            KEY date       (date),
-            KEY status     (status),
-            KEY user_id    (user_id),
-            KEY group_name (group_name)
+    PRIMARY KEY id           (id),
+            KEY date         (date),
+            KEY user_id      (user_id),
+            KEY group_status (group_status),
+            KEY group_name   (group_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -39,20 +39,20 @@ CREATE TABLE IF NOT EXISTS project.groups (
 CREATE TABLE IF NOT EXISTS project.posts (
     id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status       VARCHAR(40) NOT NULL,
     user_id      BIGINT(20)  NOT NULL,
     group_id     BIGINT(20)  NOT NULL,
     parent_id    BIGINT(20)  NOT NULL,
+    post_status  VARCHAR(40) NOT NULL,
     post_type    VARCHAR(40) NOT NULL, # post / comment / task
     post_content TEXT        NOT NULL,
 
-    PRIMARY KEY id        (id),
-            KEY date      (date),
-            KEY status    (status),
-            KEY user_id   (user_id),
-            KEY group_id  (group_id),
-            KEY parent_id (parent_id),
-            KEY post_type (post_type)
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY user_id     (user_id),
+            KEY group_id    (group_id),
+            KEY parent_id   (parent_id),
+            KEY post_status (post_status),
+            KEY post_type   (post_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
