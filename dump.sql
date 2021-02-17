@@ -1,14 +1,13 @@
 SET sql_mode = '';
 
 
-# Пользователи
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_status VARCHAR(40)  NOT NULL, # pending / approved / trash
-    user_token  VARCHAR(40)  NOT NULL, # Уникальный токен
-    user_email  VARCHAR(255) NOT NULL, # Электронная почта
-    user_hash   VARCHAR(40)  NOT NULL, # Одноразовый пароль для авторизации
+    user_token  VARCHAR(40)  NOT NULL, # User token (unique)
+    user_email  VARCHAR(255) NOT NULL, # User email
+    user_hash   VARCHAR(40)  NOT NULL, # One-time password hash (non-unique)
 
     PRIMARY KEY id          (id),
             KEY date        (date),

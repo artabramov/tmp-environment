@@ -42,6 +42,15 @@ class User
     }
 
 
+    public function has( string $key ) {
+        if( !empty( $this->$key )) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     /*
     Erase user object data.
     */
@@ -88,7 +97,7 @@ class User
     }
 
 
-    public function get_hash( $value ) {
+    public function get_hash( string $value ) {
         return sha1( $value );
     }
 
@@ -129,12 +138,72 @@ class User
 
             if( empty( $user_id ) ) {
                 $this->error = 'User insertion error';
+                
+            }
+        }
+    }
+
+    
+    public function user_select( string $key, string $value ) {
+
+        $key = trim( strtolower( $key ));
+        $value = trim( strtolower( $value ));
+
+        $this->clear();
+
+        if( empty( $key )) {
+            $this->error = 'Key is empty';
+
+        } elseif( !in_array( $key, ['id', 'user_token', 'user_email'] )) {
+            $this->error = 'Key is incorrect';
+
+        } elseif( $key == 'id' and empty( $value )) {
+            $this->error = 'User id is empty';
+
+        } elseif( $key == 'id' and !ctype_digit( $value )) {
+            $this->error = 'User id is incorrect';
+
+        } elseif( $key == 'user_token' and empty( $value )) {
+            $this->error = 'User token is empty';
+
+        } elseif( $key == 'user_token' and mb_strlen( $value, 'utf-8' ) != 40 ) {
+            $this->error = 'User token must be 40 characters';
+
+        } elseif( $key == 'user_token' and !$this->is_exists( [['user_token', '=', $value]] )) {
+            $this->error = "User token is incorrect or user has been deleted";
+
+        } elseif( $key == 'user_email' and empty( $value )) {
+            $this->error = 'User email is empty';
+
+        } elseif( $key == 'user_email' and mb_strlen( $value, 'utf-8' ) > 255 ) {
+            $this->error = 'User email is is too long';
+
+        } elseif( $key == 'user_email' and !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value )) {
+            $this->error = 'User email is incorrect';
+
+        } else {
+            $user = $this->db
+            ->table('users')
+            ->where([ [$key, '=', $value] ])
+            ->select( '*' )
+            ->first();
+
+            if( isset( $user->id )) {
+                $this->id = $user->id;
+                $this->date = $user->date;
+                $this->user_status = $user->user_status;
+                $this->user_token = $user->user_token;
+                $this->user_email = $user->user_email;
+                $this->user_hash = $user->user_hash;
+
+            } else {
+                $this->error = 'User not found';
             }
         }
     }
 
 
-    public function user_auth( $user_email, $user_pass ) {
+    public function user_auth( string $user_email, string $user_pass ) {
 
         $this->clear();
 
@@ -187,6 +256,8 @@ class User
     public function user_exit( string $user_token ) {
 
         $user_token = trim( $user_token );
+
+        $this->clear();
 
         if( empty( $user_token )) {
             $this->error = 'User token is empty';
