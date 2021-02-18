@@ -51,9 +51,6 @@ class User
     }
 
 
-    /*
-    Erase user object data.
-    */
     private function clear() {
         $this->error       = '';
         $this->id          = 0;
@@ -67,7 +64,7 @@ class User
 
     public function create_token() {
         do {
-            $user_token = sha1( bin2hex( random_bytes( 64 )));
+            $user_token = bin2hex( random_bytes( 64 ));
             if( $this->is_exists( [['user_token', '=', $user_token]] )) {
                 $repeat = true;
             } else {
@@ -88,43 +85,38 @@ class User
     }
 
 
-    public function create_pass() {
+    public function create_pass( int $pass_length ) {
         $user_pass = '';
-        for( $i = 0; $i < 6; $i++ ) {
+        for( $i = 0; $i < $pass_length; $i++ ) {
             $user_pass .= mt_rand( 0,9 );
         }
         return $user_pass;
     }
 
-
-    public function get_hash( string $value ) {
-        return sha1( $value );
-    }
-
-
     public function user_create( string $user_email, string $user_hash ) {
-
-        $user_email = trim( strtolower( $user_email ));
 
         $this->clear();
 
         if( empty( $user_email )) {
-            $this->error = 'User email is empty';
+            $this->error = 'user_email is empty';
 
         } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
-            $this->error = 'User email is is too long';
+            $this->error = 'user_email is too long';
 
         } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
-            $this->error = 'User email is incorrect';
+            $this->error = 'user_email is incorrect';
 
         } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
-            $this->error = 'User email is occupied';
+            $this->error = 'user_email is occupied';
 
         } elseif( empty( $user_hash )) {
-            $this->error = 'User hash is empty';
+            $this->error = 'user_hash is empty';
 
-        } elseif( mb_strlen( $user_hash, 'utf-8' ) != 40 ) {
-            $this->error = 'User hash must be 40 characters';
+        } elseif( mb_strlen( $user_hash, 'utf-8' ) < 40 ) {
+            $this->error = 'user_hash is too short';
+
+        } elseif( mb_strlen( $user_hash, 'utf-8' ) > 40 ) {
+            $this->error = 'user_hash is too long';
 
         } else {
 
@@ -137,54 +129,51 @@ class User
             ]);
 
             if( empty( $user_id ) ) {
-                $this->error = 'User insertion error';
+                $this->error = 'user creation error';
                 
             }
         }
     }
 
-    
-    public function user_select( string $key, string $value ) {
-
-        $key = trim( strtolower( $key ));
-        $value = trim( strtolower( $value ));
-
+    public function user_select( string $key, int|string $value ) {
+  
         $this->clear();
 
         if( empty( $key )) {
-            $this->error = 'Key is empty';
+            $this->error = 'key is empty';
 
         } elseif( !in_array( $key, ['id', 'user_token', 'user_email'] )) {
-            $this->error = 'Key is incorrect';
+            $this->error = 'key is incorrect';
 
-        } elseif( $key == 'id' and empty( $value )) {
-            $this->error = 'User id is empty';
+        } elseif( empty( $value )) {
+            $this->error = 'value is empty';
+            
+        } elseif( $key == 'id' and !is_int( $value )) {
+            $this->error = 'value for user_id is incorrect';
 
-        } elseif( $key == 'id' and !ctype_digit( $value )) {
-            $this->error = 'User id is incorrect';
+        } elseif( $key == 'id' and mb_strlen( strval( $value ), 'utf-8' ) > 20 ) {
+            $this->error = 'value for user_id is too long';
 
-        } elseif( $key == 'user_token' and empty( $value )) {
-            $this->error = 'User token is empty';
+        } elseif( $key == 'user_token' and mb_strlen( $value, 'utf-8' ) < 128 ) {
+            $this->error = 'value for user_token is too short';
 
-        } elseif( $key == 'user_token' and mb_strlen( $value, 'utf-8' ) != 40 ) {
-            $this->error = 'User token must be 40 characters';
+        } elseif( $key == 'user_token' and mb_strlen( $value, 'utf-8' ) > 128 ) {
+            $this->error = 'value for user_token is too long';
 
         } elseif( $key == 'user_token' and !$this->is_exists( [['user_token', '=', $value]] )) {
-            $this->error = "User token is incorrect or user has been deleted";
-
-        } elseif( $key == 'user_email' and empty( $value )) {
-            $this->error = 'User email is empty';
+            $this->error = 'value for user_token not found';
 
         } elseif( $key == 'user_email' and mb_strlen( $value, 'utf-8' ) > 255 ) {
-            $this->error = 'User email is is too long';
+            $this->error = 'value fot user_email is too long';
 
         } elseif( $key == 'user_email' and !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value )) {
-            $this->error = 'User email is incorrect';
+            $this->error = 'value for user_email is incorrect';
 
         } else {
+
             $user = $this->db
-            ->table('users')
-            ->where([ [$key, '=', $value] ])
+            ->table( 'users' )
+            ->where([[ $key, '=', $value ]])
             ->select( '*' )
             ->first();
 
@@ -197,7 +186,7 @@ class User
                 $this->user_hash = $user->user_hash;
 
             } else {
-                $this->error = 'User not found';
+                $this->error = 'user not found';
             }
         }
     }
