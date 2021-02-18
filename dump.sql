@@ -1,6 +1,7 @@
 SET sql_mode = '';
 
 
+# Пользователи
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -18,43 +19,6 @@ CREATE TABLE IF NOT EXISTS project.users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Группы
-CREATE TABLE IF NOT EXISTS project.groups (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)   NOT NULL, # Создатель группы
-    group_status VARCHAR(40)  NOT NULL, # private / public / trash
-    group_name   VARCHAR(255) NOT NULL, # Название группы
-
-    PRIMARY KEY id           (id),
-            KEY date         (date),
-            KEY user_id      (user_id),
-            KEY group_status (group_status),
-            KEY group_name   (group_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Записи
-CREATE TABLE IF NOT EXISTS project.posts (
-    id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
-    date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)  NOT NULL,
-    group_id     BIGINT(20)  NOT NULL,
-    parent_id    BIGINT(20)  NOT NULL,
-    post_status  VARCHAR(40) NOT NULL,
-    post_type    VARCHAR(40) NOT NULL, # post / comment / task
-    post_content TEXT        NOT NULL,
-
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY user_id     (user_id),
-            KEY group_id    (group_id),
-            KEY parent_id   (parent_id),
-            KEY post_status (post_status),
-            KEY post_type   (post_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 # Метаданные пользователей
 CREATE TABLE IF NOT EXISTS project.usermeta (
     id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
@@ -68,6 +32,59 @@ CREATE TABLE IF NOT EXISTS project.usermeta (
             KEY user_id    (user_id),
             KEY meta_key   (meta_key),
             KEY meta_value (meta_value)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Хабы
+CREATE TABLE IF NOT EXISTS project.hubs (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL, # Создатель группы
+    hub_status VARCHAR(40)  NOT NULL, # private / public / trash
+    hub_name   VARCHAR(255) NOT NULL, # Название группы
+
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY hub_status (hub_status),
+            KEY hub_name   (hub_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Метаданные хабов
+CREATE TABLE IF NOT EXISTS project.hubmeta (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    hub_id     BIGINT(20)   NOT NULL,
+    meta_key   VARCHAR(40)  NOT NULL,
+    meta_value VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY hub_id     (hub_id),
+            KEY meta_key   (meta_key),
+            KEY meta_value (meta_value)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Записи
+CREATE TABLE IF NOT EXISTS project.posts (
+    id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
+    date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    parent_id    BIGINT(20)  NOT NULL,
+    user_id      BIGINT(20)  NOT NULL,
+    hub_id       BIGINT(20)  NOT NULL,
+    post_status  VARCHAR(40) NOT NULL, # task: todo / active / done / trash, comment: inherit / trash
+    post_type    VARCHAR(40) NOT NULL, # task / comment
+    post_content TEXT        NOT NULL,
+
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY parent_id   (parent_id),
+            KEY user_id     (user_id),
+            KEY hub_id      (hub_id),
+            KEY post_status (post_status),
+            KEY post_type   (post_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
