@@ -1,14 +1,14 @@
 SET sql_mode = '';
 
 
-# Пользователи
+# Users
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_status VARCHAR(40)  NOT NULL, # pending / approved / trash
-    user_token  VARCHAR(128) NOT NULL, # Unique user token
-    user_email  VARCHAR(255) NOT NULL, # User email
-    user_hash   VARCHAR(40)  NOT NULL, # One-time password hash (sha1)
+    user_status VARCHAR(40)  NOT NULL, # pending | approved | trash
+    user_token  VARCHAR(80)  NOT NULL, # Unique user token
+    user_email  VARCHAR(255) NOT NULL,
+    user_hash   VARCHAR(40)  NOT NULL, # One-time password hash
 
     PRIMARY KEY id          (id),
             KEY date        (date),
@@ -19,101 +19,110 @@ CREATE TABLE IF NOT EXISTS project.users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Хабы
-CREATE TABLE IF NOT EXISTS project.desks (
-    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id     BIGINT(20)   NOT NULL, # Создатель группы
-    desk_status VARCHAR(40)  NOT NULL, # private / public / trash
-    desk_name   VARCHAR(255) NOT NULL, # Название группы
+# Users metadata
+CREATE TABLE IF NOT EXISTS project.user_meta (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    meta_key   VARCHAR(40)  NOT NULL,
+    meta_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY user_id     (user_id),
-            KEY desk_status (desk_status),
-            KEY desk_name   (desk_name)
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY meta_key   (meta_key),
+            KEY meta_value (meta_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Роли пользователей
-CREATE TABLE IF NOT EXISTS project.members (
-    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id     BIGINT(20)   NOT NULL,
-    desk_id     BIGINT(20)   NOT NULL,
-    member_role VARCHAR(40)  NOT NULL, # 
+# Users roles
+CREATE TABLE IF NOT EXISTS project.user_roles (
+    id        BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id   BIGINT(20)   NOT NULL,
+    group_id  BIGINT(20)   NOT NULL,
+    user_role VARCHAR(40)  NOT NULL, # admin | editor | reader
 
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY user_id     (user_id),
-            KEY desk_id     (desk_id),
-            KEY member_role (member_role)
+    PRIMARY KEY id        (id),
+            KEY date      (date),
+            KEY user_id   (user_id),
+            KEY group_id  (group_id),
+            KEY user_role (user_role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+# Users groups
+CREATE TABLE IF NOT EXISTS project.groups (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    group_name VARCHAR(255) NOT NULL,
 
-
-
-# Метаданные
-CREATE TABLE IF NOT EXISTS project.meta (
-    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    parent_type VARCHAR(40)  NOT NULL,
-    parent_id   BIGINT(20)   NOT NULL,
-    user_id      BIGINT(20)  NOT NULL,
-    meta_key    VARCHAR(40)  NOT NULL,
-    meta_value  VARCHAR(255) NOT NULL,
-
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY parent_type (parent_type),
-            KEY parent_id   (parent_id),
-            KEY user_id     (user_id),
-            KEY meta_key    (meta_key),
-            KEY meta_value  (meta_value)
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY group_name (group_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Записи
+# Posts
 CREATE TABLE IF NOT EXISTS project.posts (
     id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    parent_type  VARCHAR(40) NOT NULL,
-    parent_id    BIGINT(20)  NOT NULL,
     user_id      BIGINT(20)  NOT NULL,
-    post_status  VARCHAR(40) NOT NULL, # task: todo / doing / done / trash, comment: inherit / trash
-    post_type    VARCHAR(40) NOT NULL, # task / comment
+    group_id     BIGINT(20)  NOT NULL,
+    parent_id    BIGINT(20)  NOT NULL,
+    post_status  VARCHAR(40) NOT NULL, # parent: todo | doing | done | trash, child: inherit | trash
+    post_type    VARCHAR(40) NOT NULL, # document | comment
     post_content TEXT        NOT NULL,
 
     PRIMARY KEY id          (id),
             KEY date        (date),
-            KEY parent_type (parent_type),
-            KEY parent_id   (parent_id),
             KEY user_id     (user_id),
+            KEY group_id    (group_id),
+            KEY parent_id   (parent_id),
             KEY post_status (post_status),
             KEY post_type   (post_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Загруженные файлы
-CREATE TABLE IF NOT EXISTS project.uploads (
-    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    parent_type VARCHAR(40) NOT NULL,
-    parent_id   BIGINT(20)  NOT NULL,
-    user_id      BIGINT(20)  NOT NULL,
-    upload_name VARCHAR(255) NOT NULL,
-    upload_mime VARCHAR(255) NOT NULL,
-    upload_size BIGINT(20)   NOT NULL,
-    upload_file VARCHAR(255) NOT NULL,
+# Posts metadata
+CREATE TABLE IF NOT EXISTS project.post_meta (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    post_id    BIGINT(20)   NOT NULL,
+    meta_key   VARCHAR(40)  NOT NULL,
+    meta_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY parent_type (parent_type),
-            KEY parent_id   (parent_id),
-            KEY user_id     (user_id),
-            KEY upload_name (upload_name),
-            KEY upload_mime (upload_mime),
-            KEY upload_size (upload_size),
-            KEY upload_file (upload_file)
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY post_id    (post_id),
+            KEY meta_key   (meta_key),
+            KEY meta_value (meta_value)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Posts uploads
+CREATE TABLE IF NOT EXISTS project.post_uploads (
+    id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id       BIGINT(20)   NOT NULL,
+    post_id       BIGINT(20)   NOT NULL,
+    upload_status VARCHAR(40)  NOT NULL, # inherit | favorite | trash
+    upload_name   VARCHAR(255) NOT NULL, # Filename
+    upload_mime   VARCHAR(255) NOT NULL,
+    upload_size   BIGINT(20)   NOT NULL,
+    upload_file   VARCHAR(255) NOT NULL, # Full link to the file
+
+    PRIMARY KEY id            (id),
+            KEY date          (date),
+            KEY user_id       (user_id),
+            KEY post_id       (post_id),
+            KEY upload_status (upload_status),
+            KEY upload_name   (upload_name),
+            KEY upload_mime   (upload_mime),
+            KEY upload_size   (upload_size),
+     UNIQUE KEY upload_file   (upload_file)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
