@@ -126,3 +126,21 @@ CREATE TABLE IF NOT EXISTS project.post_uploads (
             KEY upload_size   (upload_size),
      UNIQUE KEY upload_file   (upload_file)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Posts timers
+CREATE TABLE IF NOT EXISTS project.post_timers (
+    id          BIGINT(20)  NOT NULL AUTO_INCREMENT,
+    date        DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id     BIGINT(20)  NOT NULL,
+    post_id     BIGINT(20)  NOT NULL,
+    timer_key   VARCHAR(40) NOT NULL,
+    timer_value DATETIME    NOT NULL,
+
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY user_id     (user_id),
+            KEY post_id     (post_id),
+            KEY timer_key   (timer_key),
+            KEY timer_value (timer_value)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -85,89 +85,6 @@ class User
     }
 
     /*
-    Create a new user.
-    */
-    public function create( string $user_email, string $user_hash ) : bool {
-
-        $this->clear();
-
-        if( empty( $user_email )) {
-            $this->error = 'user_email is empty';
-
-        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
-            $this->error = 'user_email is too long';
-
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
-            $this->error = 'user_email is incorrect';
-
-        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
-            $this->error = 'user_email is occupied';
-
-        } elseif( empty( $user_hash )) {
-            $this->error = 'user_hash is empty';
-
-        } elseif( mb_strlen( $user_hash, 'utf-8' ) < 40 ) {
-            $this->error = 'user_hash is too short';
-
-        } elseif( mb_strlen( $user_hash, 'utf-8' ) > 40 ) {
-            $this->error = 'user_hash is too long';
-
-        } else {
-
-            $user_id = $this->db->table('users')->insertGetId([
-                'date'        => $this->db::raw('now()'),
-                'user_status' => 'pending',
-                'user_token'  => $this->create_token(),
-                'user_email'  => $user_email,
-                'user_hash'   => $user_hash
-            ]);
-
-            if( empty( $user_id ) ) {
-                $this->error = 'user creation error';
-            }
-        }
-
-        return empty( $user_id ) ? false : true;
-    }
-    
-    /*
-    Get user by id.
-    */
-    public function select( int $user_id ) : bool {
-  
-        $this->clear();
-
-        if( empty( $user_id )) {
-            $this->error = 'user_id is empty';
-
-        } elseif( strlen( strval( $user_id )) > 20 ) {
-            $this->error = 'user_id is too long';
-
-        } else {
-
-            $user = $this->db
-            ->table( 'users' )
-            ->where([[ 'id', '=', $user_id ]])
-            ->select( '*' )
-            ->first();
-
-            if( isset( $user->id )) {
-                $this->id = $user->id;
-                $this->date = $user->date;
-                $this->user_status = $user->user_status;
-                $this->user_token = $user->user_token;
-                $this->user_email = $user->user_email;
-                $this->user_hash = $user->user_hash;
-
-            } else {
-                $this->error = 'user not found';
-            }
-        }
-
-        return empty( $user->id ) ? false : true;
-    }
-
-    /*
     Get user by token.
     */
     public function auth( string $user_token ) : bool {
@@ -208,7 +125,7 @@ class User
     }
 
     /*
-    Get user by email and hash.
+    Get user by email and hash (also update status from pending to approved).
     */
     public function signin( string $user_email, string $user_hash ) : bool {
 
@@ -301,6 +218,89 @@ class User
     }
 
     /*
+    Create a new user.
+    */
+    public function create( string $user_email, string $user_hash ) : bool {
+
+        $this->clear();
+
+        if( empty( $user_email )) {
+            $this->error = 'user_email is empty';
+
+        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
+            $this->error = 'user_email is too long';
+
+        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
+            $this->error = 'user_email is incorrect';
+
+        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
+            $this->error = 'user_email is occupied';
+
+        } elseif( empty( $user_hash )) {
+            $this->error = 'user_hash is empty';
+
+        } elseif( mb_strlen( $user_hash, 'utf-8' ) < 40 ) {
+            $this->error = 'user_hash is too short';
+
+        } elseif( mb_strlen( $user_hash, 'utf-8' ) > 40 ) {
+            $this->error = 'user_hash is too long';
+
+        } else {
+
+            $user_id = $this->db->table('users')->insertGetId([
+                'date'        => $this->db::raw('now()'),
+                'user_status' => 'pending',
+                'user_token'  => $this->create_token(),
+                'user_email'  => $user_email,
+                'user_hash'   => $user_hash
+            ]);
+
+            if( empty( $user_id ) ) {
+                $this->error = 'user creation error';
+            }
+        }
+
+        return empty( $user_id ) ? false : true;
+    }
+
+    /*
+    Select user by id.
+    */
+    public function select( int $user_id ) : bool {
+  
+        $this->clear();
+
+        if( empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( strlen( strval( $user_id )) > 20 ) {
+            $this->error = 'user_id is too long';
+
+        } else {
+
+            $user = $this->db
+            ->table( 'users' )
+            ->where([[ 'id', '=', $user_id ]])
+            ->select( '*' )
+            ->first();
+
+            if( isset( $user->id )) {
+                $this->id = $user->id;
+                $this->date = $user->date;
+                $this->user_status = $user->user_status;
+                $this->user_token = $user->user_token;
+                $this->user_email = $user->user_email;
+                $this->user_hash = $user->user_hash;
+
+            } else {
+                $this->error = 'user not found';
+            }
+        }
+
+        return empty( $user->id ) ? false : true;
+    }
+
+    /*
     Update user email (also token and status).
     */
     public function update( string $user_token, string $user_email ) : bool {
@@ -336,9 +336,38 @@ class User
             $result = $this->db
             ->table('users')
             ->where([ ['user_token', '=', $user_token] ])
-            ->update([ 'user_status' => 'pending' ])
-            ->update([ 'user_token' => $this->create_token() ])
-            ->update([ 'user_email' => $user_email ]);
+            ->update([ 
+                'user_status' => 'pending', 
+                'user_email' => $user_email, 
+                'user_token' => $this->create_token() 
+                ]);
+        }
+
+        return empty( $result ) ? false : true;
+    }
+
+    /*
+    Trash the user.
+    */
+    public function delete( string $user_id ) : bool {
+
+        $this->clear();
+
+        if( empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( strlen( strval( $user_id )) > 20 ) {
+            $this->error = 'user_id is too long';
+
+        } elseif( !$this->is_exists( [[ 'id', '=', $user_id ]] )) {
+            $this->error = 'user_id not found';
+
+        } else {
+
+            $result = $this->db
+            ->table('users')
+            ->where([ ['id', '=', $user_id] ])
+            ->update([ 'user_status' => 'trash' ]);
         }
 
         return empty( $result ) ? false : true;
