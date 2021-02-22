@@ -35,22 +35,6 @@ CREATE TABLE IF NOT EXISTS project.user_meta (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Users roles
-CREATE TABLE IF NOT EXISTS project.user_roles (
-    id        BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id   BIGINT(20)   NOT NULL,
-    group_id  BIGINT(20)   NOT NULL,
-    user_role VARCHAR(40)  NOT NULL, # admin | editor | reader
-
-    PRIMARY KEY id        (id),
-            KEY date      (date),
-            KEY user_id   (user_id),
-            KEY group_id  (group_id),
-            KEY user_role (user_role)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 # Users groups
 CREATE TABLE IF NOT EXISTS project.groups (
     id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
@@ -62,6 +46,22 @@ CREATE TABLE IF NOT EXISTS project.groups (
             KEY date       (date),
             KEY user_id    (user_id),
             KEY group_name (group_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# Users groups
+CREATE TABLE IF NOT EXISTS project.user_groups (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    group_id   BIGINT(20)   NOT NULL,
+    group_role VARCHAR(40)  NOT NULL, # admin | editor | reader
+
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY group_id   (group_id),
+            KEY group_role (group_role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

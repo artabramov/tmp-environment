@@ -38,7 +38,7 @@ class Usermeta
         return null;
     }
 
-    // check is key has a value
+    // check is data has a value
     public function has( string $key ) : bool {
         if( $key == 'error' and !empty( $this->error ) ) {
             return true;
@@ -60,12 +60,24 @@ class Usermeta
         ];
     }
 
+    private function is_exists( int $user_id, string $meta_key ) : bool {
+            
+        $usermeta = $this->db
+        ->table('user_meta')
+        ->select('id')
+        ->where( 'user_id', '=', $user_id )
+        ->where( 'meta_key', '=', $meta_key )
+        ->first();
+
+        return empty( $usermeta->id ) ? false : true;
+    }
+
     // insert a new meta (user_id, meta_key, meta_value)
     public function insert() : bool {
 
-        $user_id = $this->data[ 'user_id' ];
-        $meta_key = $this->data[ 'meta_key' ];
-        $meta_value = $this->data[ 'meta_value' ];
+        $user_id = (int) $this->data[ 'user_id' ];
+        $meta_key = (string) $this->data[ 'meta_key' ];
+        $meta_value = (string) $this->data[ 'meta_value' ];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -116,52 +128,12 @@ class Usermeta
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
-
-    private function is_exists( int $user_id, string $meta_key ) : bool {
-            
-        $usermeta = $this->db
-        ->table('user_meta')
-        ->select('id')
-        ->where( 'user_id', '=', $user_id )
-        ->where( 'meta_key', '=', $meta_key )
-        ->first();
-
-    return empty( $usermeta->id ) ? false : true;
-    }
-
-    public function select( int $user_id ) : bool {
-
-        $this->clear();
-
-        if( empty( $user_id )) {
-            $this->error = 'user_id is empty';
-
-        } elseif( strlen( strval( $user_id )) > 20 ) {
-            $this->error = 'user_id is too long';
-
-        } else {
-
-            $metas = $this->db
-            ->table( 'user_meta' )
-            ->where([[ 'user_id', '=', $user_id ]])
-            ->select( '*' )
-            ->get();
-
-            if( !empty( $metas )) {
-                foreach( $metas as $meta ) {
-                    $this->data[ $meta->meta_key ] = $meta->meta_value;
-                }
-            }
-        }
-
-        return true;
-    }
-
     // update (or insert) the usermeta
-    public function update( int $user_id, string $meta_key, string $meta_value ) : bool {
+    public function update() : bool {
 
-        $this->clear();
+        $user_id = (int) $this->data['user_id'];
+        $meta_key = (string) $this->data['meta_key'];
+        $meta_value = (string) $this->data['meta_value'];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -205,6 +177,36 @@ class Usermeta
         }
 
         return empty( $this->error ) ? true : false;
+    }
+
+    // TODO
+
+    public function select( int $user_id ) : bool {
+
+        $this->clear();
+
+        if( empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( strlen( strval( $user_id )) > 20 ) {
+            $this->error = 'user_id is too long';
+
+        } else {
+
+            $metas = $this->db
+            ->table( 'user_meta' )
+            ->where([[ 'user_id', '=', $user_id ]])
+            ->select( '*' )
+            ->get();
+
+            if( !empty( $metas )) {
+                foreach( $metas as $meta ) {
+                    $this->data[ $meta->meta_key ] = $meta->meta_value;
+                }
+            }
+        }
+
+        return true;
     }
 
     public function delete( int $user_id, string $meta_key ) : bool {
