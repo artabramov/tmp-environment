@@ -313,7 +313,7 @@ class User
 
             $this->create_token();
 
-            $affected = $this->db
+            $affected_rows = $this->db
             ->table('users')
             ->where([ ['id', '=', $user_id] ])
             ->update([
@@ -321,7 +321,7 @@ class User
                 'user_email' => $this->data['user_email'],
                 'user_token' => $this->data['user_token']]);
                 
-            if( $affected == 0 ) {
+            if( $affected_rows == 0 ) {
                 $this->error = 'user update error';
             }
         }
@@ -392,12 +392,10 @@ class User
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
+    // trash the user by user_id
+    public function delete() : bool {
 
-    // trash the user
-    public function delete( string $user_id ) : bool {
-
-        $this->clear();
+        $user_id = (int) $this->data['id'];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -405,21 +403,20 @@ class User
         } elseif( strlen( strval( $user_id )) > 20 ) {
             $this->error = 'user_id is too long';
 
-        } elseif( !$this->is_exists( [[ 'id', '=', $user_id ]] )) {
-            $this->error = 'user_id not found';
-
-        } elseif( !$this->is_exists( [[ 'user_status', '<>', 'trash' ]] )) {
-            $this->error = 'user_id deleted';
-
         } else {
 
-            $result = $this->db
+            $affected = $this->db
             ->table('users')
             ->where([ ['id', '=', $user_id] ])
-            ->update([ 'user_status' => 'trash' ]);
+            ->update([
+                'user_status' => 'trash']);
+                
+            if( $affected == 0 ) {
+                $this->error = 'user delete error';
+            }
         }
 
-        return empty( $result ) ? false : true;
+        return empty( $this->error ) ? true : false;
     }
 
 }

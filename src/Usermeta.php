@@ -72,7 +72,7 @@ class Usermeta
         return empty( $usermeta->id ) ? false : true;
     }
 
-    // insert a new meta (user_id, meta_key, meta_value)
+    // insert a new usermeta
     public function insert() : bool {
 
         $user_id = (int) $this->data[ 'user_id' ];
@@ -119,7 +119,7 @@ class Usermeta
         return empty( $this->error ) ? true : false;
     }
 
-    // update (or insert) the usermeta
+    // update/insert the usermeta
     public function update() : bool {
 
         $user_id = (int) $this->data['user_id'];
@@ -213,11 +213,11 @@ class Usermeta
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
+    // delete usermeta by user_id and meta_key
+    public function delete() : bool {
 
-    public function delete( int $user_id, string $meta_key ) : bool {
-
-        $this->clear();
+        $user_id = (int) $this->data['user_id'];
+        $meta_key = (string) $this->data['meta_key'];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -236,14 +236,17 @@ class Usermeta
 
         } else {
 
-            $this->db
+            $affected_rows = $this->db
             ->table('user_meta')
             ->where([ ['user_id', '=', $user_id], [ 'meta_key', '=', $meta_key ] ])
-            ->delete();
+            ->update([ 'meta_value'  => $meta_value ]);
+
+            if( $affected_rows == 0 ) {
+                $this->error = 'user update error';
+            }
         }
 
         return empty( $this->error ) ? true : false;
     }
-
 
 }
