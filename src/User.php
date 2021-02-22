@@ -357,12 +357,10 @@ class User
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
-
-    // select user by id
-    public function select( int $user_id ) : bool {
+    // select user by user_id
+    public function select() : bool {
   
-        $this->data();
+        $user_id = (int) $this->data['id'];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -373,21 +371,28 @@ class User
         } else {
 
             $user = $this->db
-            ->table( 'users' )
-            ->where([[ 'id', '=', $user_id ]])
-            ->select( '*' )
+            ->table('users')
+            ->select(['*'])
+            ->where([ ['id', '=', $user_id] ])
             ->first();
 
-            if( isset( $user->id )) {
-                $this->data = (array) $user;
+            if( empty( $user->id )) {
+                $this->error = 'user is not available';
 
             } else {
-                $this->error = 'user not found';
+                $this->data['id'] = $user->id;
+                $this->data['date'] = $user->date;
+                $this->data['user_status'] = 'approved';
+                $this->data['user_token'] = $user->user_token;
+                $this->data['user_email'] = $user->user_email;
+                $this->data['user_hash'] = $user->user_hash;
             }
         }
 
-        return empty( $user->data['id'] ) ? false : true;
+        return empty( $this->error ) ? true : false;
     }
+
+    // TODO
 
     // trash the user
     public function delete( string $user_id ) : bool {

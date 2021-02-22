@@ -82,17 +82,11 @@ class Usermeta
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
 
-        } elseif( !is_int( $user_id ) ) {
-            $this->error = 'user_id is not an integer';
-
         } elseif( strlen( strval( $user_id )) > 20 ) {
             $this->error = 'user_id is too long';
 
         } elseif( empty( $meta_key )) {
             $this->error = 'meta_key is empty';
-
-        } elseif( !is_string( $meta_key ) ) {
-            $this->error = 'meta_key is not a string';
 
         } elseif( mb_strlen( $meta_key, 'utf-8' ) > 40 ) {
             $this->error = 'meta_key is is too long';
@@ -102,9 +96,6 @@ class Usermeta
 
         } elseif( empty( $meta_value )) {
             $this->error = 'meta_value is empty';
-
-        } elseif( !is_string( $meta_value ) ) {
-            $this->error = 'meta_value is not a string';
 
         } elseif( mb_strlen( $meta_value, 'utf-8' ) > 255 ) {
             $this->error = 'meta_value is is too long';
@@ -179,11 +170,10 @@ class Usermeta
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
+    public function select() : bool {
 
-    public function select( int $user_id ) : bool {
-
-        $this->clear();
+        $user_id = (int) $this->data['user_id'];
+        $meta_key = (string) $this->data['meta_key'];
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -191,23 +181,39 @@ class Usermeta
         } elseif( strlen( strval( $user_id )) > 20 ) {
             $this->error = 'user_id is too long';
 
+        } elseif( empty( $meta_key )) {
+            $this->error = 'meta_key is empty';
+
+        } elseif( mb_strlen( $meta_key, 'utf-8' ) > 40 ) {
+            $this->error = 'meta_key is is too long';
+
+        } elseif( !preg_match("/^[a-z0-9_]/", $meta_key )) {
+            $this->error = 'meta_key is incorrect';
+
         } else {
 
-            $metas = $this->db
+            $meta = $this->db
             ->table( 'user_meta' )
-            ->where([[ 'user_id', '=', $user_id ]])
+            ->where([[ 'user_id', '=', $user_id ], [ 'meta_key', '=', $meta_key ]])
             ->select( '*' )
-            ->get();
+            ->first();
 
-            if( !empty( $metas )) {
-                foreach( $metas as $meta ) {
-                    $this->data[ $meta->meta_key ] = $meta->meta_value;
-                }
+            if( empty( $meta->id )) {
+                $this->error = 'usermeta is not available';
+
+            } else {
+                $this->data['id'] = $meta->id;
+                $this->data['date'] = $meta->date;
+                $this->data['user_id'] = $meta->user_id;
+                $this->data['meta_key'] = $meta->meta_key;
+                $this->data['meta_value'] = $meta->meta_value;
             }
         }
 
-        return true;
+        return empty( $this->error ) ? true : false;
     }
+
+    // TODO
 
     public function delete( int $user_id, string $meta_key ) : bool {
 
