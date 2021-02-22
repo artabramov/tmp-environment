@@ -116,7 +116,7 @@ class User
     // create a new user by user_email
     public function insert() : bool {
 
-        $user_email = (string) $this->data[ 'user_email' ];
+        $user_email = (string) strtolower( $this->data[ 'user_email' ] );
 
         if( empty( $user_email )) {
             $this->error = 'user_email is empty';
@@ -289,7 +289,7 @@ class User
     public function update() : bool {
 
         $user_id = (int) $this->data['id'];
-        $user_email = (string) $this->data['user_email'];
+        $user_email = (string) strtolower( $this->data['user_email'] );
 
         if( empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -329,35 +329,35 @@ class User
         return empty( $this->error ) ? true : false;
     }
 
-    // TODO
+    // signout by user_id
+    public function signout() : bool {
 
-    // logout
-    public function signout( string $user_token ) : bool {
+        $user_id = (int) $this->data['id'];
 
-        $this->clear();
+        if( empty( $user_id )) {
+            $this->error = 'user_id is empty';
 
-        if( empty( $user_token )) {
-            $this->error = 'user_token is empty';
-
-        } elseif( mb_strlen( $user_token, 'utf-8' ) < 80 ) {
-            $this->error = 'user_token is too short';
-
-        } elseif( mb_strlen( $user_token, 'utf-8' ) > 80 ) {
-            $this->error = 'user_token is too long';
-
-        } elseif( !$this->is_exists( [['user_token', '=', $user_token], ['user_status', '=', 'approved']] )) {
-            $this->error = 'user_token is incorrect';
+        } elseif( strlen( strval( $user_id )) > 20 ) {
+            $this->error = 'user_id is too long';
 
         } else {
 
-            $result = $this->db
+            $this->create_token();
+
+            $affected = $this->db
             ->table('users')
-            ->where([ ['user_token', '=', $user_token] ])
-            ->update([ 'user_token' => $this->create_token() ]);
+            ->where([ ['id', '=', $user_id] ])
+            ->update(['user_token' => $this->data['user_token']]);
+                
+            if( $affected == 0 ) {
+                $this->error = 'user update error';
+            }
         }
 
-        return empty( $result ) ? false : true;
+        return empty( $this->error ) ? true : false;
     }
+
+    // TODO
 
     // select user by id
     public function select( int $user_id ) : bool {
