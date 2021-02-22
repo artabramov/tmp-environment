@@ -49,13 +49,13 @@ CREATE TABLE IF NOT EXISTS project.groups (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Users groups
-CREATE TABLE IF NOT EXISTS project.user_groups (
-    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id    BIGINT(20)   NOT NULL,
-    group_id   BIGINT(20)   NOT NULL,
-    group_role VARCHAR(40)  NOT NULL, # admin | editor | reader
+# Group roles
+CREATE TABLE IF NOT EXISTS project.group_roles (
+    id         BIGINT(20)  NOT NULL AUTO_INCREMENT,
+    date       DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)  NOT NULL,
+    group_id   BIGINT(20)  NOT NULL,
+    group_role VARCHAR(40) NOT NULL, # admin | editor | reader | draft
 
     PRIMARY KEY id         (id),
             KEY date       (date),
