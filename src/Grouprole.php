@@ -60,6 +60,18 @@ class Grouprole
         ];
     }
 
+    private function is_exists( int $user_id, int $group_id ) : bool {
+            
+        $role = $this->db
+        ->table('group_roles')
+        ->select('id')
+        ->where( 'user_id', '=', $user_id )
+        ->where( 'group_id', '=', $group_id )
+        ->first();
+
+        return empty( $role->id ) ? false : true;
+    }
+
     // insert a new role
     public function insert() : bool {
 
@@ -78,6 +90,9 @@ class Grouprole
 
         } elseif( strlen( strval( $group_id )) > 20 ) {
             $this->error = 'group_id is too long';
+
+        } elseif( $this->is_exists( $user_id, $group_id ) ) {
+            $this->error = 'user_id and group_id are exists';
 
         } elseif( empty( $group_role )) {
             $this->error = 'group_role is empty';
