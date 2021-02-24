@@ -104,4 +104,38 @@ class Group
         return empty( $this->error ) ? true : false;
     }
 
+    // rename the group
+    public function rename() : bool {
+
+        $group_id = (int) $this->data[ 'id' ];
+        $group_name = (string) $this->data[ 'group_name' ];
+
+        if( empty( $group_id )) {
+            $this->error = 'group_id is empty';
+
+        } elseif( strlen( strval( $group_id )) > 20 ) {
+            $this->error = 'group_id is too long';
+
+        } elseif( empty( $group_name )) {
+            $this->error = 'group_name is empty';
+
+        } elseif( mb_strlen( $group_name, 'utf-8' ) > 255 ) {
+            $this->error = 'group_name is is too long';
+
+        } else {
+
+            $affected_rows = $this->db
+            ->table('groups')
+            ->where([ ['id', '=', $group_id] ])
+            ->update([
+                'group_name' => $group_name]);
+                
+            if( $affected_rows == 0 ) {
+                $this->error = 'group rename error';
+            }
+        }
+
+        return empty( $this->error ) ? true : false;
+    }
+
 }
