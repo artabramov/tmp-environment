@@ -77,7 +77,7 @@ class User
         } elseif ( $key == 'user_email' and is_string( $this->data['user_email'] ) and mb_strlen( $this->data['user_email'], 'utf-8' ) < 256 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->data['user_email'] ) ) {
             return true;
 
-        } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and !empty( $this->data['user_pass'] ) ) {
+        } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and mb_strlen( $this->data['user_pass'], 'utf-8' ) >= 4 ) {
             return true;
 
         } elseif ( $key == 'user_hash' and is_string( $this->data['user_hash'] ) and mb_strlen( $this->data['user_hash'], 'utf-8' ) == 40 ) {
@@ -138,6 +138,7 @@ class User
     public function insert() : bool {
 
         $this->create_token();
+        
         $this->data['id'] = $this->db
         ->table('users')
         ->insertGetId([
@@ -167,72 +168,32 @@ class User
     }
 
 
-
-
-
-
-
-
-
-    
-    // signin by user_email and user_pass
+    // signin by user_email
     public function signin() : bool {
 
-        $user_email = (string) $this->data['user_email'];
-        $user_pass = (string) $this->data['user_pass'];
+        $affected_rows = $this->db
+        ->table('users')
+        ->where([ ['user_email', '=', $this->data['user_email']], ['user_hash', '=', $this->data['user_hash']] ])
+        ->update([ 'user_status' => 'approved', 'user_hash' => '' ]);
 
-        if( empty( $user_email )) {
-            $this->error = 'user_email is empty';
-
-        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
-            $this->error = 'user_email is is too long';
-
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
-            $this->error = 'user_email is incorrect';
-
-        } elseif( empty( $user_pass )) {
-            $this->error = 'user_pass is empty';
-
-        } else {
-            $this->create_hash();
-            $user_hash = $this->data['user_hash'];
-
+        if( $affected_rows > 0 ) {
             $user = $this->db
             ->table('users')
             ->select(['*'])
-            ->where([ ['user_email', '=', $user_email], ['user_hash', '=', $user_hash], ['user_status', '<>', 'trash'] ])
+            ->where([ 'user_email', '=', $this->data['user_email'] ])
             ->first();
 
-            if( empty( $user->id )) {
-                $this->error = 'user is not available';
-
-            } else {
-                $update_fields = [ 'user_hash' => '' ];
-
-                if( $user->user_status == 'pending' ) {
-                    $update_fields['user_status'] = 'approved';
-                }
-
-                $affected_rows = $this->db
-                ->table('users')
-                ->where([[ 'id', '=', $user->id ]])
-                ->update( $update_fields );
-
-                if( $affected_rows == 0 ) {
-                    $this->error = 'user update error';
-
-                } else {
-                    $this->data['id'] = $user->id;
-                    $this->data['date'] = $user->date;
-                    $this->data['user_status'] = 'approved';
-                    $this->data['user_token'] = $user->user_token;
-                    $this->data['user_email'] = $user->user_email;
-                    $this->data['user_hash'] = $user->user_hash;
-                }
+            if( !empty( $user->id )) {
+                $this->data['id'] = $user->id;
+                $this->data['date'] = $user->date;
+                $this->data['user_status'] = $user->user_status;
+                $this->data['user_token'] = $user->user_token;
+                $this->data['user_email'] = $user->user_email;
+                $this->data['user_hash'] = $user->user_hash;
             }
         }
 
-        return empty( $this->error ) ? true : false;
+        return $affected_rows > 0 and !empty( $user->id ) ? true : false;
     }
 
     // get user_id by user_token
