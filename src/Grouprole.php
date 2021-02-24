@@ -119,4 +119,18 @@ class Grouprole
         return empty( $this->error ) ? true : false;
     }
 
+    // checking is user an admin
+    public function is_admin( int $user_id, int $group_id ) : bool {
+
+        $role = $this->db
+        ->table('group_roles')
+        ->select('id')
+        ->where( 'user_id', '=', $user_id )
+        ->where( 'group_id', '=', $group_id )
+        ->where( 'group_role', '=', 'admin' )
+        ->first();
+
+        return empty( $role->id ) ? false : true;
+    }
+
 }
