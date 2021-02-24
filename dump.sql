@@ -37,15 +37,17 @@ CREATE TABLE IF NOT EXISTS project.user_meta (
 
 # Users groups
 CREATE TABLE IF NOT EXISTS project.groups (
-    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id    BIGINT(20)   NOT NULL,
-    group_name VARCHAR(255) NOT NULL,
+    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id      BIGINT(20)   NOT NULL,
+    group_status VARCHAR(40)  NOT NULL, # private | public | trash
+    group_name   VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id         (id),
-            KEY date       (date),
-            KEY user_id    (user_id),
-            KEY group_name (group_name)
+    PRIMARY KEY id           (id),
+            KEY date         (date),
+            KEY user_id      (user_id),
+            KEY group_status (group_status),
+            KEY group_name   (group_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

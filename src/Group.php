@@ -13,10 +13,11 @@ class Group
         $this->db    = $db;
         $this->error = '';
         $this->data  = [
-            'id'         => 0,
-            'date'       => '',
-            'user_id'    => 0,
-            'group_name' => ''
+            'id'           => 0,
+            'date'         => '',
+            'user_id'      => 0,
+            'group_status' => '',
+            'group_name'   => ''
         ];
     }
 
@@ -51,10 +52,11 @@ class Group
     public function clear() {
         $this->error = '';
         $this->data  = [
-            'id'         => 0,
-            'date'       => '',
-            'user_id'    => 0,
-            'group_name' => ''
+            'id'           => 0,
+            'date'         => '',
+            'user_id'      => 0,
+            'group_status' => '',
+            'group_name'   => ''
         ];
     }
 
@@ -62,6 +64,7 @@ class Group
     public function insert() : bool {
 
         $user_id = (int) $this->data[ 'user_id' ];
+        $group_status = (string) $this->data[ 'group_status' ];
         $group_name = (string) $this->data[ 'group_name' ];
 
         if( empty( $user_id )) {
@@ -69,6 +72,12 @@ class Group
 
         } elseif( strlen( strval( $user_id )) > 20 ) {
             $this->error = 'user_id is too long';
+
+        } elseif( empty( $group_status )) {
+            $this->error = 'group_status is empty';
+
+        } elseif( !in_array( $group_status, ['private', 'public'] )) {
+            $this->error = 'group_status is incorrect';
 
         } elseif( empty( $group_name )) {
             $this->error = 'group_name is empty';
@@ -81,9 +90,10 @@ class Group
             $this->data['id'] = $this->db
             ->table('groups')
             ->insertGetId([
-                'date'       => $this->db::raw('now()'),
-                'user_id'    => $user_id,
-                'group_name' => $group_name
+                'date'         => $this->db::raw('now()'),
+                'user_id'      => $user_id,
+                'group_status' => $group_status,
+                'group_name'   => $group_name
             ]);
 
             if( empty( $this->data['id'] )) {
