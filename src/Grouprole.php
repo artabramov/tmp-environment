@@ -133,4 +133,16 @@ class Grouprole
         return empty( $role->id ) ? false : true;
     }
 
+    // data validation
+    public function is_correct( string $data_key, $data_value ) : bool {
+
+        if( $data_key == 'user_id' and !is_int( $data_value )) {
+            return false;
+
+        } elseif( $data_key == 'user_id' and strlen( strval( $data_value )) > 20 ) {
+            return false;
+        }
+
+    }
+
 }
