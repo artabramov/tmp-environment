@@ -97,10 +97,7 @@ class Grouprole
         } elseif( empty( $group_role )) {
             $this->error = 'group_role is empty';
 
-        } elseif( mb_strlen( $group_role, 'utf-8' ) > 255 ) {
-            $this->error = 'group_role is is too long';
-
-        } elseif( !preg_match("/^[a-z0-9_]/", $group_role )) {
+        } elseif( !in_array( $group_role, ['admin', 'editor', 'reader', 'none'] )) {
             $this->error = 'group_role is incorrect';
 
         } else {
