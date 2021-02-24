@@ -5,14 +5,12 @@ namespace artabramov\Echidna;
 class User
 {
     private $db;
-    private $error;
     private $data;
 
     // create the object
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
 
         $this->db    = $db;
-        $this->error = '';
         $this->data  = [
             'id'          => 0,
             'date'        => '',
@@ -33,15 +31,13 @@ class User
 
     // get the data
     public function __get( string $key ) {
-        if( $key == 'error' ) {
-            return $this->error;
-        } elseif( array_key_exists( $key, $this->data ) ) {
+        if( array_key_exists( $key, $this->data ) ) {
             return $this->data[ $key ];
         }
         return null;
     }
 
-    // check is key has a value
+    // check data is not empty
     public function has( string $key ) : bool {
         if( $key == 'error' and !empty( $this->error ) ) {
             return true;
@@ -51,8 +47,8 @@ class User
         return false;
     }
 
-    // clear error and data
-    public function clear() {
+    // clear data and error
+    public function clear() : bool {
         $this->error = '';
         $this->data  = [
             'id'          => 0,
@@ -63,11 +59,50 @@ class User
             'user_pass'   => '',
             'user_hash'   => ''
         ];
+        return true;
     }
 
-    // generate unique random token
-    private function create_token() {
+    // data validation
+    public function is_correct( string $key ) : bool {
 
+        if ( $key == 'id' and is_int( $this->data['id'] ) and $this->data['id'] > 0 and ceil( log10( $this->data['id'] )) <= 20 ) {
+            return true;
+
+        } elseif ( $key == 'user_status' and in_array( $this->data['user_status'], [ 'pending', 'approved', 'trash' ] )) {
+            return true;
+
+        } elseif ( $key == 'user_token' and is_string( $this->data['user_token'] ) and mb_strlen( $this->data['user_token'], 'utf-8' ) == 80 ) {
+            return true;
+
+        } elseif ( $key == 'user_email' and is_string( $this->data['user_email'] ) and mb_strlen( $this->data['user_email'], 'utf-8' ) < 256 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->data['user_email'] ) ) {
+            return true;
+
+        } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and !empty( $this->data['user_pass'] ) ) {
+            return true;
+
+        } elseif ( $key == 'user_hash' and is_string( $this->data['user_hash'] ) and mb_strlen( $this->data['user_hash'], 'utf-8' ) == 40 ) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    // check that the user exists
+    public function is_exists( array $args ) : bool {
+        $user = $this->db
+        ->table('users')
+        ->select('id');
+        foreach( $args as $where ) {
+            $user = $user->where( $where[0], $where[1], $where[2] );
+        }
+        $user = $user->first();
+        return empty( $user->id ) ? false : true;
+    }
+
+
+    // generate unique random token
+    public function create_token() : bool {
         do {
             $user_token = bin2hex( random_bytes( 40 ));
             if( $this->is_exists( [['user_token', '=', $user_token]] )) {
@@ -76,117 +111,70 @@ class User
                 $repeat = false;
             }
         } while( $repeat );
-
         $this->data['user_token'] = $user_token;
+        return true;
     }
 
-    // generate random password
-    private function create_pass() {
 
+    // generate random password
+    public function create_pass() : bool {
         $user_pass = '';
         for( $i = 0; $i < 8; $i++ ) {
             $user_pass .= mt_rand( 0,9 );
         }
-
         $this->data['user_pass'] = $user_pass;
+        return true;
     }
+
 
     // return a hash
-    private function create_hash() {
-
+    public function create_hash() : bool {
         $this->data['user_hash'] = sha1( $this->data['user_pass'] );
+        return true;
     }
 
-    // check that the user exists
-    private function is_exists( array $args ) : bool {
-            
-            $user = $this->db
-            ->table('users')
-            ->select('id');
-
-            foreach( $args as $where ) {
-                $user = $user->where( $where[0], $where[1], $where[2] );
-            }
-
-            $user = $user->first();
-
-        return empty( $user->id ) ? false : true;
-    }
 
     // create a new user by user_email
     public function insert() : bool {
 
-        $user_email = (string) strtolower( $this->data[ 'user_email' ] );
+        $this->create_token();
+        $this->data['id'] = $this->db
+        ->table('users')
+        ->insertGetId([
+            'date'        => $this->db::raw('now()'),
+            'user_status' => 'pending',
+            'user_token'  => $this->data['user_token'],
+            'user_email'  => strtolower( $this->data['user_email'] ),
+            'user_hash'   => ''
+        ]);
 
-        if( empty( $user_email )) {
-            $this->error = 'user_email is empty';
-
-        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
-            $this->error = 'user_email is too long';
-
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
-            $this->error = 'user_email is incorrect';
-
-        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
-            $this->error = 'user_email is occupied';
-
-        } else {
-
-            $this->create_token();
-
-            $this->data['id'] = $this->db
-            ->table('users')
-            ->insertGetId([
-                'date'        => $this->db::raw('now()'),
-                'user_status' => 'pending',
-                'user_token'  => $this->data['user_token'],
-                'user_email'  => $this->data['user_email'],
-                'user_hash'   => ''
-            ]);
-
-            if( empty( $this->data['id'] )) {
-                $this->error = 'user insertion error';
-            }
-        }
-
-        return empty( $this->error ) ? true : false;
+        return empty( $this->data['id'] ) ? false : true;
     }
+
 
     // restore user_pass by user_email
     public function restore() : bool {
 
-        $user_email = (string) $this->data['user_email'];
+        $this->create_pass();
+        $this->create_hash();
 
-        if( empty( $user_email )) {
-            $this->error = 'user_email is empty';
+        $affected_rows = $this->db
+        ->table('users')
+        ->where([[ 'user_email', '=', $this->data['user_email'] ]])
+        ->update(['user_hash' => $this->data['user_hash']]);
 
-        } elseif( mb_strlen( $user_email, 'utf-8' ) > 255 ) {
-            $this->error = 'user_email is too long';
-
-        } elseif( !preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $user_email )) {
-            $this->error = 'user_email is incorrect';
-
-        } elseif( !$this->is_exists( [['user_email', '=', $user_email], ['user_status', '<>', 'trash']] )) {
-            $this->error = 'user_email is not available';
-
-        } else {
-
-            $this->create_pass();
-            $this->create_hash();
-
-            $affected = $this->db
-            ->table('users')
-            ->where([ ['user_email', '=', $user_email] ])
-            ->update(['user_hash' => $this->data['user_hash']]);
-                
-            if( $affected == 0 ) {
-                $this->error = 'user restore error';
-            }
-        }
-
-        return empty( $this->error ) ? true : false;
+        return $affected_rows > 0 ? true : false;
     }
 
+
+
+
+
+
+
+
+
+    
     // signin by user_email and user_pass
     public function signin() : bool {
 
