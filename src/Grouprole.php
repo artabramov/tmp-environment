@@ -5,13 +5,11 @@ namespace artabramov\Echidna;
 class Grouprole
 {
     private $db;
-    private $error;
     private $data;
 
     // create the object
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db    = $db;
-        $this->error = '';
         $this->data  = [
             'id'         => 0,
             'date'       => '',
@@ -30,9 +28,7 @@ class Grouprole
 
     // get the data
     public function __get( string $key ) {
-        if( $key == 'error' ) {
-            return $this->error;
-        } elseif( array_key_exists( $key, $this->data ) ) {
+        if( array_key_exists( $key, $this->data ) ) {
             return $this->data[ $key ];
         }
         return null;
@@ -40,9 +36,7 @@ class Grouprole
 
     // check is data has a value
     public function has( string $key ) : bool {
-        if( $key == 'error' and !empty( $this->error ) ) {
-            return true;
-        } elseif( !empty( $this->data[ $key ] ) ) {
+        if( !empty( $this->data[ $key ] ) ) {
             return true;
         }
         return false;
@@ -50,7 +44,6 @@ class Grouprole
 
     // clear error and data
     public function clear() {
-        $this->error = '';
         $this->data  = [
             'id'         => 0,
             'date'       => '',
@@ -60,13 +53,35 @@ class Grouprole
         ];
     }
 
-    private function is_exists( int $user_id, int $group_id ) : bool {
+    // data validation
+    public function is_correct( string $key ) : bool {
+
+        if ( $key == 'id' and is_int( $this->data['id'] ) and $this->data['id'] > 0 and ceil( log10( $this->data['id'] )) <= 20 ) {
+            return true;
+
+        } elseif ( $key == 'user_id' and is_int( $this->data['user_id'] ) and $this->data['user_id'] > 0 and ceil( log10( $this->data['user_id'] )) <= 20 ) {
+            return true;
+
+        } elseif ( $key == 'group_id' and is_int( $this->data['group_id'] ) and $this->data['group_id'] > 0 and ceil( log10( $this->data['group_id'] )) <= 20 ) {
+            return true;
+
+        } elseif ( $key == 'group_role' and in_array( $this->data['group_role'], [ 'admin', 'editor', 'reader', 'none' ] )) {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    // check
+    private function is_exists( int $user_id, int $group_id, string $group_role ) : bool {
             
         $role = $this->db
         ->table('group_roles')
         ->select('id')
         ->where( 'user_id', '=', $user_id )
         ->where( 'group_id', '=', $group_id )
+        ->where( 'group_role', '=', $group_role )
         ->first();
 
         return empty( $role->id ) ? false : true;
@@ -75,74 +90,43 @@ class Grouprole
     // insert a new role
     public function insert() : bool {
 
-        $user_id = (int) $this->data[ 'user_id' ];
-        $group_id = (int) $this->data[ 'group_id' ];
-        $group_role = (string) $this->data[ 'group_role' ];
-
-        if( empty( $user_id )) {
-            $this->error = 'user_id is empty';
-
-        } elseif( strlen( strval( $user_id )) > 20 ) {
-            $this->error = 'user_id is too long';
-
-        } elseif( empty( $group_id )) {
-            $this->error = 'group_id is empty';
-
-        } elseif( strlen( strval( $group_id )) > 20 ) {
-            $this->error = 'group_id is too long';
-
-        } elseif( $this->is_exists( $user_id, $group_id ) ) {
-            $this->error = 'user_id and group_id are exists';
-
-        } elseif( empty( $group_role )) {
-            $this->error = 'group_role is empty';
-
-        } elseif( !in_array( $group_role, ['admin', 'editor', 'reader', 'none'] )) {
-            $this->error = 'group_role is incorrect';
-
-        } else {
-
-            $this->data['id'] = $this->db
-            ->table('group_roles')
-            ->insertGetId([
-                'date'       => $this->db::raw('now()'),
-                'user_id'    => $user_id,
-                'group_id'   => $group_id,
-                'group_role' => $group_role
-            ]);
-
-            if( empty( $this->data['id'] )) {
-                $this->error = 'group_role insertion error';
-            }
-        }
-
-        return empty( $this->error ) ? true : false;
-    }
-
-    // checking is user an admin
-    public function is_admin( int $user_id, int $group_id ) : bool {
-
-        $role = $this->db
+        $this->data['id'] = $this->db
         ->table('group_roles')
-        ->select('id')
-        ->where( 'user_id', '=', $user_id )
-        ->where( 'group_id', '=', $group_id )
-        ->where( 'group_role', '=', 'admin' )
-        ->first();
-
-        return empty( $role->id ) ? false : true;
+        ->insertGetId([
+            'date'       => $this->db::raw('now()'),
+            'user_id'    => $this->data['user_id'],
+            'group_id'   => $this->data['group_id'],
+            'group_role' => $this->data['group_role']
+        ]);
     }
 
-    // data validation
-    public function is_correct( string $data_key, $data_value ) : bool {
+    // update
+    public function update() : bool {
 
-        if( $data_key == 'user_id' and !is_int( $data_value )) {
-            return false;
+        $affected_rows = $this->db
+            ->table('group_roles')
+            ->where([ 
+                ['user_id', '=', $this->data['user_id']],
+                ['group_id', '=', $this->data['group_id']] ])
+            ->update([ 
+                'group_role'   => $this->data['group_role'] ]);
 
-        } elseif( $data_key == 'user_id' and strlen( strval( $data_value )) > 20 ) {
-            return false;
-        }
-
+        return $affected_rows > 0 ? true : false;
     }
+
+    // delete
+    public function delete() : bool {
+
+        $deleted_rows = $this->db
+            ->table('group_roles')
+            ->where([ 
+                ['user_id', '=', $theis->data['user_id']], 
+                ['group_id', '=', $this->data['group_id']] ])
+            ->delete();
+
+        // TODO: check deleting
+        return true;
+    }
+
 
 }

@@ -72,6 +72,20 @@ class Group
         return false;
     }
 
+
+    // check
+    private function is_exists( int $group_id, string $group_status ) : bool {
+            
+        $group = $this->db
+        ->table('groups')
+        ->select('id')
+        ->where( 'id', '=', $group_id )
+        ->where( 'group_status', '=', $group_status )
+        ->first();
+
+        return empty( $group->id ) ? false : true;
+    }
+
     // insert a new group
     public function insert() : bool {
 
