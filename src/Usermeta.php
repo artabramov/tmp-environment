@@ -99,13 +99,13 @@ class Usermeta
         return empty( $this->data['id'] ) ? false : true;
     }
 
-    // update/insert the usermeta
+    // update
     public function update() : bool {
 
         $affected_rows = $this->db
             ->table('user_meta')
-            ->where([ ['user_id', '=', $user_id], [ 'meta_key', '=', $meta_key ] ])
-            ->update([ 'meta_value'  => $meta_value ]);
+            ->where([ ['user_id', '=', $this->data['user_id']], [ 'meta_key', '=', $this->data['meta_key']] ])
+            ->update([ 'meta_value'  => $this->data['meta_value']]);
 
         return $affected_rows > 0 ? true : false;
     }

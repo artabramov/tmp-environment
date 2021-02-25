@@ -87,5 +87,18 @@ class Group
         return empty( $this->data['id'] ) ? false : true;
     }
 
+    // update
+    public function update() : bool {
+
+        $affected_rows = $this->db
+            ->table('groups')
+            ->where([ ['id', '=', $this->data['id'] ] ])
+            ->update([ 
+                'group_status' => $this->data['group_status'],
+                'group_name'   => $this->data['group_name'] ]);
+
+        return $affected_rows > 0 ? true : false;
+    }
+
 
 }
