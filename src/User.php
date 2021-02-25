@@ -12,13 +12,15 @@ class User
 
         $this->db    = $db;
         $this->data  = [
-            'id'          => 0,
-            'date'        => '',
-            'user_status' => '',
-            'user_token'  => '',
-            'user_email'  => '',
-            'user_pass'   => '',
-            'user_hash'   => ''
+            'id'           => 0,
+            'date'         => '',
+            'user_status'  => '',
+            'user_token'   => '',
+            'user_email'   => '',
+            'user_pass'    => '',
+            'user_hash'    => '',
+            'hash_time'    => 0,
+            'hash_expired' => ''
         ];
     }
 
@@ -49,13 +51,15 @@ class User
     public function clear() : bool {
         $this->error = '';
         $this->data  = [
-            'id'          => 0,
-            'date'        => '',
-            'user_status' => '',
-            'user_token'  => '',
-            'user_email'  => '',
-            'user_pass'   => '',
-            'user_hash'   => ''
+            'id'           => 0,
+            'date'         => '',
+            'user_status'  => '',
+            'user_token'   => '',
+            'user_email'   => '',
+            'user_pass'    => '',
+            'user_hash'    => '',
+            'hash_time'    => 0,
+            'hash_expired' => ''
         ];
         return true;
     }
@@ -79,6 +83,13 @@ class User
             return true;
 
         } elseif ( $key == 'user_hash' and is_string( $this->data['user_hash'] ) and mb_strlen( $this->data['user_hash'], 'utf-8' ) == 40 ) {
+            return true;
+
+        } elseif ( $key == 'hash_time' and is_int( $this->data['hash_time'] ) and $this->data['hash_time'] <= 600 ) {
+            return true;
+
+        // TODO
+        } elseif ( $key == 'hash_expired' ) {
             return true;
         }
 
