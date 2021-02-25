@@ -39,9 +39,7 @@ class User
 
     // check data is not empty
     public function has( string $key ) : bool {
-        if( $key == 'error' and !empty( $this->error ) ) {
-            return true;
-        } elseif( !empty( $this->data[ $key ] ) ) {
+        if( !empty( $this->data[ $key ] ) ) {
             return true;
         }
         return false;
@@ -74,7 +72,7 @@ class User
         } elseif ( $key == 'user_token' and is_string( $this->data['user_token'] ) and mb_strlen( $this->data['user_token'], 'utf-8' ) == 80 ) {
             return true;
 
-        } elseif ( $key == 'user_email' and is_string( $this->data['user_email'] ) and mb_strlen( $this->data['user_email'], 'utf-8' ) < 256 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->data['user_email'] ) ) {
+        } elseif ( $key == 'user_email' and is_string( $this->data['user_email'] ) and mb_strlen( $this->data['user_email'], 'utf-8' ) <= 255 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->data['user_email'] ) ) {
             return true;
 
         } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and mb_strlen( $this->data['user_pass'], 'utf-8' ) >= 4 ) {
@@ -141,6 +139,7 @@ class User
             'user_email'  => $this->data['user_email'],
             'user_hash'   => $this->data['user_hash']
         ]);
+
         return empty( $this->data['id'] ) ? false : true;
     }
 
@@ -148,12 +147,12 @@ class User
     public function select( string $key ) : bool {
   
         $user = $this->db
-        ->table('users')
-        ->select(['*'])
-        ->where([ [ $key, '=', $this->data[ $key ] ] ])
-        ->first();
+            ->table('users')
+            ->select(['*'])
+            ->where([ [ $key, '=', $this->data[ $key ] ] ])
+            ->first();
 
-        if( empty( $user->id )) {
+        if( !empty( $user->id )) {
             $this->data['id'] = $user->id;
             $this->data['date'] = $user->date;
             $this->data['user_status'] = $user->user_status;
