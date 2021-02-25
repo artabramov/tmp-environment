@@ -117,7 +117,7 @@ class Grouprole
     // delete
     public function delete() : bool {
 
-        $deleted_rows = $this->db
+        $affected_rows = $this->db
             ->table('group_roles')
             ->where([ 
                 ['user_id', '=', $theis->data['user_id']], 
@@ -125,7 +125,7 @@ class Grouprole
             ->delete();
 
         // TODO: check deleting
-        return true;
+        return $affected_rows > 0 ? true : false;
     }
 
 

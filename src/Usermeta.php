@@ -134,13 +134,13 @@ class Usermeta
     // delete usermeta by user_id and meta_key
     public function delete() : bool {
 
-        $deleted_rows = $this->db
+        $affected_rows = $this->db
             ->table('user_meta')
             ->where([ ['user_id', '=', $theis->data['user_id']], [ 'meta_key', '=', $this->data['meta_key'] ] ])
             ->delete();
 
         // TODO: check deleting
-        return true;
+        return $affected_rows > 0 ? true : false;
     }
 
 }
