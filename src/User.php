@@ -133,6 +133,12 @@ class User
         return true;
     }
 
+    // get mysql time
+    public function get_time() : string {
+        $result = $this->db::select( 'select NOW() as time' );
+        return empty( $result[0] ) ? '0000-00-00 00:00:00' : $result[0]->time;
+    }
+
     // create a new user by user_email
     public function insert() : bool {
         
@@ -170,19 +176,20 @@ class User
         return empty( $user->id ) ? false : true;
     }
 
-    // TODO: update user by id
-    public function update( string $key ) : bool {
+    // update user by id
+    public function update( array $keys ) : bool {
+
+        $data = [];
+        foreach( $keys as $key ) {
+            $data[ $key ] = $this->data[ $key ];
+        }        
 
         $affected_rows = $this->db
         ->table('users')
-        ->where([ ['id', '=', $user_id] ])
-        ->update([
-            'user_status' => $this->data['user_status'],
-            'user_token' => $this->data['user_token'],
-            'user_email' => $this->data['user_email'],
-            'user_hash' => $this->data['user_hash']]);
+        ->where(['id' => $this->data['id'] ])
+        ->update( $data );
 
         return $affected_rows > 0 ? true : false;
     }
-
+    
 }
