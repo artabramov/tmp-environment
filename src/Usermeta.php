@@ -143,7 +143,4 @@ class Usermeta
         return $affected_rows > 0 ? true : false;
     }
 
-    // get mysql time
-    public function get_time() : string {}
-
 }

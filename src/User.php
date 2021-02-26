@@ -68,7 +68,7 @@ class User
         if ( $key == 'id' and is_int( $this->data['id'] ) and $this->data['id'] > 0 and ceil( log10( $this->data['id'] )) <= 20 ) {
             return true;
 
-        } elseif ( $key == 'user_status' and in_array( $this->data['user_status'], [ 'pending', 'approved', 'trash' ] )) {
+        } elseif ( $key == 'user_status' and is_string( $this->data['user_status'] ) and mb_strlen( $this->data['user_status'], 'utf-8' ) <= 40 and preg_match("/^[a-z0-9_-]/", $this->data['user_status'] ) ) {
             return true;
 
         } elseif ( $key == 'user_token' and is_string( $this->data['user_token'] ) and mb_strlen( $this->data['user_token'], 'utf-8' ) == 80 ) {
@@ -77,7 +77,7 @@ class User
         } elseif ( $key == 'user_email' and is_string( $this->data['user_email'] ) and mb_strlen( $this->data['user_email'], 'utf-8' ) <= 255 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->data['user_email'] ) ) {
             return true;
 
-        } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and mb_strlen( $this->data['user_pass'], 'utf-8' ) >= 4 ) {
+        } elseif ( $key == 'user_pass' and is_string( $this->data['user_pass'] ) and !empty( $this->data['user_pass'] ) ) {
             return true;
 
         } elseif ( $key == 'user_hash' and is_string( $this->data['user_hash'] ) and mb_strlen( $this->data['user_hash'], 'utf-8' ) == 40 ) {
@@ -131,12 +131,6 @@ class User
     public function create_hash() : bool {
         $this->data['user_hash'] = sha1( $this->data['user_pass'] );
         return true;
-    }
-
-    // get mysql time
-    public function get_time() : string {
-        $result = $this->db::select( 'select NOW() as time' );
-        return empty( $result[0] ) ? '0000-00-00 00:00:00' : $result[0]->time;
     }
 
     // create a new user by user_email
