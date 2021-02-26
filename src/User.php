@@ -149,7 +149,7 @@ class User
         return empty( $this->data['id'] ) ? false : true;
     }
 
-    // select user by key
+    // TODO: select user by key field
     public function select( string $key ) : bool {
   
         $user = $this->db
@@ -170,8 +170,8 @@ class User
         return empty( $user->id ) ? false : true;
     }
 
-    // update user data
-    public function update() : bool {
+    // TODO: update user by id
+    public function update( string $key ) : bool {
 
         $affected_rows = $this->db
         ->table('users')
