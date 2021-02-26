@@ -3,21 +3,21 @@ SET sql_mode = '';
 
 # Users
 CREATE TABLE IF NOT EXISTS project.users (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_status  VARCHAR(40)  NOT NULL, # pending | approved | trash
-    user_token   VARCHAR(80)  NOT NULL, # Unique user token
-    user_email   VARCHAR(255) NOT NULL,
-    user_hash    VARCHAR(40)  NOT NULL, # One-time password hash
-    hash_expired DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
+    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_status VARCHAR(40)  NOT NULL, # pending | approved | trash
+    user_token  VARCHAR(80)  NOT NULL, # Unique user token
+    user_email  VARCHAR(255) NOT NULL,
+    user_hash   VARCHAR(40)  NOT NULL, # One-time password hash
+    hash_date   DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
 
-    PRIMARY KEY id           (id),
-            KEY date         (date),
-            KEY user_status  (user_status),
-    UNIQUE  KEY user_token   (user_token),
-    UNIQUE  KEY user_email   (user_email),
-            KEY user_hash    (user_hash),
-            KEY hash_expired (hash_expired)
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY user_status (user_status),
+    UNIQUE  KEY user_token  (user_token),
+    UNIQUE  KEY user_email  (user_email),
+            KEY user_hash   (user_hash),
+            KEY hash_date   (hash_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
