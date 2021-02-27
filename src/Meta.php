@@ -2,7 +2,7 @@
 
 namespace artabramov\Echidna;
 
-class Usermeta
+class Meta
 {
     private $db;
     private $data;

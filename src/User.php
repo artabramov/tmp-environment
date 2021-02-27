@@ -143,7 +143,8 @@ class User
             'user_status' => $this->data['user_status'],
             'user_token'  => $this->data['user_token'],
             'user_email'  => $this->data['user_email'],
-            'user_hash'   => $this->data['user_hash']
+            'user_hash'   => $this->data['user_hash'],
+            'hash_date'   => $this->data['hash_date']
         ]);
 
         return empty( $this->data['id'] ) ? false : true;
@@ -165,6 +166,7 @@ class User
             $this->data['user_token'] = $user->user_token;
             $this->data['user_email'] = $user->user_email;
             $this->data['user_hash'] = $user->user_hash;
+            $this->data['hash_date'] = $user->hash_date;
         }
 
         return empty( $user->id ) ? false : true;
