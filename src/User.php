@@ -149,7 +149,7 @@ class User
         return empty( $this->data['id'] ) ? false : true;
     }
 
-    // TODO: select user by key field
+    // TODO:
     public function select( string $key ) : bool {
   
         $user = $this->db
@@ -178,11 +178,11 @@ class User
         foreach( $keys as $key ) {
             $data[ $key ] = $this->data[ $key ];
         }        
-
+        
         $affected_rows = $this->db
-        ->table('users')
-        ->where(['id' => $this->data['id'] ])
-        ->update( $data );
+            ->table('users')
+            ->where([[ 'id', '=', $this->data['id'] ]])
+            ->update( $data );
 
         return $affected_rows > 0 ? true : false;
     }
