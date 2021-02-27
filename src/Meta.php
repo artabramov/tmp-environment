@@ -119,7 +119,7 @@ class Meta
             ->select( '*' )
             ->first();
 
-        if( empty( $meta->id )) {
+        if( !empty( $meta->id )) {
             $this->data['id'] = $meta->id;
             $this->data['date'] = $meta->date;
             $this->data['user_id'] = $meta->user_id;

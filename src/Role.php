@@ -2,7 +2,7 @@
 
 namespace artabramov\Echidna;
 
-class Grouprole
+class Role
 {
     private $db;
     private $data;
