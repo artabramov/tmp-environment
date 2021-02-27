@@ -83,8 +83,7 @@ class User
         } elseif ( $key == 'user_hash' and is_string( $this->data['user_hash'] ) and mb_strlen( $this->data['user_hash'], 'utf-8' ) == 40 ) {
             return true;
 
-        // TODO
-        } elseif ( $key == 'hash_date' ) {
+        } elseif ( $key == 'hash_date' and is_string( $this->data['user_hash'] ) and preg_match("/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/", $this->data['hash_date'] ) ) {
             return true;
         }
 
