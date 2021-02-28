@@ -103,15 +103,18 @@ class Group
         return empty( $this->data['id'] ) ? false : true;
     }
 
-    // update
-    public function update() : bool {
+    // update group by id
+    public function update( array $keys ) : bool {
 
+        $data = [];
+        foreach( $keys as $key ) {
+            $data[ $key ] = $this->data[ $key ];
+        }        
+        
         $affected_rows = $this->db
             ->table('groups')
-            ->where([ ['id', '=', $this->data['id'] ] ])
-            ->update([ 
-                'group_status' => $this->data['group_status'],
-                'group_name'   => $this->data['group_name'] ]);
+            ->where([[ 'id', '=', $this->data['id'] ]])
+            ->update( $data );
 
         return $affected_rows > 0 ? true : false;
     }
