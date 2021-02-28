@@ -73,16 +73,18 @@ class Group
     }
 
 
-    // check
-    private function is_exists( int $group_id, string $group_status ) : bool {
-            
-        $group = $this->db
-        ->table('groups')
-        ->select('id')
-        ->where( 'id', '=', $group_id )
-        ->where( 'group_status', '=', $group_status )
-        ->first();
+    // check that the group exists
+    public function is_exists( array $args ) : bool {
 
+        $group = $this->db
+            ->table('groups')
+            ->select('id');
+
+        foreach( $args as $where ) {
+            $group = $group->where( $where[0], $where[1], $where[2] );
+        }
+
+        $group = $group->first();
         return empty( $group->id ) ? false : true;
     }
 

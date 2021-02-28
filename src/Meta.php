@@ -72,16 +72,19 @@ class Meta
         return false;
     }
 
-    private function is_exists( int $user_id, string $meta_key ) : bool {
-            
-        $usermeta = $this->db
-        ->table('user_meta')
-        ->select('id')
-        ->where( 'user_id', '=', $user_id )
-        ->where( 'meta_key', '=', $meta_key )
-        ->first();
+    // check that meta exists
+    public function is_exists( array $args ) : bool {
 
-        return empty( $usermeta->id ) ? false : true;
+        $meta = $this->db
+            ->table('user_meta')
+            ->select('id');
+
+        foreach( $args as $where ) {
+            $meta = $meta->where( $where[0], $where[1], $where[2] );
+        }
+
+        $meta = $meta->first();
+        return empty( $meta->id ) ? false : true;
     }
 
     // insert a new usermeta

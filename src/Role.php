@@ -73,17 +73,18 @@ class Role
     }
 
 
-    // check
-    private function is_exists( int $user_id, int $group_id, string $user_role ) : bool {
-            
-        $role = $this->db
-        ->table('user_roles')
-        ->select('id')
-        ->where( 'user_id', '=', $user_id )
-        ->where( 'group_id', '=', $group_id )
-        ->where( 'user_role', '=', $user_role )
-        ->first();
+    // check that the role exists
+    public function is_exists( array $args ) : bool {
 
+        $role = $this->db
+            ->table('user_roles')
+            ->select('id');
+
+        foreach( $args as $where ) {
+            $role = $role->where( $where[0], $where[1], $where[2] );
+        }
+
+        $role = $role->first();
         return empty( $role->id ) ? false : true;
     }
 
