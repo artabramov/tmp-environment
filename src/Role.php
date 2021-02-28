@@ -11,11 +11,11 @@ class Role
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db    = $db;
         $this->data  = [
-            'id'         => 0,
-            'date'       => '',
-            'user_id'    => 0,
-            'group_id'   => 0,
-            'group_role' => ''
+            'id'        => 0,
+            'date'      => '',
+            'user_id'   => 0,
+            'group_id'  => 0,
+            'user_role' => ''
         ];
     }
 
@@ -45,11 +45,11 @@ class Role
     // clear error and data
     public function clear() {
         $this->data  = [
-            'id'         => 0,
-            'date'       => '',
-            'user_id'    => 0,
-            'group_id'   => 0,
-            'group_role' => ''
+            'id'        => 0,
+            'date'      => '',
+            'user_id'   => 0,
+            'group_id'  => 0,
+            'user_role' => ''
         ];
     }
 
@@ -65,7 +65,7 @@ class Role
         } elseif ( $key == 'group_id' and is_int( $this->data['group_id'] ) and $this->data['group_id'] > 0 and ceil( log10( $this->data['group_id'] )) <= 20 ) {
             return true;
 
-        } elseif ( $key == 'group_role' and in_array( $this->data['group_role'], [ 'admin', 'editor', 'reader', 'none' ] )) {
+        } elseif ( $key == 'user_role' and is_string( $this->data['user_role'] ) and mb_strlen( $this->data['user_role'], 'utf-8' ) <= 40 and preg_match("/^[a-z0-9_-]/", $this->data['user_role'] ) ) {
             return true;
         }
 
@@ -74,14 +74,14 @@ class Role
 
 
     // check
-    private function is_exists( int $user_id, int $group_id, string $group_role ) : bool {
+    private function is_exists( int $user_id, int $group_id, string $user_role ) : bool {
             
         $role = $this->db
-        ->table('group_roles')
+        ->table('user_roles')
         ->select('id')
         ->where( 'user_id', '=', $user_id )
         ->where( 'group_id', '=', $group_id )
-        ->where( 'group_role', '=', $group_role )
+        ->where( 'user_role', '=', $user_role )
         ->first();
 
         return empty( $role->id ) ? false : true;
@@ -91,25 +91,27 @@ class Role
     public function insert() : bool {
 
         $this->data['id'] = $this->db
-        ->table('group_roles')
+        ->table('user_roles')
         ->insertGetId([
-            'date'       => $this->db::raw('now()'),
-            'user_id'    => $this->data['user_id'],
-            'group_id'   => $this->data['group_id'],
-            'group_role' => $this->data['group_role']
+            'date'      => $this->db::raw('now()'),
+            'user_id'   => $this->data['user_id'],
+            'group_id'  => $this->data['group_id'],
+            'user_role' => $this->data['user_role']
         ]);
+
+        return empty( $this->data['id'] ) ? false : true;
     }
 
     // update
     public function update() : bool {
 
         $affected_rows = $this->db
-            ->table('group_roles')
+            ->table('user_roles')
             ->where([ 
                 ['user_id', '=', $this->data['user_id']],
                 ['group_id', '=', $this->data['group_id']] ])
             ->update([ 
-                'group_role'   => $this->data['group_role'] ]);
+                'user_role' => $this->data['user_role'] ]);
 
         return $affected_rows > 0 ? true : false;
     }
@@ -118,7 +120,7 @@ class Role
     public function delete() : bool {
 
         $affected_rows = $this->db
-            ->table('group_roles')
+            ->table('user_roles')
             ->where([ 
                 ['user_id', '=', $theis->data['user_id']], 
                 ['group_id', '=', $this->data['group_id']] ])

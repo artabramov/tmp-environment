@@ -62,7 +62,7 @@ class Group
         } elseif ( $key == 'user_id' and is_int( $this->data['user_id'] ) and $this->data['user_id'] > 0 and ceil( log10( $this->data['user_id'] )) <= 20 ) {
             return true;
 
-        } elseif ( $key == 'group_status' and in_array( $this->data['group_status'], [ 'private', 'public', 'trash' ] )) {
+        } elseif ( $key == 'group_status' and is_string( $this->data['group_status'] ) and mb_strlen( $this->data['group_status'], 'utf-8' ) <= 40 and preg_match("/^[a-z0-9_-]/", $this->data['group_status'] ) ) {
             return true;
 
         } elseif ( $key == 'group_name' and is_string( $this->data['group_name'] ) and mb_strlen( $this->data['group_name'], 'utf-8' ) <= 255 ) {
@@ -93,9 +93,9 @@ class Group
         ->table('groups')
         ->insertGetId([
             'date'         => $this->db::raw('now()'),
-            'user_id'      => $user_id,
-            'group_status' => $group_status,
-            'group_name'   => $group_name
+            'user_id'      => $this->data['user_id'],
+            'group_status' => $this->data['group_status'],
+            'group_name'   => $this->data['group_name']
         ]);
 
         return empty( $this->data['id'] ) ? false : true;
