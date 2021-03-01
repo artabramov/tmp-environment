@@ -147,7 +147,6 @@ class Role
                 ['group_id', '=', $this->data['group_id']] ])
             ->delete();
 
-        // TODO: check deleting
         return $affected_rows > 0 ? true : false;
     }
 
