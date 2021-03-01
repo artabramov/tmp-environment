@@ -143,7 +143,7 @@ class Role
         $affected_rows = $this->db
             ->table('user_roles')
             ->where([ 
-                ['user_id', '=', $theis->data['user_id']], 
+                ['user_id', '=', $this->data['user_id']], 
                 ['group_id', '=', $this->data['group_id']] ])
             ->delete();
 
