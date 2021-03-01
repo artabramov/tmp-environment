@@ -151,5 +151,18 @@ class Role
         return $affected_rows > 0 ? true : false;
     }
 
+    // count roles of the group
+    public function count( array $args ) : int {
+
+        $role = $this->db->table('user_roles');
+
+        foreach( $args as $where ) {
+            $role = $role->where( $where[0], $where[1], $where[2] );
+        }
+
+        $role = $role->count();
+        return $role;
+    }
+
 
 }
