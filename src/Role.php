@@ -117,6 +117,26 @@ class Role
         return $affected_rows > 0 ? true : false;
     }
 
+    // select the role
+    public function select() : bool {
+
+        $role = $this->db
+            ->table( 'user_roles' )
+            ->where([[ 'user_id', '=', $this->data['user_id'] ], [ 'group_id', '=', $this->data['group_id'] ]])
+            ->select( '*' )
+            ->first();
+
+        if( !empty( $role->id )) {
+            $this->data['id']        = $role->id;
+            $this->data['date']      = $role->date;
+            $this->data['user_id']   = $role->user_id;
+            $this->data['group_id']  = $role->group_id;
+            $this->data['user_role'] = $role->user_role;
+        }
+
+        return empty( $role->id ) ? false : true;
+    }
+
     // delete
     public function delete() : bool {
 
