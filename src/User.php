@@ -9,8 +9,12 @@ class User
 
     // create the object
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
+        $this->db = $db;
+        $this->clear();
+    }
 
-        $this->db    = $db;
+    // clear data and error
+    public function clear() {
         $this->data  = [
             'id'          => 0,
             'date'        => '',
@@ -44,22 +48,6 @@ class User
             return true;
         }
         return false;
-    }
-
-    // clear data and error
-    public function clear() : bool {
-        $this->error = '';
-        $this->data  = [
-            'id'          => 0,
-            'date'        => '',
-            'user_status' => '',
-            'user_token'  => '',
-            'user_email'  => '',
-            'user_pass'   => '',
-            'user_hash'   => '',
-            'hash_date'   => ''
-        ];
-        return true;
     }
 
     // data validation
