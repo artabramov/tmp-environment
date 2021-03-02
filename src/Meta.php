@@ -9,8 +9,13 @@ class Meta
 
     // create the object
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
-        $this->db    = $db;
-        $this->data  = [
+        $this->db = $db;
+        $this->clear();
+    }
+
+    // clear data
+    public function clear() {
+        $this->data = [
             'id'         => 0,
             'date'       => '',
             'user_id'    => 0,
@@ -40,17 +45,6 @@ class Meta
             return true;
         }
         return false;
-    }
-
-    // clear error and data
-    public function clear() {
-        $this->data  = [
-            'id'         => 0,
-            'date'       => '',
-            'user_id'    => 0,
-            'meta_key'   => '',
-            'meta_value' => ''
-        ];
     }
 
     // data validation

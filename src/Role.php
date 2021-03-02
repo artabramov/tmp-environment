@@ -10,6 +10,11 @@ class Role
     // create the object
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db    = $db;
+        $this->clear();
+    }
+
+    // clear data
+    public function clear() {
         $this->data  = [
             'id'        => 0,
             'date'      => '',
@@ -40,17 +45,6 @@ class Role
             return true;
         }
         return false;
-    }
-
-    // clear error and data
-    public function clear() {
-        $this->data  = [
-            'id'        => 0,
-            'date'      => '',
-            'user_id'   => 0,
-            'group_id'  => 0,
-            'user_role' => ''
-        ];
     }
 
     // data validation

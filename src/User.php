@@ -13,7 +13,7 @@ class User
         $this->clear();
     }
 
-    // clear data and error
+    // clear data
     public function clear() {
         $this->data  = [
             'id'          => 0,
