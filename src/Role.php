@@ -17,7 +17,7 @@ class Role
     public function clear() {
         $this->data  = [
             'id'        => 0,
-            'date'      => '',
+            'date'      => '0000-00-00 00:00:00',
             'user_id'   => 0,
             'group_id'  => 0,
             'user_role' => ''

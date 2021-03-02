@@ -17,13 +17,13 @@ class User
     public function clear() {
         $this->data  = [
             'id'          => 0,
-            'date'        => '',
+            'date'        => '0000-00-00 00:00:00',
             'user_status' => '',
             'user_token'  => '',
             'user_email'  => '',
             'user_pass'   => '',
             'user_hash'   => '',
-            'hash_date'   => ''
+            'hash_date'   => '0000-00-00 00:00:00'
         ];
     }
 
