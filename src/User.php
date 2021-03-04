@@ -43,24 +43,11 @@ class User
     }
 
     // check data is not empty
-    public function has( string $key ) : bool {
-        if( !empty( $this->data[ $key ] ) ) {
-            return true;
-        }
-        return false;
-    }
-
-    //
     public function is_empty( string $key ): bool {
-
         if( in_array( $key, [ 'data', 'hash_data' ] )) {
-            return empty( $this->data[$key] ) or $this->data[$key] == '0000-00-00 00:00:00';
-
-        } elseif( empty( $this->data[ $key ] ) ) {
-            return true;
-        } 
-
-        return false;
+            return $this->data[$key] == '0000-00-00 00:00:00';
+        }
+        return empty( $this->data[ $key ] );
     }
 
     // data validation
