@@ -44,7 +44,7 @@ class User
 
     // check data is not empty
     public function is_empty( string $key ): bool {
-        if( in_array( $key, [ 'data', 'hash_data' ] )) {
+        if( in_array( $key, [ 'date', 'hash_date' ] )) {
             return $this->data[$key] == '0000-00-00 00:00:00';
         }
         return empty( $this->data[ $key ] );

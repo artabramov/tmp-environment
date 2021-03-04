@@ -40,11 +40,11 @@ class Role
     }
 
     // check is data has a value
-    public function has( string $key ) : bool {
-        if( !empty( $this->data[ $key ] ) ) {
-            return true;
+    public function is_empty( string $key ): bool {
+        if( $key == 'date' ) {
+            return $this->data[$key] == '0000-00-00 00:00:00';
         }
-        return false;
+        return empty( $this->data[ $key ] );
     }
 
     // data validation
