@@ -108,7 +108,7 @@ class Role
             ->update([ 
                 'user_role' => $this->data['user_role'] ]);
 
-        return $affected_rows > 0 ? true : false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // select the role

@@ -104,7 +104,7 @@ class Meta
             ->where([ ['user_id', '=', $this->data['user_id']], [ 'meta_key', '=', $this->data['meta_key']] ])
             ->update([ 'meta_value'  => $this->data['meta_value']]);
 
-        return $affected_rows > 0 ? true : false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // select usermeta by user_id and meta_key

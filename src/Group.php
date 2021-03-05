@@ -110,7 +110,7 @@ class Group
             ->where([[ 'id', '=', $this->data['id'] ]])
             ->update( $data );
 
-        return $affected_rows > 0 ? true : false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
 
