@@ -5,45 +5,47 @@ namespace artabramov\Echidna;
 class User
 {
     private $db;
+    private $error;
+    private $id;
     private $data;
+    private $user_status;
+    private $user_token;
+    private $user_email;
+    private $user_pass;
+    private $user_hash;
+    private $hash_date;
 
-    // create the object
+    // create the object *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
-        $this->db = $db;
-        $this->clear();
+
+        $this->db          = $db;
+        $this->error       = '';
+        $this->id          = 0;
+        $this->data        = '0000-00-00 00:00:00';
+        $this->user_status = '';
+        $this->user_token  = '';
+        $this->user_email  = '';
+        $this->user_pass   = '';
+        $this->user_hash   = '';
+        $this->hash_date   = '0000-00-00 00:00:00';
     }
 
-    // clear data
-    public function clear() {
-        $this->data  = [
-            'id'          => 0,
-            'date'        => '0000-00-00 00:00:00',
-            'user_status' => '',
-            'user_token'  => '',
-            'user_email'  => '',
-            'user_pass'   => '',
-            'user_hash'   => '',
-            'hash_date'   => '0000-00-00 00:00:00'
-        ];
-    }
+    // set the data *
+    public function __set( string $key, $value ) {}
 
-    // set the data
-    public function __set( string $key, $value ) {
-        if( array_key_exists( $key, $this->data ) ) {
-            $this->data[ $key ] = $value;
-        }
-    }
-
-    // get the data
+    // get the data *
     public function __get( string $key ) {
-        if( array_key_exists( $key, $this->data ) ) {
-            return $this->data[ $key ];
-        }
-        return null;
+        return isset( $this->$key ) ? $this->key : null;
     }
 
-    // check data is not empty
-    public function is_empty( string $key ): bool {
+    // check error exists *
+    public function is_error() {
+        return empty( $this->error );
+    }
+
+    // check data exists
+    private function is_empty( string $key ): bool {
+
         if( in_array( $key, [ 'date', 'hash_date' ] )) {
             return $this->data[$key] == '0000-00-00 00:00:00';
         }
@@ -51,7 +53,7 @@ class User
     }
 
     // data validation
-    public function is_correct( string $key ) : bool {
+    private function is_correct( string $key ) : bool {
 
         if ( $key == 'id' and is_int( $this->data['id'] ) and $this->data['id'] > 0 and ceil( log10( $this->data['id'] )) <= 20 ) {
             return true;
@@ -79,7 +81,7 @@ class User
     }
 
     // check that the user exists
-    public function is_exists( array $args ) : bool {
+    private function is_exists( array $args ) : bool {
         $user = $this->db
         ->table('users')
         ->select('id');
@@ -91,7 +93,7 @@ class User
     }
 
     // generate unique random token
-    public function create_token() : bool {
+    private function token_create() : string {
         do {
             $user_token = bin2hex( random_bytes( 40 ));
             if( $this->is_exists( [['user_token', '=', $user_token]] )) {
@@ -100,28 +102,25 @@ class User
                 $repeat = false;
             }
         } while( $repeat );
-        $this->data['user_token'] = $user_token;
-        return true;
+        return $user_token;
     }
 
     // generate random password
-    public function create_pass() : bool {
+    private function pass_create() : string {
         $user_pass = '';
         for( $i = 0; $i < 8; $i++ ) {
             $user_pass .= mt_rand( 0,9 );
         }
-        $this->data['user_pass'] = $user_pass;
-        return true;
+        return $user_pass;
     }
 
     // return a hash
-    public function create_hash() : bool {
-        $this->data['user_hash'] = sha1( $this->data['user_pass'] );
-        return true;
+    private function hash_create( $user_pass ) : string {
+        return sha1( $this->data['user_pass'] );
     }
 
-    // create a new user by user_email
-    public function insert() : bool {
+    // insert user
+    private function user_insert() : bool {
         
         $this->data['id'] = $this->db
         ->table('users')
@@ -137,8 +136,8 @@ class User
         return empty( $this->data['id'] ) ? false : true;
     }
 
-    // TODO:
-    public function select( string $key ) : bool {
+    // select user
+    private function user_select( string $key ) : bool {
   
         $user = $this->db
             ->table('users')
@@ -159,8 +158,8 @@ class User
         return empty( $user->id ) ? false : true;
     }
 
-    // update user by id
-    public function update( array $keys ) : bool {
+    // update user
+    private function user_update( array $keys ) : bool {
 
         $data = [];
         foreach( $keys as $key ) {
@@ -173,6 +172,32 @@ class User
             ->update( $data );
 
         return is_int( $affected_rows ) ? true : false;
+    }
+
+    // register *
+    public function register( string $user_email ) : bool {
+
+        if( $user->is_empty( 'user_email' )) {
+            $this->error = 'user_email is empty';
+        
+        } elseif( !$user->is_correct( 'user_email' )) {
+            $this->error = 'user_email is incorrect';
+        
+        } elseif( $user->is_exists( [['user_email', '=', $user->user_email]] )) {
+            $this->error = 'user_email is exists';
+        
+        } else {
+            $this->user_status = 'pending';
+            $this->user_token  = $this->token_create();
+            $this->user_email  = $user_email;
+            $this->user_pass   = $this->pass_create();
+            $this->user_hash   = $this->hash_create( $this->user_pass );
+            $this->hash_date   = '0000-00-00 00:00:00';
+
+            if( !$user->insert() ) {
+                $this->error = 'user insert error';
+            }
+        }
     }
     
 }
