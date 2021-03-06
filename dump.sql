@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS project.user_roles (
     date      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id   BIGINT(20)  NOT NULL,
     group_id  BIGINT(20)  NOT NULL,
-    user_role VARCHAR(40) NOT NULL, # admin | editor | reader | none
+    user_role VARCHAR(40) NOT NULL, # admin | editor | reader | invited
 
     PRIMARY KEY id        (id),
             KEY date      (date),

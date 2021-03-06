@@ -43,10 +43,6 @@ class Meta
 
     // is data empty
     private function is_empty( string $key ): bool {
-
-        if( $key = 'date' )) {
-            return $this->date == '0000-00-00 00:00:00' or empty( $this->date );
-        }
         return empty( $this->$key );
     }
 
@@ -104,7 +100,7 @@ class Meta
 
         $affected_rows = $this->db
             ->table('user_meta')
-            ->where([ ['user_id', '=', $this->user_id], [ 'meta_key', '=', $thismeta_key] ])
+            ->where([ ['user_id', '=', $this->user_id], [ 'meta_key', '=', $this->meta_key] ])
             ->update([ 'meta_value'  => $this->meta_value]);
 
         return is_int( $affected_rows ) ? true : false;
@@ -143,7 +139,45 @@ class Meta
     }
 
     // insert/update meta *
-    public function set( int $user_id, string $meta_key, string $meta_value ) : bool {}
+    public function set( int $user_id, string $meta_key, string $meta_value, bool $can_empty = false ) : bool {
+        
+        $this->user_id    = $user_id;
+        $this->meta_key   = $meta_key;
+        $this->meta_value = $meta_value;
+
+        if( $this->is_empty( 'user_id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'user_id' )) {
+            $this->error = 'user_id is incorrect';
+        
+        } elseif( $this->is_empty( 'meta_key' )) {
+            $this->error = 'meta_key is empty';
+        
+        } elseif( !$this->is_correct( 'meta_key' )) {
+            $this->error = 'meta_key is incorrect';
+
+        } elseif( !$can_empty and $this->is_empty( 'meta_value' )) {
+            $this->error = 'meta_value is empty';
+
+        } elseif( !$this->is_correct( 'meta_value' )) {
+            $this->error = 'meta_value is incorrect';
+        
+        } else {
+            if( !$this->is_exists( [['user_id', '=', $this->user_id], ['meta_key', '=', $this->meta_key]] )) {
+                if( !$this->insert()) {
+                    $this->error = 'meta insert error';
+                }
+
+            } else {
+                if( !$this->update()) {
+                    $this->error = 'meta update error';
+                }
+            }
+        }
+
+        return empty( $this->error );
+    }
 
     // select meta *
     public function get( int $user_id, string $meta_key ) : bool {}
