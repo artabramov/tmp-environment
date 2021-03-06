@@ -311,8 +311,8 @@ class User
         return true;
     }
 
-    // user signout *
-    public function signout( string $user_token ) : bool {
+    // user auth *
+    public function auth( string $user_token ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -330,6 +330,74 @@ class User
         
         } elseif( !$this->select( 'user_token' )) {
             $this->error = 'user_token select error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    // user change *
+    public function change( int $user_id, string $user_email ) : bool {
+
+        $this->error = '';
+        $this->clear();
+        
+        $this->id         = $user_id;
+        $this->user_email = $user_email;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->is_empty( 'user_email' )) {
+            $this->error = 'user_email is empty';
+        
+        } elseif( !$this->is_correct( 'user_email' )) {
+            $this->error = 'user_email is incorrect';
+        
+        } elseif( $this->is_exists( [['user_email', '=', $this->user_email]] )) {
+            $this->error = 'user_email is exists';
+
+        } else {
+
+            $this->user_status = 'pending';
+            $this->user_token  = $this->token_create();
+            $this->user_pass   = '';
+            $this->user_hash   = '';
+            $this->hash_date   = '0000-00-00 00:00:00';
+
+            if( !$this->update(['user_status', 'user_token', 'user_email', 'user_hash', 'hash_date']) ) {
+                $this->error = 'user update error';
+            }
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    // user signout *
+    public function signout( int $user_id ) : bool {
+
+        $this->error = '';
+        $this->clear();
+        
+        $this->id = $user_id;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'user_id is incorrect';
 
         } else {
             $this->user_token = $this->token_create();
@@ -347,6 +415,34 @@ class User
         return true;
     }
 
+    // get user *
+    public function get( int $user_id ) : bool {
 
+        $this->error = '';
+        $this->clear();
+        
+        $this->id = $user_id;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( !$this->is_exists( [['id', '=', $this->id], ['user_status', '=', 'approved']] )) {
+            $this->error = 'user_id not found';
+
+        } elseif( !$this->select( 'id' ) ) {
+            $this->error = 'user select error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+    
 
 }

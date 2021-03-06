@@ -15,6 +15,8 @@ class Meta
     // construct *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db = $db;
+
+        $this->error = '';
         $this->clear();
     }
 
@@ -28,7 +30,7 @@ class Meta
 
     // clear data
     private function clear() {
-        $this->error      = '';
+
         $this->id         = 0;
         $this->date       = '0000-00-00 00:00:00';
         $this->user_id    = 0;
@@ -66,17 +68,15 @@ class Meta
     }
 
     // is meta exists
-    private function is_exists( array $args ) : bool {
+    private function is_exists() : bool {
 
         $meta = $this->db
             ->table('user_meta')
-            ->select('id');
+            ->select('id')
+            ->where( 'user_id', '=', $this->user_id )
+            ->where( 'meta_key', '=', $this->meta_key )
+            ->first();
 
-        foreach( $args as $where ) {
-            $meta = $meta->where( $where[0], $where[1], $where[2] );
-        }
-
-        $meta = $meta->first();
         return empty( $meta->id ) ? false : true;
     }
 
@@ -141,6 +141,9 @@ class Meta
     // insert/update meta *
     public function set( int $user_id, string $meta_key, string $meta_value, bool $can_empty = false ) : bool {
         
+        $this->error = '';
+        $this->clear();
+
         $this->user_id    = $user_id;
         $this->meta_key   = $meta_key;
         $this->meta_value = $meta_value;
@@ -176,11 +179,52 @@ class Meta
             }
         }
 
-        return empty( $this->error );
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
     }
 
     // select meta *
-    public function get( int $user_id, string $meta_key ) : bool {}
+    public function get( int $user_id, string $meta_key ) : bool {
+
+        $this->error = '';
+        $this->clear();
+
+        $this->user_id  = $user_id;
+        $this->meta_key = $meta_key;
+
+        if( $this->is_empty( 'user_id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'user_id' )) {
+            $this->error = 'user_id is incorrect';
+        
+        } elseif( $this->is_empty( 'meta_key' )) {
+            $this->error = 'meta_key is empty';
+        
+        } elseif( !$this->is_correct( 'meta_key' )) {
+            $this->error = 'meta_key is incorrect';
+        
+        } elseif( !$this->is_exists()) {
+            $this->error = 'meta not found';
+
+        } elseif( !$this->select() ) {
+            $this->error = 'meta select error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    // isset meta *
+    public function isset( int $user_id, string $meta_key ) : bool {}
 
     // delete meta *
     public function unset( int $user_id, string $meta_key ) : bool {}
