@@ -134,8 +134,7 @@ class Meta
             ->where([ ['user_id', '=', $this->user_id], ['meta_key', '=', $this->meta_key] ])
             ->delete();
 
-        // TODO: check deleting
-        return $affected_rows > 0 ? true : false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // insert/update meta *
@@ -223,10 +222,37 @@ class Meta
         return true;
     }
 
-    // isset meta *
-    public function isset( int $user_id, string $meta_key ) : bool {}
-
     // delete meta *
-    public function unset( int $user_id, string $meta_key ) : bool {}
+    public function unset( int $user_id, string $meta_key ) : bool {
+
+        $this->error = '';
+        $this->clear();
+
+        $this->user_id    = $user_id;
+        $this->meta_key   = $meta_key;
+
+        if( $this->is_empty( 'user_id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'user_id' )) {
+            $this->error = 'user_id is incorrect';
+        
+        } elseif( $this->is_empty( 'meta_key' )) {
+            $this->error = 'meta_key is empty';
+        
+        } elseif( !$this->is_correct( 'meta_key' )) {
+            $this->error = 'meta_key is incorrect';
+        
+        } elseif( !$this->delete()) {
+            $this->error = 'meta delete error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
 
 }
