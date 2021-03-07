@@ -210,6 +210,8 @@ class Role
         $this->group_id  = $group_id;
         $this->user_role = $user_role;
 
+        $is_exists = false;
+
         if( $this->is_empty( 'user_id' )) {
             $this->error = 'user_id is empty';
         
@@ -222,24 +224,18 @@ class Role
         } elseif( !$this->is_correct( 'group_id' )) {
             $this->error = 'group_id is incorrect'
         
-        } else {
-            
-            if( in_array( $this->user_role, ['admin', 'editor', 'reader', 'invited'])) {
-                $is_exists = $this->is_exists([ 'user_id', 'group_id', 'user_role'] );
+        } elseif( in_array( $this->user_role, ['admin', 'editor', 'reader', 'invited'])) {
+            $is_exists = $this->is_exists([ 'user_id', 'group_id', 'user_role'] );
 
-            } elseif( $this->is_empty('user_role')) {
-                $is_exists = $this->is_exists([ 'user_id', 'group_id' ]);
-
-            } else {
-                $is_exists = false;
-            }
+        } elseif( $this->is_empty('user_role')) {
+            $is_exists = $this->is_exists([ 'user_id', 'group_id' ]);
         }
 
-        if( $this->is_error() ) {
+        if( $is_exists ) {
             $this->clear();
-            return false;
+            return true;
         }
 
-        return true
+        return false; 
     }
 }

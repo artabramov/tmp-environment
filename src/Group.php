@@ -203,18 +203,19 @@ class Group
        
         } elseif( !$this->is_correct( 'group_id' )) {
             $this->error = 'group_id is incorrect';
-        
-        } else {
 
-        }
+        } elseif( $this->is_empty( 'group_status' )) {
+            $this->error = 'group_status is empty';
+       
+        } elseif( !$this->is_correct( 'group_status' )) {
+            $this->error = 'group_status is incorrect';
 
-
-        if( $this->is_error() ) {
+        } elseif( $this->is_exists( ['group_id', 'group_status' ])) {
             $this->clear();
-            return false;
+            return true;
         }
 
-        return true
+        return false;
     }
 
     // trash group *
