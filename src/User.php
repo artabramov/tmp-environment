@@ -443,6 +443,5 @@ class User
 
         return true;
     }
-    
 
 }

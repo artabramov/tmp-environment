@@ -90,21 +90,21 @@ CREATE TABLE IF NOT EXISTS project.posts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Posts metadata
-CREATE TABLE IF NOT EXISTS project.post_meta (
-    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id    BIGINT(20)   NOT NULL,
-    post_id    BIGINT(20)   NOT NULL,
-    meta_key   VARCHAR(40)  NOT NULL,
-    meta_value VARCHAR(255) NOT NULL,
+# Posts tags
+CREATE TABLE IF NOT EXISTS project.post_tags (
+    id        BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id   BIGINT(20)   NOT NULL,
+    post_id   BIGINT(20)   NOT NULL,
+    tag_key   VARCHAR(40)  NOT NULL,
+    tag_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id         (id),
-            KEY date       (date),
-            KEY user_id    (user_id),
-            KEY post_id    (post_id),
-            KEY meta_key   (meta_key),
-            KEY meta_value (meta_value)
+    PRIMARY KEY id        (id),
+            KEY date      (date),
+            KEY user_id   (user_id),
+            KEY post_id   (post_id),
+            KEY tag_key   (tag_key),
+            KEY tag_value (tag_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

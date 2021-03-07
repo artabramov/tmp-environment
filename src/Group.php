@@ -15,6 +15,8 @@ class Group
     // construct *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db = $db;
+
+        $this->error = '';
         $this->clear();
     }
 
@@ -28,7 +30,7 @@ class Group
 
     // clear data
     private function clear() {
-        $this->error        = '';
+
         $this->id           = 0;
         $this->date         = '0000-00-00 00:00:00';
         $this->user_id      = 0;
@@ -114,6 +116,9 @@ class Group
     // create group *
     public function create( int $user_id, string $group_status, string $group_name ) : bool {
 
+        $this->error = '';
+        $this->clear();
+
         $this->user_id      = $user_id;
         $this->group_status = $group_status;
         $this->group_name   = $group_name;
@@ -140,11 +145,77 @@ class Group
             $this->error = 'group insert error';
         }
 
-        return empty( $this->error );
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
     }
 
     // rename group *
-    public function rename( int $group_id, string $group_name ) : bool {}
+    public function rename( int $group_id, string $group_name ) : bool {
+
+        $this->error = '';
+        $this->clear();
+        
+        $this->id         = $group_id;
+        $this->group_name = $group_name;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'group_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'group_id is incorrect';
+
+        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'trash']] )) {
+            $this->error = 'group is trash';
+
+        } elseif( $this->is_empty( 'group_name' )) {
+            $this->error = 'group_name is empty';
+        
+        } elseif( !$this->is_correct( 'group_name' )) {
+            $this->error = 'group_name is incorrect';
+
+        } elseif( !$this->update( [ 'group_name' ] )) {
+            $this->error = 'group update error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true
+    }
+
+    // is group exists *
+    public function is_an( int $group_id, string $group_status = 'public' ) : bool {
+
+        $this->error = '';
+        $this->clear();
+
+        $this->group_id     = $group_id;
+        $this->group_status = $group_status;
+
+        if( $this->is_empty( 'group_id' )) {
+            $this->error = 'group_id is empty';
+       
+        } elseif( !$this->is_correct( 'group_id' )) {
+            $this->error = 'group_id is incorrect';
+        
+        } else {
+
+        }
+
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true
+    }
 
     // trash group *
     public function trash( int $group_id ) : bool {}

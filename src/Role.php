@@ -15,6 +15,8 @@ class Role
     // construct *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db = $db;
+
+        $this->error = '';
         $this->clear();
     }
 
@@ -28,7 +30,7 @@ class Role
 
     // clear data
     private function clear() {
-        $this->error     = '';
+
         $this->id        = 0;
         $this->date      = '0000-00-00 00:00:00';
         $this->user_id   = 0;
@@ -64,7 +66,6 @@ class Role
 
         return false;
     }
-
 
     // check that the role exists
     private function is_exists( array $args ) : bool {
@@ -157,7 +158,10 @@ class Role
     }
 
     // create role *
-    public function create( int $user_id, string $group_id, string $user_role ) : bool {
+    public function set( int $user_id, int $group_id, string $user_role ) : bool {
+
+        $this->error = '';
+        $this->clear();
 
         $this->user_id   = $user_id;
         $this->group_id  = $group_id;
@@ -188,8 +192,54 @@ class Role
             $this->error = 'role insert error';
         }
 
-        return empty( $this->error );
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
     }
 
+    // is user have role in group *
+    public function is_an( int $user_id, int $group_id, string $user_role = '' ) : bool {
 
+        $this->error = '';
+        $this->clear();
+
+        $this->user_id   = $user_id;
+        $this->group_id  = $group_id;
+        $this->user_role = $user_role;
+
+        if( $this->is_empty( 'user_id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'user_id' )) {
+            $this->error = 'user_id is incorrect';
+        
+        } elseif( $this->is_empty( 'group_id' )) {
+            $this->error = 'group_id is empty';
+        
+        } elseif( !$this->is_correct( 'group_id' )) {
+            $this->error = 'group_id is incorrect'
+        
+        } else {
+            
+            if( in_array( $this->user_role, ['admin', 'editor', 'reader', 'invited'])) {
+                $is_exists = $this->is_exists([ 'user_id', 'group_id', 'user_role'] );
+
+            } elseif( $this->is_empty('user_role')) {
+                $is_exists = $this->is_exists([ 'user_id', 'group_id' ]);
+
+            } else {
+                $is_exists = false;
+            }
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true
+    }
 }
