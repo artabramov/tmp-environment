@@ -200,17 +200,14 @@ class Role
         return true;
     }
 
-    // is user have role in group *
-    public function is_an( int $user_id, int $group_id, string $user_role = '' ) : bool {
+    // get the role *
+    public function get( int $user_id, int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
 
         $this->user_id   = $user_id;
         $this->group_id  = $group_id;
-        $this->user_role = $user_role;
-
-        $is_exists = false;
 
         if( $this->is_empty( 'user_id' )) {
             $this->error = 'user_id is empty';
@@ -222,20 +219,20 @@ class Role
             $this->error = 'group_id is empty';
         
         } elseif( !$this->is_correct( 'group_id' )) {
-            $this->error = 'group_id is incorrect'
-        
-        } elseif( in_array( $this->user_role, ['admin', 'editor', 'reader', 'invited'])) {
-            $is_exists = $this->is_exists([ 'user_id', 'group_id', 'user_role'] );
+            $this->error = 'group_id is incorrect';
 
-        } elseif( $this->is_empty('user_role')) {
-            $is_exists = $this->is_exists([ 'user_id', 'group_id' ]);
+        } elseif( !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
+            $this->error = 'role not found';
+
+        } elseif( !$this->select() ) {
+            $this->error = 'role select error';
         }
 
-        if( $is_exists ) {
+        if( $this->is_error() ) {
             $this->clear();
-            return true;
+            return false;
         }
 
-        return false; 
+        return true;
     }
 }
