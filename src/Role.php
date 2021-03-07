@@ -200,8 +200,8 @@ class Role
         return true;
     }
 
-    // get the role *
-    public function get( int $user_id, int $group_id ) : bool {
+    // fetch the role *
+    public function fetch( int $user_id, int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();

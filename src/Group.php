@@ -122,7 +122,7 @@ class Group
 
         $data = [];
         foreach( $keys as $key ) {
-            $data[ $key ] = $this->data[ $key ];
+            $data[ $key ] = $this->$key;
         }        
         
         $affected_rows = $this->db
@@ -209,8 +209,8 @@ class Group
         return true;
     }
 
-    // is group exists *
-    public function get( int $group_id ) : bool {
+    // fetch the group *
+    public function fetch( int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -239,6 +239,37 @@ class Group
     }
 
     // trash group *
-    public function trash( int $group_id ) : bool {}
+    public function trash( int $group_id ) : bool {
+
+        $this->error = '';
+        $this->clear();
+        
+        $this->id = $group_id;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'group_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'group_id is incorrect';
+
+        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'trash']] )) {
+            $this->error = 'group is not found';
+
+        } else {
+            $this->group_status = 'trash';
+
+            if( !$this->update( ['group_status'] )) {
+                $this->error = 'group trash error';
+            }
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+ 
+    }
 
 }
