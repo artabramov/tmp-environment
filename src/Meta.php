@@ -242,6 +242,9 @@ class Meta
         
         } elseif( !$this->is_correct( 'meta_key' )) {
             $this->error = 'meta_key is incorrect';
+
+        } elseif( !$this->is_exists()) {
+            $this->error = 'meta not found';
         
         } elseif( !$this->delete()) {
             $this->error = 'meta delete error';

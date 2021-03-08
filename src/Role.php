@@ -185,11 +185,17 @@ class Role
         } elseif( !$this->is_correct( 'user_role' )) {
             $this->error = 'user_role is incorrect';
 
-        } elseif( $this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
-            $this->error = 'role is exists';
-        
-        } elseif( !$this->insert()) {
-            $this->error = 'role insert error';
+        } else {
+            if( !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
+                if( !$this->insert()) {
+                    $this->error = 'role insert error';
+                }
+
+            } else {
+                if( !$this->update()) {
+                    $this->error = 'role update error';
+                }
+            }
         }
 
         if( $this->is_error() ) {
@@ -230,6 +236,48 @@ class Role
 
         } elseif( !$this->select() ) {
             $this->error = 'role select error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    // delete role *
+    public function unset( int $user_id, int $group_id ) : bool {
+
+        $this->error = '';
+        $this->clear();
+
+        $this->user_id  = $user_id;
+        $this->group_id = $group_id;
+
+        if( $this->is_empty( 'user_id' )) {
+            $this->error = 'user_id is empty';
+        
+        } elseif( !$this->is_correct( 'user_id' )) {
+            $this->error = 'user_id is incorrect';
+        
+        } elseif( $this->is_empty( 'group_id' )) {
+            $this->error = 'group_id is empty';
+        
+        } elseif( !$this->is_correct( 'group_id' )) {
+            $this->error = 'group_id is incorrect';
+
+        } elseif( !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
+            $this->error = 'role not found';
+
+        } elseif( !$this->select() ) {
+            $this->error = 'role select error';
+
+        } elseif( $this->user_role == 'admin' and $this->count( [['group_id', '=', $group_id], ['user_role', '=', 'admin']] ) <= 1 ) {
+            $this->error = 'cannot delete last admin role';
+        
+        } elseif( !$this->delete()) {
+            $this->error = 'role delete error';
         }
 
         if( $this->is_error() ) {
