@@ -174,7 +174,7 @@ class Group
     }
 
     // rename group *
-    public function rename( int $group_id, string $group_name ) : bool {
+    public function change( int $group_id, string $group_name ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -210,7 +210,7 @@ class Group
     }
 
     // fetch the group *
-    public function fetch( int $group_id ) : bool {
+    public function get( int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
