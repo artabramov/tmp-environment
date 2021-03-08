@@ -186,7 +186,7 @@ class Role
             $this->error = 'user_role is incorrect';
 
         } elseif( $this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
-            $this->error = 'group_id is incorrect';
+            $this->error = 'role is exists';
         
         } elseif( !$this->insert()) {
             $this->error = 'role insert error';
@@ -201,13 +201,14 @@ class Role
     }
 
     // fetch the role *
-    public function get( int $user_id, int $group_id ) : bool {
+    public function get( int $user_id, int $group_id, string $user_role = '' ) : bool {
 
         $this->error = '';
         $this->clear();
 
         $this->user_id   = $user_id;
         $this->group_id  = $group_id;
+        $this->user_role = $user_role;
 
         if( $this->is_empty( 'user_id' )) {
             $this->error = 'user_id is empty';
@@ -221,7 +222,10 @@ class Role
         } elseif( !$this->is_correct( 'group_id' )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
+        } elseif( empty( $this->user_role ) and !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id]] )) {
+            $this->error = 'role not found';
+
+        } elseif( !empty( $this->user_role ) and !$this->is_exists( [['user_id', '=', $this->user_id], ['group_id', '=', $this->group_id], ['user_role', '=', $this->user_role]] )) {
             $this->error = 'role not found';
 
         } elseif( !$this->select() ) {

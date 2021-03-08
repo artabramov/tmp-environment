@@ -209,13 +209,14 @@ class Group
         return true;
     }
 
-    // fetch the group *
-    public function get( int $group_id ) : bool {
+    // get the group *
+    public function get( int $group_id, string $group_status = '' ) : bool {
 
         $this->error = '';
         $this->clear();
 
         $this->id = $group_id;
+        $this->group_status = $group_status;
 
         if( $this->is_empty( 'id' )) {
             $this->error = 'group_id is empty';
@@ -223,7 +224,10 @@ class Group
         } elseif( !$this->is_correct( 'id' )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'trash']] )) {
+        } elseif( empty( $this->group_status ) and !$this->is_exists( [['id', '=', $this->id]] ) ) {
+            $this->error = 'group not found';
+
+        } elseif( !empty( $this->group_status ) and !$this->is_exists( [['id', '=', $this->id], ['group_status', '=', $this->group_status]] )) {
             $this->error = 'group not found';
 
         } elseif( !$this->select() ) {
