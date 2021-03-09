@@ -174,7 +174,7 @@ class Group
     }
 
     // rename group *
-    public function change( int $group_id, string $group_name ) : bool {
+    public function rename( int $group_id, string $group_name ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -198,7 +198,43 @@ class Group
             $this->error = 'group_name is incorrect';
 
         } elseif( !$this->update( [ 'group_name' ] )) {
-            $this->error = 'group update error';
+            $this->error = 'group name update error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
+            return false;
+        }
+
+        return true;
+    }
+
+    // change status *
+    public function restatus( int $group_id, string $group_status ) : bool {
+
+        $this->error = '';
+        $this->clear();
+        
+        $this->id           = $group_id;
+        $this->group_status = $group_status;
+
+        if( $this->is_empty( 'id' )) {
+            $this->error = 'group_id is empty';
+        
+        } elseif( !$this->is_correct( 'id' )) {
+            $this->error = 'group_id is incorrect';
+
+        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'private']] )) {
+            $this->error = 'group is not available';
+
+        } elseif( $this->is_empty( 'group_status' )) {
+            $this->error = 'group_status is empty';
+        
+        } elseif( !in_array( $this->group_status, ['public', 'trash'] )) {
+            $this->error = 'group_status is incorrect';
+
+        } elseif( !$this->update( [ 'group_status' ] )) {
+            $this->error = 'group status update error';
         }
 
         if( $this->is_error() ) {
