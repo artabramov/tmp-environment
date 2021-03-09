@@ -319,7 +319,7 @@ class User
             $this->error = 'user_token is incorrect';
         
         } elseif( !$this->is_exists( [['user_token', '=', $user_token], ['user_status', '=', 'approved']] )) {
-            $this->error = 'user_token not found';
+            $this->error = 'user not found';
         
         } elseif( !$this->select( 'user_token', $user_token )) {
             $this->error = 'user select error';
@@ -420,7 +420,7 @@ class User
         } elseif( !empty( $user_status ) and !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', $user_status]] )) {
             $this->error = 'user_id not found';
 
-        } elseif( !$this->select( 'id', $user_id ) ) {
+        } elseif( !$this->select( [['id', '=', $user_id]] ) ) {
             $this->error = 'user select error';
         }
 

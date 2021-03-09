@@ -134,6 +134,17 @@ class Group
         return empty( $group->id ) ? false : true;
     }
 
+    // delete
+    private function delete( array $where ) : bool {
+
+        $affected_rows = $this->db
+            ->table('groups')
+            ->where( $where )
+            ->delete();
+
+        return is_int( $affected_rows ) ? true : false;
+    }
+
     // create group *
     public function create( int $user_id, string $group_status, string $group_name ) : bool {
 
@@ -233,66 +244,49 @@ class Group
     }
 
     // get the group *
-    public function get( int $group_id, string $group_status = '' ) : bool {
+    public function get( int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
 
-        $this->id = $group_id;
-        $this->group_status = $group_status;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'group_id is empty';
-       
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( empty( $this->group_status ) and !$this->is_exists( [['id', '=', $this->id]] ) ) {
+        } elseif( !$this->is_exists( [['id', '=', $group_id]] ) ) {
             $this->error = 'group not found';
 
-        } elseif( !empty( $this->group_status ) and !$this->is_exists( [['id', '=', $this->id], ['group_status', '=', $this->group_status]] )) {
-            $this->error = 'group not found';
-
-        } elseif( !$this->select() ) {
+        } elseif( !$this->select( [['id', '=', $group_id]] ) ) {
             $this->error = 'group select error';
         }
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // delete the group *
-    public function delete( int $group_id ) : bool {
+    public function unset( int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
         
-        $this->id = $group_id;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'group_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'group_id' )) {
             $this->error = 'group_id is incorrect';
 
         } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '=', 'trash']] )) {
-            $this->error = 'group is not found';
+            $this->error = 'group not found';
 
-        } else {
-            // TODO
+        } elseif( !$this->delete( [['id', '=', $group_id]] ) ) {
+            $this->error = 'group delete error';
         }
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
- 
+        return $this->is_error() ? false : true;
     }
 
 }
