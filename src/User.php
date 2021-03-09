@@ -15,7 +15,6 @@ class User
     private $user_hash;
     private $hash_date;
 
-    // construct *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db = $db;
 
@@ -23,10 +22,9 @@ class User
         $this->clear();
     }
 
-    // set *
-    public function __set( string $key, $value ) {}
+    public function __set( string $key, $value ) {
+    }
 
-    // get *
     public function __get( string $key ) {
         return isset( $this->$key ) ? $this->$key : null;
     }
@@ -49,67 +47,68 @@ class User
         return !empty( $this->error );
     }
 
-    // is data empty
-    private function is_empty( string $key ): bool {
-        return empty( $this->$key );
-    }
+    // is correct
+    private function is_correct( string $key, $value ) : bool {
 
-    // is data correct
-    private function is_correct( string $key ) : bool {
-
-        if ( $key == 'id' and is_int( $this->id ) and $this->id > 0 and ceil( log10( $this->id )) <= 20 ) {
+        if ( $key == 'id' and !empty( $value ) and is_int( $value ) ) {
             return true;
 
-        } elseif ( $key == 'user_status' and in_array( $this->user_status, ['pending', 'approved', 'trash']) ) {
+        } elseif ( $key == 'user_status' and in_array( $value, ['pending', 'approved', 'trash']) ) {
             return true;
 
-        } elseif ( $key == 'user_token' and is_string( $this->user_token ) and mb_strlen( $this->user_token, 'utf-8' ) == 80 ) {
+        } elseif ( $key == 'user_token' and is_string( $value ) and mb_strlen( $value, 'utf-8' ) == 80 ) {
             return true;
 
-        } elseif ( $key == 'user_email' and is_string( $this->user_email ) and mb_strlen( $this->user_email, 'utf-8' ) <= 255 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $this->user_email ) ) {
+        } elseif ( $key == 'user_email' and is_string( $value ) and mb_strlen( $value, 'utf-8' ) <= 255 and preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value ) ) {
             return true;
 
-        } elseif ( $key == 'user_pass' and is_string( $this->user_pass )) {
+        } elseif ( $key == 'user_pass' and !empty( $value ) and is_string( $value ) ) {
             return true;
 
-        } elseif ( $key == 'user_hash' and is_string( $this->user_hash ) and mb_strlen( $this->user_hash, 'utf-8' ) == 40 ) {
+        } elseif ( $key == 'user_hash' and is_string( $value ) and mb_strlen( $value, 'utf-8' ) == 40 ) {
             return true;
         }
 
         return false;
     }
 
-    // is user exists
+    // is exists
     private function is_exists( array $args ) : bool {
-        $user = $this->db
-        ->table('users')
-        ->select('id');
-        foreach( $args as $where ) {
-            $user = $user->where( $where[0], $where[1], $where[2] );
-        }
-        $user = $user->first();
-        return empty( $user->id ) ? false : true;
+
+        $role = $this->db
+            ->table('users')
+            ->select('id')
+            ->where( $args )
+            ->first();
+
+        return empty( $role->id ) ? false : true;
     }
 
-    // generate token
+    // create token
     private function token_create() : string {
+
         do {
             $user_token = bin2hex( random_bytes( 40 ));
+
             if( $this->is_exists( [['user_token', '=', $user_token]] )) {
                 $repeat = true;
+                
             } else {
                 $repeat = false;
             }
         } while( $repeat );
+
         return $user_token;
     }
 
     // generate password
     private function pass_create( int $pass_length ) : string {
+
         $user_pass = '';
         for( $i = 0; $i < $pass_length; $i++ ) {
             $user_pass .= mt_rand( 0,9 );
         }
+
         return $user_pass;
     }
 
@@ -125,29 +124,54 @@ class User
     }
 
     // insert user
-    private function insert() : bool {
+    private function insert( array $data ) : bool {
         
-        $this->id = $this->db
-        ->table('users')
-        ->insertGetId([
-            'date'        => $this->db::raw('now()'),
-            'user_status' => $this->user_status,
-            'user_token'  => $this->user_token,
-            'user_email'  => $this->user_email,
-            'user_hash'   => $this->user_hash,
-            'hash_date'   => $this->hash_date
-        ]);
+        $data['date'] = $this->db::raw('now()');
 
-        return empty( $this->id ) ? false : true;
+        $user_id = $this->db
+            ->table('users')
+            ->insertGetId( $data );
+
+        if( !empty( $user_id ) ) {
+            $this->id = $user_id;
+
+            foreach( $data as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return empty( $user_id ) ? false : true;
+    }
+
+    // user update
+    private function update( array $where, array $update ) : bool {
+
+        $affected_rows = $this->db
+            ->table('users')
+            ->where( $where )
+            ->update( $update );
+
+        if( is_int( $affected_rows ) ) {
+            foreach( $where as $value ) {
+                $key = $value[0];
+                $this->$key = $value[2];
+            }
+
+            foreach( $update as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // select user
-    private function select( string $key ) : bool {
+    private function select( array $where ) : bool {
   
         $user = $this->db
-            ->table('users')
-            ->select(['*'])
-            ->where([ [ $key, '=', $this->$key ] ])
+            ->table( 'users' )
+            ->where( $where )
+            ->select( '*' )
             ->first();
 
         if( !empty( $user->id )) {
@@ -163,91 +187,70 @@ class User
         return empty( $user->id ) ? false : true;
     }
 
-    // user update
-    private function update( array $keys ) : bool {
-
-        $data = [];
-        foreach( $keys as $key ) {
-            $data[ $key ] = $this->$key;
-        }        
-        
-        $affected_rows = $this->db
-            ->table('users')
-            ->where([[ 'id', '=', $this->id ]])
-            ->update( $data );
-
-        return is_int( $affected_rows ) ? true : false;
-    }
-
     // user register *
     public function register( string $user_email ) : bool {
 
         $this->error = '';
         $this->clear();
-
-        $this->user_email = $user_email;
-
-        if( $this->is_empty( 'user_email' )) {
-            $this->error = 'user_email is empty';
         
-        } elseif( !$this->is_correct( 'user_email' )) {
+        if( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
         
-        } elseif( $this->is_exists( [['user_email', '=', $this->user_email]] )) {
+        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
             $this->error = 'user_email is exists';
         
         } else {
-            $this->user_status = 'pending';
-            $this->user_token  = $this->token_create();
-            $this->user_pass   = '';
-            $this->user_hash   = '';
-            $this->hash_date   = '0000-00-00 00:00:00';
 
-            if( !$this->insert() ) {
+            $data = [
+                'user_status' => 'pending',
+                'user_token'  => $this->token_create(),
+                'user_email'  => $user_email,
+                'user_hash'   => '',
+                'hash_date'   => '0000-00-00 00:00:00' ];
+
+            if( !$this->insert( $data ) ) {
                 $this->error = 'user insert error';
             }
         }
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // user restore *
-    public function restore( string $user_email, int $pass_length = 6, int $restore_delay = 30 ) : bool {
+    public function restore( string $user_email, int $pass_length = 4, int $restore_delay = 30 ) : bool {
 
         $this->error = '';
         $this->clear();
-
-        $this->user_email = $user_email;
-
-        if( $this->is_empty( 'user_email' )) {
-            $this->error = 'user_email is empty';
         
-        } elseif( !$this->is_correct( 'user_email' )) {
+        if( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
         
         } elseif( !$this->is_exists( [['user_email', '=', $this->user_email], ['user_status', '<>', 'trash']] )) {
-	        $this->error = 'user_email is not exists';
+	        $this->error = 'user_email is not exists or trashed';
 
         } else {
 
-            if( !$this->select( 'user_email' )) {
+            if( !$this->select( [['user_email', '=', $user_email]] )) {
                 $this->error = 'user select error';
 
-            } elseif( $restore_delay > 0 and strtotime($this->time()) - strtotime($this->hash_date) < $restore_delay ) {
-                $this->error = 'user delay error';
+            } elseif( strtotime( $this->time() ) - strtotime( $this->hash_date ) < $restore_delay ) {
+                $this->error = 'restore delay is too long';
 
             } else {
 
                 $this->user_pass = $this->pass_create( $pass_length );
-                $this->user_hash = $this->hash_create( $this->user_pass );
-                $this->hash_date = $this->db::raw('now()');
 
-                if( !$this->update(['user_hash', 'hash_date']) ) {
+                $where = [['user_email', '=', $user_email]];
+
+                $update = [
+                    'user_hash' => $this->hash_create( $this->user_pass ),
+                    'hash_date' => $this->db::raw('now()') ];
+
+                if( !$this->update( $where, $update ) ) {
                     $this->error = 'user update error';
                 }
             }
@@ -255,10 +258,9 @@ class User
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
     
     // user signin *
@@ -267,26 +269,18 @@ class User
         $this->error = '';
         $this->clear();
 
-        $this->user_email = $user_email;
-        $this->user_pass  = $user_pass;
-        $this->user_hash  = $this->hash_create( $this->user_pass );
-
-        if( $this->is_empty( 'user_email' )) {
-            $this->error = 'user_email is empty';
+        $user_hash  = $this->hash_create( $user_pass );
         
-        } elseif( !$this->is_correct( 'user_email' )) {
+        if( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
-
-        } elseif( $this->is_empty( 'user_pass' )) {
-            $this->error = 'user_pass is empty';
     
-        } elseif( !$this->is_correct( 'user_pass' )) {
+        } elseif( !$this->is_correct( 'user_pass', $user_pass )) {
             $this->error = 'user_pass is incorrect';
 
-        } elseif( !$this->is_exists( [['user_email', '=', $this->user_email], ['user_hash', '=', $this->user_hash], ['user_status', '<>', 'trash']] )) {
-            $this->error = 'user_pass is wrong';
+        } elseif( !$this->is_exists( [['user_email', '=', $user_email], ['user_hash', '=', $user_hash], ['user_status', '<>', 'trash']] )) {
+            $this->error = 'user_pass is wrong or user is not exists or trashed';
         
-        } elseif( !$this->select( 'user_email' )) {
+        } elseif( !$this->select( 'user_email', $user_email )) {
             $this->error = 'user select error';
         
         } elseif( strtotime( $this->time() ) - strtotime( $this->hash_date ) > $pass_expires ) {
@@ -294,21 +288,23 @@ class User
 
         } else {
 
-            $this->user_status = 'approved';
-            $this->user_hash   = '';
-            $this->hash_date   = '0000-00-00 00:00:00';
+            $where = [['user_email', '=', $user_email]];
 
-            if( !$this->update(['user_status', 'user_hash', 'hash_date']) ) {
+            $update = [
+                'user_status' => 'approved',
+                'user_hash'   => '',
+                'hash_date'   => '0000-00-00 00:00:00'];
+
+            if( !$this->update( $where, $update ) ) {
                 $this->error = 'user update error';
             }
         }
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // user auth *
@@ -318,26 +314,22 @@ class User
         $this->clear();
         
         $this->user_token = $user_token;
-
-        if( $this->is_empty( 'user_token' )) {
-            $this->error = 'user_token is empty';
         
-        } elseif( !$this->is_correct( 'user_token' )) {
+        if( !$this->is_correct( 'user_token', $user_token )) {
             $this->error = 'user_token is incorrect';
         
-        } elseif( !$this->is_exists( [['user_token', '=', $this->user_token], ['user_status', '=', 'approved']] )) {
+        } elseif( !$this->is_exists( [['user_token', '=', $user_token], ['user_status', '=', 'approved']] )) {
             $this->error = 'user_token not found';
         
-        } elseif( !$this->select( 'user_token' )) {
-            $this->error = 'user_token select error';
+        } elseif( !$this->select( 'user_token', $user_token )) {
+            $this->error = 'user select error';
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // user change *
@@ -346,43 +338,39 @@ class User
         $this->error = '';
         $this->clear();
         
-        $this->id         = $user_id;
-        $this->user_email = $user_email;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'user_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $user_id )) {
             $this->error = 'user_id is incorrect';
 
-        } elseif( $this->is_empty( 'user_email' )) {
-            $this->error = 'user_email is empty';
+        } elseif( !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', 'approved']] )) {
+            $this->error = 'user_id not found';
         
-        } elseif( !$this->is_correct( 'user_email' )) {
+        } elseif( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
         
-        } elseif( $this->is_exists( [['user_email', '=', $this->user_email]] )) {
-            $this->error = 'user_email is exists';
+        } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
+            $this->error = 'user_email is occupied';
 
         } else {
 
-            $this->user_status = 'pending';
-            $this->user_token  = $this->token_create();
-            $this->user_pass   = '';
-            $this->user_hash   = '';
-            $this->hash_date   = '0000-00-00 00:00:00';
+            $where = [['id', '=', $user_id]];
 
-            if( !$this->update(['user_status', 'user_token', 'user_email', 'user_hash', 'hash_date']) ) {
+            $update = [
+                'user_status' => 'pending',
+                'user_token'  => $this->token_create(),
+                'user_pass'   => '',
+                'user_hash'   => '',
+                'hash_date'   => '0000-00-00 00:00:00' ];
+
+            if( !$this->update( $where, $update )) {
                 $this->error = 'user update error';
             }
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // user signout *
@@ -391,28 +379,27 @@ class User
         $this->error = '';
         $this->clear();
         
-        $this->id = $user_id;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'user_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $user_id )) {
             $this->error = 'user_id is incorrect';
 
-        } else {
-            $this->user_token = $this->token_create();
+        } elseif( !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', 'approved']] )) {
+            $this->error = 'user_id not found';
 
-            if( !$this->update(['user_token']) ) {
+        } else {
+            $where = [['id', '=', $user_id]];
+
+            $update = [ 'user_token' => $this->token_create() ];
+
+            if( !$this->update( $where, $update ) ) {
                 $this->error = 'user update error';
             }
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // get user *
@@ -421,31 +408,26 @@ class User
         $this->error = '';
         $this->clear();
         
-        $this->id = $user_id;
-        $this->user_status = $user_status;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'user_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $user_id )) {
             $this->error = 'user_id is incorrect';
 
-        } elseif( empty( $this->user_status ) and !$this->is_exists( [['id', '=', $this->id]] )) {
+        } elseif( !empty( $user_status ) and !$this->is_correct( 'user_status', $user_status )) {
+            $this->error = 'user_status is incorrect';
+
+        } elseif( empty( $user_status ) and !$this->is_exists( [['id', '=', $user_id]] )) {
             $this->error = 'user_id not found';
 
-        } elseif( !empty( $this->user_status ) and !$this->is_exists( [['id', '=', $this->id], ['user_status', '=', 'approved']] )) {
+        } elseif( !empty( $user_status ) and !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', $user_status]] )) {
             $this->error = 'user_id not found';
 
-        } elseif( !$this->select( 'id' ) ) {
+        } elseif( !$this->select( 'id', $user_id ) ) {
             $this->error = 'user select error';
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
-
 }

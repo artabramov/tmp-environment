@@ -6,7 +6,6 @@ class Role
 {
     private $db;
     private $error;
-
     private $id;
     private $date;
     private $user_id;
@@ -42,7 +41,7 @@ class Role
         return !empty( $this->error );
     }
 
-    // data validation
+    // is correct
     private function is_correct( string $key, $value ) : bool {
 
         if ( $key == 'id' and !empty( $value ) and is_int( $value ) ) {
@@ -76,7 +75,6 @@ class Role
     // insert a new role
     private function insert( array $data ) : bool {
 
-        $this->clear();
         $data['date'] = $this->db::raw('now()');
 
         $role_id = $this->db
@@ -89,17 +87,14 @@ class Role
             foreach( $data as $key=>$value ) {
                 $this->$key = $value;
             }
-
-            return true;
         }
 
-        return false;
+        return empty( $role_id ) ? false : true;
     }
 
     // update the role
     private function update( array $where, array $update ) : bool {
 
-        $this->clear();
         $affected_rows = $this->db
             ->table('user_roles')
             ->where( $where )
@@ -114,17 +109,14 @@ class Role
             foreach( $update as $key=>$value ) {
                 $this->$key = $value;
             }
-
-            return true;
         }
 
-        return false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // select the role
     private function select( array $where ) : bool {
 
-        $this->clear();
         $role = $this->db
             ->table( 'user_roles' )
             ->where( $where )
@@ -137,11 +129,9 @@ class Role
             $this->user_id   = $role->user_id;
             $this->group_id  = $role->group_id;
             $this->user_role = $role->user_role;
-
-            return true;
         }
 
-        return false;
+        return empty( $role->id ) ? false : true;
     }
 
     // delete
@@ -152,12 +142,7 @@ class Role
             ->where( $where )
             ->delete();
 
-        if( is_int( $affected_rows ) ) {
-            $this->clear();
-            return true;
-        }
-
-        return false;
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // count roles
@@ -175,6 +160,7 @@ class Role
     public function set( int $user_id, int $group_id, string $user_role ) : bool {
 
         $this->error = '';
+        $this->clear();
 
         if( !$this->is_correct( 'user_id', $user_id )) {
             $this->error = 'user_id is incorrect';
@@ -188,15 +174,32 @@ class Role
         } else {
 
             if( $this->is_exists( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] )) {
-                if( !$this->update( [[ 'user_id', '=', $user_id ], [ 'group_id', '=', $group_id ]], [ 'user_role' => $user_role ] )) {
+
+                $where = [
+                    [ 'user_id', '=', $user_id ], 
+                    [ 'group_id', '=', $group_id ]];
+
+                $data = [ 'user_role' => $user_role ];
+
+                if( !$this->update( $where, $data )) {
                     $this->error = 'role update error';
                 }
 
             } else {
-                if( !$this->insert( [ 'user_id' => $user_id, 'group_id' => $group_id, 'user_role' => $user_role ] )) {
+
+                $data = [ 
+                    'user_id' => $user_id, 
+                    'group_id' => $group_id, 
+                    'user_role' => $user_role ];
+
+                if( !$this->insert( $data )) {
                     $this->error = 'role insert error';
                 }
             }
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
         }
 
         return $this->is_error() ? false : true;
@@ -206,6 +209,7 @@ class Role
     public function get( int $user_id, int $group_id, string $user_role = '' ) : bool {
 
         $this->error = '';
+        $this->clear();
         
         if( !$this->is_correct( 'user_id', $user_id )) {
             $this->error = 'user_id is incorrect';
@@ -223,6 +227,10 @@ class Role
             $this->error = 'role select error';
         }
 
+        if( $this->is_error() ) {
+            $this->clear();
+        }
+
         return $this->is_error() ? false : true;
     }
 
@@ -230,6 +238,7 @@ class Role
     public function unset( int $user_id, int $group_id ) : bool {
 
         $this->error = '';
+        $this->clear();
 
         if( !$this->is_correct( 'user_id', $user_id )) {
             $this->error = 'user_id is incorrect';
@@ -248,6 +257,10 @@ class Role
         
         } elseif( !$this->delete( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] )) {
             $this->error = 'role delete error';
+        }
+
+        if( $this->is_error() ) {
+            $this->clear();
         }
 
         return $this->is_error() ? false : true;

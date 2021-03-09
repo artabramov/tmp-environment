@@ -12,7 +12,6 @@ class Group
     private $group_status;
     private $group_name;
 
-    // construct *
     public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
         $this->db = $db;
 
@@ -20,10 +19,9 @@ class Group
         $this->clear();
     }
 
-    // set *
-    public function __set( string $key, $value ) {}
+    public function __set( string $key, $value ) {
+    }
 
-    // get *
     public function __get( string $key ) {
         return isset( $this->$key ) ? $this->$key : null;
     }
@@ -43,70 +41,89 @@ class Group
         return !empty( $this->error );
     }
 
-    // is data empty
-    private function is_empty( string $key ): bool {
-        return empty( $this->$key );
-    }
-
     // data validation
-    private function is_correct( string $key ) : bool {
+    private function is_correct( string $key, $value ) : bool {
 
-        if ( $key == 'id' and is_int( $this->id ) and $this->id > 0 and ceil( log10( $this->id )) <= 20 ) {
+        if ( $key == 'id' and !empty( $value ) and is_int( $value ) ) {
             return true;
 
-        } elseif ( $key == 'user_id' and is_int( $this->user_id ) and $this->user_id > 0 and ceil( log10( $this->user_id )) <= 20 ) {
+        } elseif ( $key == 'user_id' and !empty( $value ) and is_int( $value ) ) {
             return true;
 
-        } elseif ( $key == 'group_status' and in_array( $this->group_status, ['public', 'private', 'trash']) ) {
+        } elseif ( $key == 'group_status' and in_array( $value, ['public', 'private', 'trash']) ) {
             return true;
 
-        } elseif ( $key == 'group_name' and is_string( $this->group_name ) and mb_strlen( $this->group_name, 'utf-8' ) <= 255 ) {
+        } elseif ( $key == 'group_name' and !empty( $value ) and is_string( $value ) and mb_strlen( $value, 'utf-8' ) <= 255 ) {
             return true;
         }
 
         return false;
     }
 
-    // is group exists
+    // is exists
     private function is_exists( array $args ) : bool {
 
         $group = $this->db
             ->table('groups')
-            ->select('id');
+            ->select('id')
+            ->where( $args )
+            ->first();
 
-        foreach( $args as $where ) {
-            $group = $group->where( $where[0], $where[1], $where[2] );
-        }
-
-        $group = $group->first();
         return empty( $group->id ) ? false : true;
     }
 
     // insert group
-    private function insert() : bool {
+    private function insert( array $data ) : bool {
 
-        $this->id = $this->db
+        $data['date'] = $this->db::raw('now()');
+
+        $group_id = $this->db
             ->table('groups')
-            ->insertGetId([
-            'date'         => $this->db::raw('now()'),
-            'user_id'      => $this->user_id,
-            'group_status' => $this->group_status,
-            'group_name'   => $this->group_name
-        ]);
+            ->insertGetId( $data );
 
-        return empty( $this->id ) ? false : true;
+        if( !empty( $group_id ) ) {
+            $this->id = $group_id;
+
+            foreach( $data as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return empty( $group_id ) ? false : true;
+    }
+
+    // update group
+    private function update( array $where, array $update ) : bool {
+
+        $affected_rows = $this->db
+            ->table('groups')
+            ->where( $where )
+            ->update( $update );
+
+        if( is_int( $affected_rows ) ) {
+            foreach( $where as $value ) {
+                $key = $value[0];
+                $this->$key = $value[2];
+            }
+
+            foreach( $update as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return is_int( $affected_rows ) ? true : false;
     }
 
     // select group
-    private function select() : bool {
+    private function select( array $where ) : bool {
 
         $group = $this->db
             ->table( 'groups' )
-            ->where([[ 'id', '=', $this->id ]])
+            ->where( $where )
             ->select( '*' )
             ->first();
 
-        if( !empty( $meta->id )) {
+        if( !empty( $role->id )) {
             $this->id           = $group->id;
             $this->date         = $group->date;
             $this->user_id      = $group->user_id;
@@ -117,60 +134,38 @@ class Group
         return empty( $group->id ) ? false : true;
     }
 
-    // update group
-    private function update( array $keys ) : bool {
-
-        $data = [];
-        foreach( $keys as $key ) {
-            $data[ $key ] = $this->$key;
-        }        
-        
-        $affected_rows = $this->db
-            ->table('groups')
-            ->where([[ 'id', '=', $this->id ]])
-            ->update( $data );
-
-        return is_int( $affected_rows ) ? true : false;
-    }
-
     // create group *
     public function create( int $user_id, string $group_status, string $group_name ) : bool {
 
         $this->error = '';
         $this->clear();
-
-        $this->user_id      = $user_id;
-        $this->group_status = $group_status;
-        $this->group_name   = $group_name;
-
-        if( $this->is_empty( 'user_id' )) {
-            $this->error = 'user_id is empty';
         
-        } elseif( !$this->is_correct( 'user_id' )) {
+        if( !$this->is_correct( 'user_id', $user_id )) {
             $this->error = 'user_id is incorrect';
         
-        } elseif( $this->is_empty( 'group_status' )) {
-            $this->error = 'group_status is empty';
-        
-        } elseif( !$this->is_correct( 'group_status' )) {
+        } elseif( !$this->is_correct( 'group_status', $group_status )) {
             $this->error = 'group_status is incorrect';
-
-        } elseif( $this->is_empty( 'group_name' )) {
-            $this->error = 'group_name is empty';
         
-        } elseif( !$this->is_correct( 'group_name' )) {
+        } elseif( !$this->is_correct( 'group_name', $group_name )) {
             $this->error = 'group_name is incorrect';
         
-        } elseif( !$this->insert()) {
-            $this->error = 'group insert error';
+        } else {
+
+            $data = [
+                'user_id'      => $user_id,
+                'group_status' => $group_status,
+                'group_name'   => $group_name ];
+
+            if( !$this->insert( $data )) {
+                $this->error = 'group insert error';
+            }
         }
 
         if( $this->is_error() ) {
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // rename group *
@@ -179,34 +174,30 @@ class Group
         $this->error = '';
         $this->clear();
         
-        $this->id         = $group_id;
-        $this->group_name = $group_name;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'group_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'trash']] )) {
+        } elseif( !$this->is_exists( [['id', '=', $group_id], ['group_status', '<>', 'trash']] )) {
             $this->error = 'group is trash';
-
-        } elseif( $this->is_empty( 'group_name' )) {
-            $this->error = 'group_name is empty';
         
-        } elseif( !$this->is_correct( 'group_name' )) {
+        } elseif( !$this->is_correct( 'group_name', $group_name )) {
             $this->error = 'group_name is incorrect';
 
-        } elseif( !$this->update( [ 'group_name' ] )) {
-            $this->error = 'group name update error';
+        } else {
+        
+            $where = [['id', '=', $group_id]];
+            $update = [ 'group_name' => $group_name ];
+        
+            if( !$this->update( $where, $update )) {
+                $this->error = 'group update error';
+            }
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // change status *
@@ -215,34 +206,30 @@ class Group
         $this->error = '';
         $this->clear();
         
-        $this->id           = $group_id;
-        $this->group_status = $group_status;
-
-        if( $this->is_empty( 'id' )) {
-            $this->error = 'group_id is empty';
-        
-        } elseif( !$this->is_correct( 'id' )) {
+        if( !$this->is_correct( 'id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'private']] )) {
-            $this->error = 'group is not available';
-
-        } elseif( $this->is_empty( 'group_status' )) {
-            $this->error = 'group_status is empty';
-        
-        } elseif( !in_array( $this->group_status, ['public', 'trash'] )) {
+        } elseif( !$this->is_correct( 'group_status', $group_status ) or $group_status == 'private') {
             $this->error = 'group_status is incorrect';
 
-        } elseif( !$this->update( [ 'group_status' ] )) {
-            $this->error = 'group status update error';
+        } elseif( !$this->is_exists( [['id', '=', $group_id]] )) {
+            $this->error = 'group not found';
+
+        } else {
+            
+            $where = [['id', '=', $group_id]];
+            $update = [ 'group_status' => $group_status ];
+        
+            if( !$this->update( $where, $update )) {
+                $this->error = 'group update error';
+            }
         }
 
-        if( $this->is_error() ) {
+        if( $this->is_error() ) { 
             $this->clear();
-            return false;
         }
 
-        return true;
+        return $this->is_error() ? false : true;
     }
 
     // get the group *
