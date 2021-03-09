@@ -278,8 +278,8 @@ class Group
         return true;
     }
 
-    // trash group *
-    public function trash( int $group_id ) : bool {
+    // delete the group *
+    public function delete( int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -292,15 +292,11 @@ class Group
         } elseif( !$this->is_correct( 'id' )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '<>', 'trash']] )) {
+        } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '=', 'trash']] )) {
             $this->error = 'group is not found';
 
         } else {
-            $this->group_status = 'trash';
-
-            if( !$this->update( ['group_status'] )) {
-                $this->error = 'group trash error';
-            }
+            // TODO
         }
 
         if( $this->is_error() ) {
