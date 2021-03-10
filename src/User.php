@@ -114,7 +114,7 @@ class User
 
     // get hash
     private function hash_create( $user_pass ) : string {
-        return sha1( $this->user_pass );
+        return sha1( $user_pass );
     }
 
     // get db time
@@ -229,30 +229,24 @@ class User
         if( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
         
-        } elseif( !$this->is_exists( [['user_email', '=', $this->user_email], ['user_status', '<>', 'trash']] )) {
-	        $this->error = 'user_email is not exists or trashed';
+        } elseif( !$this->select( [['user_email', '=', $user_email], ['user_status', '<>', 'trash']] )) {
+            $this->error = 'user not found';
+
+        } elseif( strtotime( $this->time() ) - strtotime( $this->hash_date ) < $restore_delay ) {
+            $this->error = 'restore delay is too long';
 
         } else {
 
-            if( !$this->select( [['user_email', '=', $user_email]] )) {
-                $this->error = 'user select error';
+            $this->user_pass = $this->pass_create( $pass_length );
 
-            } elseif( strtotime( $this->time() ) - strtotime( $this->hash_date ) < $restore_delay ) {
-                $this->error = 'restore delay is too long';
+            $where = [['user_email', '=', $user_email]];
 
-            } else {
+            $update = [
+                'user_hash' => $this->hash_create( $this->user_pass ),
+                'hash_date' => $this->db::raw('now()') ];
 
-                $this->user_pass = $this->pass_create( $pass_length );
-
-                $where = [['user_email', '=', $user_email]];
-
-                $update = [
-                    'user_hash' => $this->hash_create( $this->user_pass ),
-                    'hash_date' => $this->db::raw('now()') ];
-
-                if( !$this->update( $where, $update ) ) {
-                    $this->error = 'user update error';
-                }
+            if( !$this->update( $where, $update ) ) {
+                $this->error = 'user update error';
             }
         }
 
@@ -276,12 +270,9 @@ class User
     
         } elseif( !$this->is_correct( 'user_pass', $user_pass )) {
             $this->error = 'user_pass is incorrect';
-
-        } elseif( !$this->is_exists( [['user_email', '=', $user_email], ['user_hash', '=', $user_hash], ['user_status', '<>', 'trash']] )) {
-            $this->error = 'user_pass is wrong or user is not exists or trashed';
         
-        } elseif( !$this->select( 'user_email', $user_email )) {
-            $this->error = 'user select error';
+        } elseif( !$this->select( [['user_email', '=', $user_email], ['user_hash', '=', $user_hash], ['user_status', '<>', 'trash']] )) {
+            $this->error = 'user not found';
         
         } elseif( strtotime( $this->time() ) - strtotime( $this->hash_date ) > $pass_expires ) {
             $this->error = 'user_pass is expired';
@@ -318,11 +309,8 @@ class User
         if( !$this->is_correct( 'user_token', $user_token )) {
             $this->error = 'user_token is incorrect';
         
-        } elseif( !$this->is_exists( [['user_token', '=', $user_token], ['user_status', '=', 'approved']] )) {
+        } elseif( !$this->select( [[ 'user_token', '=', $user_token ], ['user_status', '=', 'approved']] )) {
             $this->error = 'user not found';
-        
-        } elseif( !$this->select( 'user_token', $user_token )) {
-            $this->error = 'user select error';
         }
 
         if( $this->is_error() ) { 
@@ -341,11 +329,11 @@ class User
         if( !$this->is_correct( 'id', $user_id )) {
             $this->error = 'user_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', 'approved']] )) {
-            $this->error = 'user_id not found';
-        
         } elseif( !$this->is_correct( 'user_email', $user_email )) {
             $this->error = 'user_email is incorrect';
+
+        } elseif( !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', 'approved']] )) {
+            $this->error = 'user not found';
         
         } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
             $this->error = 'user_email is occupied';
