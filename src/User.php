@@ -403,7 +403,7 @@ class User
     }
 
     // get user *
-    public function get( int $user_id, string $user_status = '' ) : bool {
+    public function get( int $user_id ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -411,17 +411,8 @@ class User
         if( !$this->is_correct( 'id', $user_id )) {
             $this->error = 'user_id is incorrect';
 
-        } elseif( !empty( $user_status ) and !$this->is_correct( 'user_status', $user_status )) {
-            $this->error = 'user_status is incorrect';
-
-        } elseif( empty( $user_status ) and !$this->is_exists( [['id', '=', $user_id]] )) {
-            $this->error = 'user_id not found';
-
-        } elseif( !empty( $user_status ) and !$this->is_exists( [['id', '=', $user_id], ['user_status', '=', $user_status]] )) {
-            $this->error = 'user_id not found';
-
         } elseif( !$this->select( [['id', '=', $user_id]] ) ) {
-            $this->error = 'user select error';
+            $this->error = 'user not found';
         }
 
         if( $this->is_error() ) { 

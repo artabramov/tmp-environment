@@ -205,8 +205,8 @@ class Role
         return $this->is_error() ? false : true;
     }
 
-    // fetch the role *
-    public function get( int $user_id, int $group_id, string $user_role = '' ) : bool {
+    // get the role *
+    public function get( int $user_id, int $group_id ) : bool {
 
         $this->error = '';
         $this->clear();
@@ -217,14 +217,8 @@ class Role
         } elseif( !$this->is_correct( 'group_id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( empty( $user_role ) and !$this->is_exists( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] )) {
-            $this->error = 'role not found';
-
-        } elseif( !empty( $user_role ) and !$this->is_exists( [['user_id', '=', $user_id], ['group_id', '=', $group_id], ['user_role', '=', $user_role]] )) {
-            $this->error = 'role not found';
-
         } elseif( !$this->select( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] ) ) {
-            $this->error = 'role select error';
+            $this->error = 'role role not found';
         }
 
         if( $this->is_error() ) {
@@ -246,14 +240,11 @@ class Role
         } elseif( !$this->is_correct( 'group_id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] )) {
+        } elseif( !$this->select( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] ) ) {
             $this->error = 'role not found';
 
-        } elseif( !$this->select( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] ) ) {
-            $this->error = 'role select error';
-
         } elseif( $this->user_role == 'admin' and $this->count( [['group_id', '=', $group_id], ['user_role', '=', 'admin']] ) <= 1 ) {
-            $this->error = 'cannot delete last admin role';
+            $this->error = 'this is last admin role';
         
         } elseif( !$this->delete( [['user_id', '=', $user_id], ['group_id', '=', $group_id]] )) {
             $this->error = 'role delete error';

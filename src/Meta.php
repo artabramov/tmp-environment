@@ -209,12 +209,9 @@ class Meta
         
         } elseif( !$this->is_correct( 'meta_key', $meta_key )) {
             $this->error = 'meta_key is incorrect';
-        
-        } elseif( !$this->is_exists( [['user_id', '=', $user_id], ['meta_key', '=', $meta_key]] )) {
-            $this->error = 'meta not found';
 
         } elseif( !$this->select( [['user_id', '=', $user_id], ['meta_key', '=', $meta_key]] )) {
-            $this->error = 'meta select error';
+            $this->error = 'meta not found';
         }
 
         if( $this->is_error() ) {

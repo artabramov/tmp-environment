@@ -252,11 +252,8 @@ class Group
         if( !$this->is_correct( 'id', $group_id )) {
             $this->error = 'group_id is incorrect';
 
-        } elseif( !$this->is_exists( [['id', '=', $group_id]] ) ) {
-            $this->error = 'group not found';
-
         } elseif( !$this->select( [['id', '=', $group_id]] ) ) {
-            $this->error = 'group select error';
+            $this->error = 'group not found';
         }
 
         if( $this->is_error() ) {
@@ -278,7 +275,7 @@ class Group
         } elseif( !$this->is_exists( [['id', '=', $this->id], ['group_status', '=', 'trash']] )) {
             $this->error = 'group not found';
 
-        } elseif( !$this->delete( [['id', '=', $group_id]] ) ) {
+        } elseif( !$this->delete( [['id', '=', $group_id], ['group_status', '=', 'trash']] ) ) {
             $this->error = 'group delete error';
         }
 
