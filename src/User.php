@@ -22,8 +22,8 @@ class User
     // __set
     public function __set( string $key, $value ) {}
 
-    // is empty
-    private function is_empty( string $key, int|string $value ) : bool {
+    // is isset
+    private function is_isset( string $key, int|string $value ) : bool {
 
         $this->clear();
 
@@ -35,7 +35,7 @@ class User
             $this->error = $key . ' is empty';
         }
 
-        return empty( $this->error ) ? false : true;
+        return empty( $this->error ) ? true : false;
     }
 
     // is correct
@@ -79,7 +79,33 @@ class User
 
     // is insert
     private function is_insert( array $data ) : bool {
-        
+
+        $this->clear();
+
+        $stmt = $this->dbh->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
+        $stmt->bindParam( ':user_status', $data['user_status'] );
+        $stmt->bindParam( ':user_token',  $data['user_token'] );
+        $stmt->bindParam( ':user_email',  $data['user_email'] );
+        $stmt->bindParam( ':user_hash',   $data['user_hash'] );
+        $stmt->execute();
+
+        $user_id = $this->dbh->lastInsertId();
+
+        //return !empty( $user_id ) ? true : false;
+
+
+        if( !empty( $user_id )) {
+            foreach( $data as $key=>$value ) {
+                $this->data[$key] = $value;
+            }
+            $this->data['id'] = $user_id;            
+
+        } else {
+            $this->error = 'user insert error';
+        }
+
+
+        /*
         $this->clear();
 
         $user_id = $this->dbh
@@ -95,8 +121,11 @@ class User
         } else {
             $this->error = 'user insert error';
         }
+        */
 
         return empty( $this->error ) ? true : false;
+
+        
     }
 
     // is update

@@ -43,25 +43,25 @@ class UserTest extends TestCase
         $this->user = null;
     }
 
-    public function addIsEmpty() {
+    public function addIsIsset() {
         return [
-            [ 'id', 0,     true ],
-            [ 'id', '0',   true ],
-            [ 'id', '',    true ],
-            [ 'id', ' ',   true ],
-            [ 'id', ' 0 ', true ],
-            [ 'id', 1,     false ],
-            [ 'id', '1',   false ],
-            [ 'id', 'a',   false ],
+            [ 'id', 0,     false ],
+            [ 'id', '0',   false ],
+            [ 'id', '',    false ],
+            [ 'id', ' ',   false ],
+            [ 'id', ' 0 ', false ],
+            [ 'id', 1,     true ],
+            [ 'id', '1',   true ],
+            [ 'id', 'a',   true ],
         ];
     }
 
     /**
-     * @dataProvider addIsEmpty
+     * @dataProvider addIsIsset
      */
-    public function testIsEmpty( $key, $value, $expected ) {
+    public function testIsIsset( $key, $value, $expected ) {
 
-        $result = $this->call( $this->user, 'is_empty', [ $key, $value ] );
+        $result = $this->call( $this->user, 'is_isset', [ $key, $value ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -118,5 +118,39 @@ class UserTest extends TestCase
         $this->assertEquals( $expected, $result );
     }
 
+
+
+
+    
+    public function addIsInsert() {
+
+        return [
+            [ [ 'user_status' => 'pending', 
+                'user_token'  => 'token', 
+                'user_email'  => 'email', 
+                'user_hash'   => 'hash' ], 
+                true ],
+        ];
+
+
+        /*
+        return [
+            [ [ 'pending', 
+                'token', 
+                'email', 
+                'hash' ], 
+                true ],
+        ];
+        */
+    }
+
+    /**
+     * @dataProvider addIsInsert
+     */
+    public function testIsInsert( $data, $expected ) {
+
+        $result = $this->call( $this->user, 'is_insert', [ $data ] );
+        $this->assertEquals( $expected, $result );
+    }
 
 }
