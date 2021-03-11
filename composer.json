@@ -12,16 +12,12 @@
     ],
     "require": {
         "php": ">=7.4.0",
-        "illuminate/database": ">=8.28.1",
-        "phpunit/phpunit": ">=9.5.2"
+        "illuminate/database": ">=8.28.1"
     },
     "autoload": {
         "psr-4": {
             "artabramov\\Echidna\\": "src/"
-        },
-        "classmap": [
-            "src/"
-        ]
+        }
     },
     "minimum-stability": "dev",
     "require-dev": {
