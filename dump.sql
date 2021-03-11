@@ -9,31 +9,29 @@ CREATE TABLE IF NOT EXISTS project.users (
     user_token  VARCHAR(80)  NOT NULL, # Unique user token
     user_email  VARCHAR(255) NOT NULL,
     user_hash   VARCHAR(40)  NOT NULL, # One-time password hash
-    hash_date   DATETIME     NOT NULL DEFAULT '0000-00-00 00:00:00',
 
     PRIMARY KEY id          (id),
             KEY date        (date),
             KEY user_status (user_status),
     UNIQUE  KEY user_token  (user_token),
     UNIQUE  KEY user_email  (user_email),
-            KEY user_hash   (user_hash),
-            KEY hash_date   (hash_date)
+            KEY user_hash   (user_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Users metadata
-CREATE TABLE IF NOT EXISTS project.user_meta (
+# Users attributes
+CREATE TABLE IF NOT EXISTS project.user_attributes (
     id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id    BIGINT(20)   NOT NULL,
-    meta_key   VARCHAR(40)  NOT NULL,
-    meta_value VARCHAR(255) NOT NULL,
+    attr_key   VARCHAR(40)  NOT NULL,
+    attr_value VARCHAR(255) NOT NULL,
 
     PRIMARY KEY id         (id),
             KEY date       (date),
             KEY user_id    (user_id),
-            KEY meta_key   (meta_key),
-            KEY meta_value (meta_value)
+            KEY attr_key   (attr_key),
+            KEY attr_value (attr_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
