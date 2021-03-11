@@ -4,13 +4,13 @@ namespace artabramov\Echidna;
 
 class User
 {
-    private $db;
+    private $dbh;
     private $error;
     private $data;
 
     // __construct
-    public function __construct( \Illuminate\Database\Capsule\Manager $db ) {
-        $this->db = $db;
+    public function __construct( \PDO $dbh ) {
+        $this->dbh = $dbh;
         $this->clear();
     }
 
@@ -23,36 +23,37 @@ class User
     public function __set( string $key, $value ) {}
 
     // is empty
-    private function is_empty( string $key, $value ) : bool {
+    private function is_empty( string $key, int|string $value ) : bool {
 
         $this->clear();
+
+        if( is_string( $value )) {
+            $value = trim( $value );
+        }
 
         if( empty( $value )) {
             $this->error = $key . ' is empty';
         }
 
-        return empty( $this->error ) ? true : false;
+        return empty( $this->error ) ? false : true;
     }
 
     // is correct
-    private function is_correct( string $key, $value ) : bool {
+    private function is_correct( string $key, int|string $value ) : bool {
 
         $this->clear();
 
-        if( $key == 'id' and !is_int( $value )) {
+        if( !array_key_exists( $key, $this->data )) {
+            $this->error = 'key is incorrect';
+
+        } elseif( $key == 'id' and !is_int( $value )) {
             $this->error = 'id is incorrect';
 
         } elseif( $key == 'user_status' and !in_array( $value, ['pending', 'approved', 'trash']) ) {
             $this->error = 'user_status is incorrect';
 
-        } elseif( $key == 'user_token' and ( !is_string( $value ) or mb_strlen( $value, 'utf-8' ) != 80 )) {
-            $this->error = 'user_token is incorrect';
-
-        } elseif( $key == 'user_email' and ( !is_string( $value ) or preg_match("/^[a-z0-9._-]{1,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value ))) {
+        } elseif( $key == 'user_email' and ( !is_string( $value ) or !preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value ))) {
             $this->error = 'user_email is incorrect';
-
-        } elseif( $key == 'user_hash' and ( !is_string( $value ) or mb_strlen( $value, 'utf-8' ) != 40 )) {
-            $this->error = 'user_hash is incorrect';
         }
 
         return empty( $this->error ) ? true : false;
@@ -63,7 +64,7 @@ class User
 
         $this->clear();
 
-        $user = $this->db
+        $user = $this->dbh
             ->table('users')
             ->select('id')
             ->where( $args )
@@ -81,7 +82,7 @@ class User
         
         $this->clear();
 
-        $user_id = $this->db
+        $user_id = $this->dbh
             ->table('users')
             ->insertGetId( $data );
 
@@ -103,7 +104,7 @@ class User
 
         $this->clear();
 
-        $affected_rows = $this->db
+        $affected_rows = $this->dbh
             ->table('users')
             ->where( $where )
             ->update( $update );
@@ -129,7 +130,7 @@ class User
   
         $this->clear();
 
-        $user = $this->db
+        $user = $this->dbh
             ->table( 'users' )
             ->where( $where )
             ->select( '*' )
@@ -153,7 +154,7 @@ class User
 
     // get time
     private function get_time() : string {
-        $time = $this->db::select( 'select NOW() as time' );
+        $time = $this->dbh::select( 'select NOW() as time' );
 
         if( isset( $time[0]->time )) {
             return $time[0]->time;
@@ -287,7 +288,7 @@ class User
 
             $update = [
                 'user_hash' => $this->hash_create( $this->user_pass ),
-                'hash_date' => $this->db::raw('now()') ];
+                'hash_date' => $this->dbh::raw('now()') ];
 
             if( !$this->update( $where, $update ) ) {
                 $this->error = 'user update error';
