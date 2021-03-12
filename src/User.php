@@ -4,133 +4,130 @@ namespace artabramov\Echidna;
 
 class User
 {
-    private $dbh;
+    private $pdo;
+    private $exception;
     private $error;
     private $data;
 
     // __construct
-    public function __construct( \PDO $dbh ) {
-        $this->dbh = $dbh;
+    public function __construct( \PDO $pdo ) {
+        $this->pdo = $pdo;
         $this->clear();
     }
 
     // __get
     public function __get( string $key ) {
-        return isset( $this->$key ) ? $this->$key : null;
+
+        if( in_array( $key, ['exception', 'error'] )) {
+            $value = $this->$key;
+
+        } elseif( array_key_exists( $key, $this->data )) {
+            $value = $this->data[ $key ];
+        }
+
+        return !empty( $value ) ? $value : null;
     }
 
-    // __set
-    public function __set( string $key, $value ) {}
-
-    // is isset
-    private function is_isset( string $key, int|string $value ) : bool {
-
-        $this->clear();
+    // is data not empty +
+    private function is_empty( int|string $value ) : bool {
 
         if( is_string( $value )) {
             $value = trim( $value );
         }
 
-        if( empty( $value )) {
-            $this->error = $key . ' is empty';
-        }
-
-        return empty( $this->error ) ? true : false;
+        return empty( $value ) ? true : false;
     }
 
-    // is correct
+    // is correct +
     private function is_correct( string $key, int|string $value ) : bool {
 
-        $this->clear();
-
         if( !array_key_exists( $key, $this->data )) {
-            $this->error = 'key is incorrect';
+            return false;
 
         } elseif( $key == 'id' and !is_int( $value )) {
-            $this->error = 'id is incorrect';
+            return false;
 
         } elseif( $key == 'user_status' and !in_array( $value, ['pending', 'approved', 'trash']) ) {
-            $this->error = 'user_status is incorrect';
+            return false;
+
+        } elseif( $key == 'user_token' and ( !is_string( $value ) or strlen( $value ) != 80 )) {
+            return false;
 
         } elseif( $key == 'user_email' and ( !is_string( $value ) or !preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value ))) {
-            $this->error = 'user_email is incorrect';
+            return false;
+
+        } elseif( $key == 'user_hash' and ( !is_string( $value ) or strlen( $value ) != 40 )) {
+            return false;
         }
 
-        return empty( $this->error ) ? true : false;
+        return true;
     }
 
-    // is exists
+    // is exists +
     private function is_exists( array $args ) : bool {
 
-        $this->clear();
-
-        $user = $this->dbh
-            ->table('users')
-            ->select('id')
-            ->where( $args )
-            ->first();
-
-        if( empty( $user->id )) {
-            $this->error = 'user does not exist';
+        $params = '';
+        foreach( $args as $arg ) {
+            $params .= empty( $params ) ? ' WHERE ' : ' AND ';
+            $params .= $arg[0] . $arg[1] . ':' . $arg[0];
         }
 
-        return empty( $this->error ) ? true : false;
+        try {
+            $stmt = $this->pdo->prepare( 'SELECT id FROM users' . $params . ' LIMIT 1' );
+            foreach( $args as $arg ) {
+
+                if( $arg[0] == 'id' ) {
+                    $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT, 20 );
+
+                } elseif( $arg[0] == 'user_status' ) {
+                    $stmt->bindParam( ':user_status', $arg[2], \PDO::PARAM_STR, 40 );
+
+                } elseif( $arg[0] == 'user_token' ) {
+                    $stmt->bindParam( ':user_token', $arg[2], \PDO::PARAM_STR, 80 );
+
+                } elseif( $arg[0] == 'user_email' ) {
+                    $stmt->bindParam( ':user_email', $arg[2], \PDO::PARAM_STR, 255 );
+
+                } elseif( $arg[0] == 'user_hash' ) {
+                    $stmt->bindParam( ':user_hash', $arg[2], \PDO::PARAM_STR, 40 );
+                }
+            }
+
+            $stmt->execute();
+            $rows_count = $stmt->rowCount();
+
+        } catch( \PDOException $e ) {
+            $this->exception = $e;
+        }
+
+        return !empty( $rows_count ) ? true : false;
     }
 
-    // is insert
-    private function is_insert( array $data ) : bool {
+    // is insert +
+    public function is_insert( array $data ) : bool {
 
-        $this->clear();
+        try {
+            $stmt = $this->pdo->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
+            $stmt->bindParam( ':user_status', $data['user_status'], \PDO::PARAM_STR, 40 );
+            $stmt->bindParam( ':user_token',  $data['user_token'],  \PDO::PARAM_STR, 80 );
+            $stmt->bindParam( ':user_email',  $data['user_email'],  \PDO::PARAM_STR, 255 );
+            $stmt->bindParam( ':user_hash',   $data['user_hash'],   \PDO::PARAM_STR, 40 );
+            $stmt->execute();
+            $user_id = $this->pdo->lastInsertId();
 
-        $stmt = $this->dbh->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
-        $stmt->bindParam( ':user_status', $data['user_status'] );
-        $stmt->bindParam( ':user_token',  $data['user_token'] );
-        $stmt->bindParam( ':user_email',  $data['user_email'] );
-        $stmt->bindParam( ':user_hash',   $data['user_hash'] );
-        $stmt->execute();
-
-        $user_id = $this->dbh->lastInsertId();
-
-        //return !empty( $user_id ) ? true : false;
-
-
-        if( !empty( $user_id )) {
-            foreach( $data as $key=>$value ) {
-                $this->data[$key] = $value;
-            }
-            $this->data['id'] = $user_id;            
-
-        } else {
-            $this->error = 'user insert error';
+        } catch( \PDOException $e ) {
+            $this->exception = $e;
         }
 
+        $this->data['id'] = !empty( $user_id ) ? $user_id : 0;
 
-        /*
-        $this->clear();
-
-        $user_id = $this->dbh
-            ->table('users')
-            ->insertGetId( $data );
-
-        if( !empty( $user_id )) {
-            foreach( $data as $key=>$value ) {
-                $this->data[$key] = $value;
-            }
-            $this->data['id'] = $user_id;            
-
-        } else {
-            $this->error = 'user insert error';
-        }
-        */
-
-        return empty( $this->error ) ? true : false;
-
-        
+        return !empty( $user_id ) ? true : false;
     }
 
     // is update
     private function is_update( array $where, array $update ) : bool {
 
+        /*
         $this->clear();
 
         $affected_rows = $this->dbh
@@ -152,6 +149,7 @@ class User
         }
 
         return empty( $this->error ) ? true : false;
+        */
     }
 
     // is select
@@ -181,18 +179,20 @@ class User
         return empty( $this->error ) ? true : false;
     }
 
-    // get time
-    private function get_time() : string {
-        $time = $this->dbh::select( 'select NOW() as time' );
+    // get time +
+    public function get_time() : string {
 
-        if( isset( $time[0]->time )) {
-            return $time[0]->time;
+        try {
+            $result = $this->pdo->query( 'SELECT NOW() as time' )->fetch();
+
+        } catch( \PDOException $e ) {
+            $this->exception = $e;
         }
 
-        return '';
+        return isset( $result['time'] ) ? $result['time'] : '0000-00-00 00:00:00';
     }
 
-    // get token
+    // get token +
     private function get_token() : string {
 
         do {
@@ -209,7 +209,7 @@ class User
         return $user_token;
     }
 
-    // get user pass
+    // get user pass +
     private function get_pass( $length, $signs = '0123456789' ) : string {
 
         $user_pass = '';
@@ -222,15 +222,38 @@ class User
         return $user_pass;
     }
 
-    // get hash
+    // get hash +
     private function get_hash( $user_pass ) : string {
         return sha1( $user_pass );
     }
 
 
 
+
+
+    // check is variable not empty
+    public function has( string $key ) : bool {
+
+        if( in_array( $key, ['exception', 'error'] )) {
+            $value = $this->$key;
+
+        } elseif( array_key_exists( $key, $this->data )) {
+            $value = $this->data[ $key ];
+
+        } else {
+            $value = '';
+        }
+
+        if( is_string( $value )) {
+            $value = trim( $value );
+        }
+
+        return !empty( $value );
+    }
+
     // clear all user data
     public function clear() {
+        $this->exception = null;
         $this->error = '';
         $this->data = [
             'id'          => 0,
@@ -244,57 +267,47 @@ class User
         ];
     }
 
-    // is error exists
-    public function fails() {
-        return !empty( $this->error );
-    }
-
-    // is user attribute not empty *
-    public function filled( string $key ) : bool {
-        return !empty( $this->data[$key] );
-    }
-
-    // user register *
+    // user register
     public function register( string $user_email ) : bool {
 
-        if( $this->is_empty( 'user_email', $user_email )) {
-            return false;
+        $this->clear();
+
+        if( $this->is_empty( $user_email )) {
+            $this->error = 'user_email is empty';
 
         } elseif( !$this->is_correct( 'user_email', $user_email )) {
-            return false;
+            $this->error = 'user_email is incorrect';
         
         } elseif( $this->is_exists( [['user_email', '=', $user_email]] )) {
-            return false;
+            $this->error = 'user_email already exists';
         
         } else {
 
             $data = [
                 'user_status' => 'pending',
-                'user_token'  => $this->get_token(),
+                'user_token'  => 'token',
                 'user_email'  => $user_email,
-                'user_hash'   => '',
-                'hash_date'   => '0000-00-00 00:00:00' ];
+                'user_hash'   => '' ];
 
-            if( !$this->insert( $data ) ) {
-                return false;
+            if( !$this->is_insert( $data ) ) {
+                $this->error = 'user insert error';
             }
         }
 
-        return true;
+        return $this->has( 'error' ) ? false : true;
     }
 
+    // is error exists
+    public function fails() {
+        return !empty( $this->error );
+    }
 
+    // is user attribute not empty
+    public function filled( string $key ) : bool {
+        return !empty( $this->data[$key] );
+    }
 
-
-
-
-
-
-
-
-
-
-    // user restore *
+    // user restore
     public function restore( string $user_email, int $pass_length = 4, int $restore_delay = 30 ) : bool {
 
         $this->error = '';
@@ -331,7 +344,7 @@ class User
         return $this->is_error() ? false : true;
     }
     
-    // user signin *
+    // user signin
     public function signin( string $user_email, string $user_pass, int $pass_expires = 120 ) : bool {
 
         $this->error = '';
@@ -372,7 +385,7 @@ class User
         return $this->is_error() ? false : true;
     }
 
-    // user auth *
+    // user auth
     public function auth( string $user_token ) : bool {
 
         $this->error = '';
@@ -394,7 +407,7 @@ class User
         return $this->is_error() ? false : true;
     }
 
-    // user change *
+    // user change
     public function change( int $user_id, string $user_email ) : bool {
 
         $this->error = '';
@@ -435,7 +448,7 @@ class User
         return $this->is_error() ? false : true;
     }
 
-    // user signout *
+    // user signout
     public function signout( int $user_id ) : bool {
 
         $this->error = '';
@@ -464,8 +477,8 @@ class User
         return $this->is_error() ? false : true;
     }
 
-    // get user *
-    public function get( int $user_id, string $user_status ) : bool {
+    // get user
+    public function get2( int $user_id, string $user_status ) : bool {
 
         $this->error = '';
         $this->clear();

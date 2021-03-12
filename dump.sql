@@ -20,18 +20,18 @@ CREATE TABLE IF NOT EXISTS project.users (
 
 
 # Users attributes
-CREATE TABLE IF NOT EXISTS project.user_attributes (
-    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id    BIGINT(20)   NOT NULL,
-    attr_key   VARCHAR(40)  NOT NULL,
-    attr_value VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS project.user_attribs (
+    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id      BIGINT(20)   NOT NULL,
+    attrib_key   VARCHAR(40)  NOT NULL,
+    attrib_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id         (id),
-            KEY date       (date),
-            KEY user_id    (user_id),
-            KEY attr_key   (attr_key),
-            KEY attr_value (attr_value)
+    PRIMARY KEY id           (id),
+            KEY date         (date),
+            KEY user_id      (user_id),
+            KEY attrib_key   (attrib_key),
+            KEY attrib_value (attrib_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
