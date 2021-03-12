@@ -7,41 +7,64 @@ class User
     private $pdo;
     private $exception;
     private $error;
-    private $data;
 
-    // __construct
+    private $id;
+    private $date;
+    private $user_status;
+    private $user_token;
+    private $user_email;
+    private $user_pass;
+    private $user_hash;
+    private $hash_date;
+
+    // __construct +
     public function __construct( \PDO $pdo ) {
         $this->pdo = $pdo;
-        $this->clear();
     }
 
-    // __get
+    // __set +
+    public function __set( string $key, int|string $value ) {
+
+        if( property_exists( $this, $key )) {
+            $this->$key = $value;
+        }
+    }
+
+    // __get +
     public function __get( string $key ) {
 
-        if( in_array( $key, ['exception', 'error'] )) {
-            $value = $this->$key;
-
-        } elseif( array_key_exists( $key, $this->data )) {
-            $value = $this->data[ $key ];
+        if( property_exists( $this, $key )) {
+            return $this->$key;
         }
-
-        return !empty( $value ) ? $value : null;
     }
 
-    // is data not empty +
-    private function is_empty( int|string $value ) : bool {
+    // __isset +
+    public function __isset( string $key ) {
 
-        if( is_string( $value )) {
-            $value = trim( $value );
+        $value = property_exists( $this, $key ) ? $this->$key : '';
+        $value = is_string( $value ) ? trim( $value ) : $value;
+        return !empty( $value );
+    }
+
+    // __unset +
+    public function __unset( string $key ) {
+
+        if( property_exists( $this, $key )) {
+            $this->$key = '';
         }
+    }
 
-        return empty( $value ) ? true : false;
+    // is empty +
+    private function is_empty( int|string $value ) {
+
+        $value = is_string( $value ) ? trim( $value ) : $value;
+        return !empty( $value );
     }
 
     // is correct +
     private function is_correct( string $key, int|string $value ) : bool {
 
-        if( !array_key_exists( $key, $this->data )) {
+        if( !property_exists( $this, $key )) {
             return false;
 
         } elseif( $key == 'id' and !is_int( $value )) {
@@ -77,19 +100,10 @@ class User
             foreach( $args as $arg ) {
 
                 if( $arg[0] == 'id' ) {
-                    $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT, 20 );
+                    $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_INT );
 
-                } elseif( $arg[0] == 'user_status' ) {
-                    $stmt->bindParam( ':user_status', $arg[2], \PDO::PARAM_STR, 40 );
-
-                } elseif( $arg[0] == 'user_token' ) {
-                    $stmt->bindParam( ':user_token', $arg[2], \PDO::PARAM_STR, 80 );
-
-                } elseif( $arg[0] == 'user_email' ) {
-                    $stmt->bindParam( ':user_email', $arg[2], \PDO::PARAM_STR, 255 );
-
-                } elseif( $arg[0] == 'user_hash' ) {
-                    $stmt->bindParam( ':user_hash', $arg[2], \PDO::PARAM_STR, 40 );
+                } else {
+                    $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
                 }
             }
 
@@ -103,7 +117,7 @@ class User
         return !empty( $rows_count ) ? true : false;
     }
 
-    // is insert +
+    // is insert
     private function is_insert( array $data ) : bool {
 
         try {
@@ -235,7 +249,7 @@ class User
         return empty( $this->error ) ? true : false;
     }
 
-    // get time +
+    // get time
     public function get_time() : string {
 
         try {
@@ -248,7 +262,7 @@ class User
         return isset( $result['time'] ) ? $result['time'] : '0000-00-00 00:00:00';
     }
 
-    // get token +
+    // get token
     private function get_token() : string {
 
         do {
@@ -265,7 +279,7 @@ class User
         return $user_token;
     }
 
-    // get user pass +
+    // get user pass
     private function get_pass( $length, $signs = '0123456789' ) : string {
 
         $user_pass = '';
@@ -278,7 +292,7 @@ class User
         return $user_pass;
     }
 
-    // get hash +
+    // get hash
     private function get_hash( $user_pass ) : string {
         return sha1( $user_pass );
     }
@@ -309,18 +323,32 @@ class User
 
     // clear all user data
     public function clear() {
-        $this->exception = null;
+        $this->exception = '';
         $this->error = '';
         $this->data = [
             'id'          => 0,
-            'date'        => '0000-00-00 00:00:00',
+            'date'        => '',
             'user_status' => '',
             'user_token'  => '',
             'user_email'  => '',
             'user_pass'   => '',
             'user_hash'   => '',
-            'hash_date'   => '0000-00-00 00:00:00'
+            'hash_date'   => ''
         ];
+
+        /*
+        $this->exception = null;
+        $this->error = '';
+
+        $this->id = 0;
+        $this->date = '';
+        $this->user_status = '';
+        $this->user_token = '';
+        $this->user_email = '';
+        $this->user_pass = '';
+        $this->user_hash = '';
+        $this->hash_date = '';
+        */
     }
 
     // user register

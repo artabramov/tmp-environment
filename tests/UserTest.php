@@ -51,7 +51,6 @@ class UserTest extends TestCase
 
         // создаем объект подключения
         $this->pdo = new PDO( $dsn, $pdo_user, $pdo_pass, $args );
-        
 
         $this->user = new \artabramov\Echidna\User( $this->pdo );
     }
@@ -61,13 +60,91 @@ class UserTest extends TestCase
         $this->user = null;
     }
 
+
+    /**
+     * @dataProvider addMagic
+     */
+    public function testMagic( $key, $value, $expected ) {
+
+        // __unset
+        $result = $this->call( $this->user, '__unset', [ $key ] );
+        $this->assertNull( $result );
+
+        // __isset (empty)
+        $result = $this->call( $this->user, '__isset', [ $key ] );
+        $this->assertFalse( $result );
+
+        // __get (empty)
+        $result = $this->call( $this->user, '__get', [ $key ] );
+        $this->assertEquals( '', $result );
+
+        // __set
+        $result = $this->call( $this->user, '__set', [ $key, $value ] );
+        $this->assertNull( $result );
+
+        // __isset (not empty)
+        if( $expected ) {
+            $result = $this->call( $this->user, '__isset', [ $key ] );
+            $this->assertTrue( $result );
+
+        } else {
+            $result = $this->call( $this->user, '__isset', [ $key ] );
+            $this->assertFalse( $result );
+        }
+
+        // __get (not empty)
+        if( $expected !== null ) {
+            $result = $this->call( $this->user, '__get', [ $key ] );
+            $this->assertEquals( $value, $result );
+
+        } else {
+            $result = $this->call( $this->user, '__get', [ $key ] );
+            $this->assertNull( $result );
+        }
+
+        // __unset
+        $result = $this->call( $this->user, '__unset', [ $key ] );
+        $this->assertNull( $result );
+    }
+
+    public function addMagic() {
+        return [
+            [ 'exception', '...', true ],
+            [ 'error', '...', true ],
+            
+            [ 'id', 1, true ],
+            [ 'date', '0000-00-00 00:00:00', true ],
+            [ 'user_status', 'pending', true ],
+            [ 'user_token', '2fd4e1c67a2d28fced849ee1bb76e7391b93eb122fd4e1c67a2d28fced849ee1bb76e7391b93eb12', true ],
+            [ 'user_email', 'noreply@noreply.no', true ],
+            [ 'user_hash', '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12', true ],
+            
+            [ 'error', '1', true ],
+            [ 'error', '0', false ],
+            [ 'error', ' 0 ', false ],
+            [ 'error', ' ', false ],
+            [ 'error', '  ', false ],
+            [ 'error', 1, true ],
+            [ 'error', 0, false ],
+            [ 'error_', '...', null ],
+        ];
+    }
+
+
     /**
      * @dataProvider addIsEmpty
      */
     public function testIsEmpty( $value, $expected ) {
 
-        $result = $this->call( $this->user, 'is_empty', [ $value ] );
-        $this->assertEquals( $expected, $result );
+        if( $expected ) {
+            $result = $this->call( $this->user, 'is_empty', [ $value ] );
+            $this->assertFalse( $result );
+
+        } else {
+            $result = $this->call( $this->user, 'is_empty', [ $value ] );
+            $this->assertTrue( $result );
+        }
+
     }
 
     public function addIsEmpty() {
@@ -75,39 +152,15 @@ class UserTest extends TestCase
         return [
             [ '', true ],
             [ ' ', true ],
-            [ '  ', true ],
-
             [ 0, true ],
             [ 1, false ],
-            [ 2, false ],
-
             [ '0', true ],
-            [ ' 0 ', true ],
-            [ '  0  ', true ],
             [ '0 ', true ],
             [ '0  ', true ],
-            [ ' 0', true ],
-            [ '  0', true ],
-
-            [ '1', false ],
-            [ ' 1 ', false ],
-            [ '  1  ', false ],
-            [ '1 ', false ],
-            [ '1  ', false ],
-            [ ' 1', false ],
-            [ '  1', false ],
-
-            [ '\\', false ],
-            [ '/', false ],
-            [ ',', false ],
-            [ '\'', false ],
-            [ '_', false ],
-            [ '-', false ],
-            [ ';', false ],
             [ 'null', false ],
-            [ 'exit', false ],
         ];
     }
+
 
     /**
      * @dataProvider addIsCorrect
@@ -135,8 +188,7 @@ class UserTest extends TestCase
             [ 'user_status', 'approved', true ],
             [ 'user_status', 'trash', true ],
             [ 'user_status', 'PENDING', false ],
-            [ 'user_status', ' pending ', false ],
-            [ 'user_status', 'anything', false ],
+            [ 'user_status', 'pending ', false ],
             [ 'user_status', '', false ],
 
             [ 'user_token', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0', true ],
@@ -166,9 +218,45 @@ class UserTest extends TestCase
         ];
     }
 
+
+    // is_exists
+    public function testIsExists() {
+
+        // delete and insert test data
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20f'" );
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20f', 'noreply@noreply.no', '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12' )" );
+
+        $result = $this->call( $this->user, 'is_exists', [[ ['user_email', '=', 'noreply@noreply.no'], ['user_status', '=', 'pending'] ]] );
+        $this->assertTrue( $result );
+
+        $result = $this->call( $this->user, 'is_exists', [[ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=', '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12'] ]] );
+        $this->assertTrue( $result );
+
+        $result = $this->call( $this->user, 'is_exists', [[ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=', '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12'], ['user_status', '<>', 'trash'] ]] );
+        $this->assertTrue( $result );
+
+        $result = $this->call( $this->user, 'is_exists', [[['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20f'], ['user_status', '<>', 'trash'] ]] );
+        $this->assertTrue( $result );
+
+        $result = $this->call( $this->user, 'is_exists', [[['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20f0']]] );
+        $this->assertFalse( $result );
+
+        $result = $this->call( $this->user, 'is_exists', [[['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20']]] );
+        $this->assertFalse( $result );
+        
+        // delete test data
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20f'" );
+    }
+
+
+
+
+
+
     /**
      * @dataProvider addIsInsert
      */
+    /*
     public function testIsInsert( $data, $expected ) {
 
         $result = $this->call( $this->user, 'is_insert', [ $data ] );
@@ -219,49 +307,6 @@ class UserTest extends TestCase
 
 
     }
-
-    /**
-     * @dataProvider addIsExists
-     */
-    public function testIsExists( $data, $expected ) {
-
-        $result = $this->call( $this->user, 'is_exists', [ $data ] );
-        $this->assertEquals( $expected, $result );
-    }
-    
-    public function addIsExists() {
-
-        return [ 
-            [ [['id', '=', 0]], false ],
-            [ [['id', '=', 2]], false ],
-            [ [['id', '=', 4]], false ],
-            [ [['id', '=', 1]], true ],
-            [ [['id', '=', 3]], true ],
-            [ [['id', '=', 6]], true ],
-
-            [ [['id', '=', 1], ['user_status', '=', 'pending'] ], true ],
-            [ [['id', '=', 1], ['user_status', '=', 'approved'] ], false ],
-            [ [['id', '=', 1], ['user_status', '=', 'trash'] ], false ],
-            [ [['id', '=', 1], ['user_status', '<>', 'approved'] ], true ],
-            [ [['id', '=', 1], ['user_status', '<>', 'trash'] ], true ],
-
-            [ [['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200']], true ],
-            [ [['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201']], true ],
-            [ [['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202']], true ],
-            [ [['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2000']], false ],
-            [ [['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f20']], false ],
-
-            [ [['user_email', '=', 'noreply.0@noreply.no']], true ],
-            [ [['user_email', '=', 'noreply.1@noreply.no']], true ],
-            [ [['user_email', '=', 'noreply.2@noreply.no']], true ],
-            [ [['user_email', '=', 'noreply.3@noreply.no']], false ],
-
-        ];
-
-
-
-    }
-
 
     public function testGetToken() {
 
@@ -324,7 +369,7 @@ class UserTest extends TestCase
         $this->assertMatchesRegularExpression( '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $result );
     }
 
-
+    */
 
 
 }
