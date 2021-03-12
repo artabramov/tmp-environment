@@ -66,14 +66,14 @@ class User
     // is exists +
     private function is_exists( array $args ) : bool {
 
-        $params = '';
+        $where = '';
         foreach( $args as $arg ) {
-            $params .= empty( $params ) ? ' WHERE ' : ' AND ';
-            $params .= $arg[0] . $arg[1] . ':' . $arg[0];
+            $where .= empty( $where ) ? ' WHERE ' : ' AND ';
+            $where .= $arg[0] . $arg[1] . ':' . $arg[0];
         }
 
         try {
-            $stmt = $this->pdo->prepare( 'SELECT id FROM users' . $params . ' LIMIT 1' );
+            $stmt = $this->pdo->prepare( 'SELECT id FROM users' . $where . ' LIMIT 1' );
             foreach( $args as $arg ) {
 
                 if( $arg[0] == 'id' ) {
@@ -104,7 +104,7 @@ class User
     }
 
     // is insert +
-    public function is_insert( array $data ) : bool {
+    private function is_insert( array $data ) : bool {
 
         try {
             $stmt = $this->pdo->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
@@ -125,7 +125,61 @@ class User
     }
 
     // is update
-    private function is_update( array $where, array $update ) : bool {
+    public function is_update( array $args, array $data ) : bool {
+
+        $set = '';
+        foreach( $data as $key=>$value ) {
+            $set .= empty( $set ) ? ' SET ' : ', ';
+            $set .= $key . '=:' . $key;
+        }
+
+        $where = '';
+        foreach( $args as $arg ) {
+            $where .= empty( $where ) ? ' WHERE ' : ' AND ';
+            $where .= $arg[0] . $arg[1] . ':' . $arg[0];
+        }
+
+        $stmt = $this->pdo->prepare( 'UPDATE users' . $set . $where );
+
+        foreach( $args as $arg ) {
+            if( $arg[0] == 'id' ) {
+                $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT, 20 );
+
+            } elseif( $arg[0] == 'user_status' ) {
+                $stmt->bindParam( ':user_status', $arg[2], \PDO::PARAM_STR, 40 );
+
+            } elseif( $arg[0] == 'user_token' ) {
+                $stmt->bindParam( ':user_token', $arg[2], \PDO::PARAM_STR, 80 );
+
+            } elseif( $arg[0] == 'user_email' ) {
+                $stmt->bindParam( ':user_email', $arg[2], \PDO::PARAM_STR, 255 );
+
+            } elseif( $arg[0] == 'user_hash' ) {
+                $stmt->bindParam( ':user_hash', $arg[2], \PDO::PARAM_STR, 40 );
+            }
+        }
+
+        foreach( $data as $key=>$value ) {
+            if( $key == 'id' ) {
+                $stmt->bindParam( ':id', $value, \PDO::PARAM_INT, 20 );
+
+            } elseif( $key == 'user_status' ) {
+                $stmt->bindParam( ':user_status', $value, \PDO::PARAM_STR, 40 );
+
+            } elseif( $key == 'user_token' ) {
+                $stmt->bindParam( ':user_token', $value, \PDO::PARAM_STR, 80 );
+
+            } elseif( $key == 'user_email' ) {
+                $stmt->bindParam( ':user_email', $value, \PDO::PARAM_STR, 255 );
+
+            } elseif( $key == 'user_hash' ) {
+                $stmt->bindParam( ':user_hash', $value, \PDO::PARAM_STR, 40 );
+            }
+        }
+
+        $stmt->execute();
+
+        return true;
 
         /*
         $this->clear();
@@ -150,6 +204,8 @@ class User
 
         return empty( $this->error ) ? true : false;
         */
+
+
     }
 
     // is select
