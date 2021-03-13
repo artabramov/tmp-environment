@@ -249,23 +249,70 @@ class UserTest extends TestCase
     }
 
 
+    /*
+    public function testIsInsert() {
 
+        $data = [
+            'user_status' => 'pending', 
+            'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+            'user_email'  => 'noreply.0@noreply.no', 
+            'user_hash'   => '' ];
+
+        $result = $this->call( $this->user, 'is_insert', [ $data ] );
+        $this->assertTrue( $result );
+
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='" . $data['user_token'] . "'" );
+
+
+    }
+    */
 
 
 
     /**
      * @dataProvider addIsInsert
      */
-    /*
+
     public function testIsInsert( $data, $expected ) {
 
         $result = $this->call( $this->user, 'is_insert', [ $data ] );
         $this->assertEquals( $expected, $result );
+
+        // delete test data
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='" . $data['user_token'] . "'" );
     }
     
     public function addIsInsert() {
 
-        return [
+        return [ 
+
+            [[
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply.0@noreply.no'], 
+                true
+            ],
+
+            [[
+                'user_status' => 'pending', 
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply.0@noreply.no', 
+                'user_hash'   => '' ], 
+                true
+            ],
+
+
+            /*
+            [
+                'user_status' => 'pending', 
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply.0@noreply.no', 
+                'user_hash'   => '' ], 
+                true
+            ],
+            */
+
+
+            /*
             [ [ 'user_status' => 'pending', 
                 'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 'user_email'  => 'noreply.0@noreply.no', 
@@ -301,13 +348,16 @@ class UserTest extends TestCase
                 'user_email'  => 'noreply.2@noreply.no', 
                 'user_hash'   => '' ], 
                 true ],
+            */
 
         ];
+        
 
 
 
     }
 
+    /*
     public function testGetToken() {
 
         // is a string
@@ -368,7 +418,6 @@ class UserTest extends TestCase
         $result = $this->call( $this->user, 'get_time' );
         $this->assertMatchesRegularExpression( '/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/', $result );
     }
-
     */
 
 

@@ -118,14 +118,23 @@ class User
     }
 
     // is insert
-    private function is_insert( array $data ) : bool {
+    public function is_insert( array $data ) : bool {
 
         try {
-            $stmt = $this->pdo->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
-            $stmt->bindParam( ':user_status', $data['user_status'], \PDO::PARAM_STR, 40 );
-            $stmt->bindParam( ':user_token',  $data['user_token'],  \PDO::PARAM_STR, 80 );
-            $stmt->bindParam( ':user_email',  $data['user_email'],  \PDO::PARAM_STR, 255 );
-            $stmt->bindParam( ':user_hash',   $data['user_hash'],   \PDO::PARAM_STR, 40 );
+            $into = '';
+            $values = '';
+            foreach( $data as $key=>$value ) {
+                $into .= empty( $into ) ? $key : ', ' . $key;
+                $values .= empty( $values ) ? ':' . $key : ', ' . ':' . $key;
+            }
+
+            $stmt = $this->pdo->prepare( 'INSERT INTO users ( ' . $into . ' ) VALUES ( ' . $values . ' )' );
+            //$stmt = $this->pdo->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
+
+            foreach( $data as $key=>$value ) {
+                $stmt->bindParam( ':' . $key, $data[ $key ], \PDO::PARAM_STR );
+            }
+
             $stmt->execute();
             $user_id = $this->pdo->lastInsertId();
 
@@ -133,9 +142,8 @@ class User
             $this->exception = $e;
         }
 
-        $this->data['id'] = !empty( $user_id ) ? $user_id : 0;
-
-        return !empty( $user_id ) ? true : false;
+        $this->id = !empty( $user_id ) ? $user_id : 0;
+        return !empty( $this->id );
     }
 
     // is update
