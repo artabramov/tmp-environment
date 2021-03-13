@@ -1,6 +1,5 @@
 SET sql_mode = '';
 
-
 # Users
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
@@ -17,7 +16,6 @@ CREATE TABLE IF NOT EXISTS project.users (
     UNIQUE  KEY user_email  (user_email),
             KEY user_hash   (user_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 # Users attributes
 CREATE TABLE IF NOT EXISTS project.user_attribs (
