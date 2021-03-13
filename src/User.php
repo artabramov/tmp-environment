@@ -129,7 +129,6 @@ class User
             }
 
             $stmt = $this->pdo->prepare( 'INSERT INTO users ( ' . $into . ' ) VALUES ( ' . $values . ' )' );
-            //$stmt = $this->pdo->prepare( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( :user_status, :user_token, :user_email, :user_hash )" );
 
             foreach( $data as $key=>$value ) {
                 $stmt->bindParam( ':' . $key, $data[ $key ], \PDO::PARAM_STR );
