@@ -5,19 +5,21 @@ class Echidna
 {
     protected $pdo;
     protected $e;
-    protected $error;
 
     // __construct
     public function __construct( \PDO $pdo ) {
         $this->pdo = $pdo;
     }
 
+    /*
     // __set
     public function __set( string $key, int|string $value ) {
 
-        if( property_exists( $this, $key )) {
-            $this->$key = $value;
-        }
+        //if( property_exists( $this, $key )) {
+        //    $this->$key = $value;
+        //}
+
+        $this->$key = $value;
     }
 
     // __get
@@ -31,9 +33,10 @@ class Echidna
     // __isset
     public function __isset( string $key ) {
 
-        $value = property_exists( $this, $key ) ? $this->$key : '';
-        $value = is_string( $value ) ? trim( $value ) : $value;
-        return !empty( $value );
+        //$value = property_exists( $this, $key ) ? $this->$key : null;
+        //$value = is_string( $value ) ? trim( $value ) : $value;
+        //return !empty( $value );
+        return property_exists( $this, $key ) and !empty( $this->key );
     }
 
     // __unset
@@ -50,10 +53,24 @@ class Echidna
         $value = is_string( $value ) ? trim( $value ) : $value;
         return !empty( $value );
     }
+    */
 
-    // is correct
-    protected function is_correct( string $key, int|string $value, string $type ) : bool {
+    // is empty
+    protected function is_empty( int|string $value ) : bool {
+        $value = is_string( $value ) ? trim( $value ) : $value;
+        return empty( $value );
+    }
 
+    // is int
+    protected function is_int( int|string $value, int $max_length = 1 ) : bool {
+        return is_int( $value ) and ceil( log10( abs( $value ) + 1 )) <= $max_length;
+    }
+
+    // is string
+    protected function is_string( int|string $value, int $max_length = 1 ) : bool {
+        return is_string( $value ) and mb_strlen( $value ) <= $max_length;
+
+        /*
         if( !property_exists( $this, $key )) {
             return false;
 
@@ -74,6 +91,12 @@ class Echidna
         }
 
         return true;
+        */
+    }
+
+    // is key (a-z0-9_-)
+    protected function is_key( int|string $value, int $max_length = 1 ) : bool {
+        return is_string( $value ) and preg_match("/^[a-z0-9_-]{1,40}$/", $value );
     }
 
     // is exists
