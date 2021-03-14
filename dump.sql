@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS project.groups (
     id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id      BIGINT(20)   NOT NULL,
-    group_status VARCHAR(40)  NOT NULL, # private | public | trash
+    group_status VARCHAR(20)  NOT NULL, # private | public | trash
     group_name   VARCHAR(255) NOT NULL,
 
     PRIMARY KEY id           (id),
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS project.user_roles (
     date      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id   BIGINT(20)  NOT NULL,
     group_id  BIGINT(20)  NOT NULL,
-    user_role VARCHAR(40) NOT NULL, # admin | editor | reader | invited
+    user_role VARCHAR(20) NOT NULL, # admin | editor | reader | invited
 
     PRIMARY KEY id        (id),
             KEY date      (date),
@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS project.posts (
     user_id      BIGINT(20)  NOT NULL,
     group_id     BIGINT(20)  NOT NULL,
     parent_id    BIGINT(20)  NOT NULL,
-    post_status  VARCHAR(40) NOT NULL, # parent: todo | doing | done | trash, child: inherit | trash
-    post_type    VARCHAR(40) NOT NULL, # document | comment
+    post_status  VARCHAR(20) NOT NULL, # parent: todo | doing | done | trash, child: inherit | trash
+    post_type    VARCHAR(20) NOT NULL, # document | comment
     post_content TEXT        NOT NULL,
 
     PRIMARY KEY id          (id),
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS project.post_tags (
     date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id   BIGINT(20)   NOT NULL,
     post_id   BIGINT(20)   NOT NULL,
-    tag_key   VARCHAR(40)  NOT NULL,
+    tag_key   VARCHAR(20)  NOT NULL,
     tag_value VARCHAR(255) NOT NULL,
 
     PRIMARY KEY id        (id),
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS project.post_uploads (
     date          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id       BIGINT(20)   NOT NULL,
     post_id       BIGINT(20)   NOT NULL,
-    upload_status VARCHAR(40)  NOT NULL, # inherit | favorite | trash
+    upload_status VARCHAR(20)  NOT NULL, # inherit | favorite | trash
     upload_name   VARCHAR(255) NOT NULL, # Filename
     upload_mime   VARCHAR(255) NOT NULL,
     upload_size   BIGINT(20)   NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS project.post_timers (
     date        DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id     BIGINT(20)  NOT NULL,
     post_id     BIGINT(20)  NOT NULL,
-    timer_key   VARCHAR(40) NOT NULL,
+    timer_key   VARCHAR(20) NOT NULL,
     timer_value DATETIME    NOT NULL,
 
     PRIMARY KEY id          (id),
