@@ -84,87 +84,186 @@ class EchidnaTest extends TestCase
     }
 
     /**
-     * @dataProvider addIsString
+     * @dataProvider addIsId
      */
-    public function testIsString( $value, $max_length, $expected ) {
-        $result = $this->call( $this->echidna, 'is_string', [ $value, $max_length ] );
+    public function testIsId( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_id', [ $value ] );
         $this->assertEquals( $expected, $result );
     }
 
-    public function addIsString() {
+    public function addIsId() {
         return [
-            [ -1, 2, false ],
-            [ 0, 2, false ],
-            [ 1, 2, false ],
+            [ '', false ],
+            [ '0', false ],
+            [ '1', false ],
+            [ '-1', false ],
 
-            [ '', 0, true ],
-            [ '1', 1, true ],
-            [ '11', 2, true ],
-            [ '111', 2, false ],
+            [ 0, true ],
+            [ 1, true ],
+            [ -1, true ],
+
+            [ 999999999999999999, true ],
+            [ -999999999999999999, true ],
+            [ 10000000000000000000, false ],
+            [ -10000000000000000000, false ],
         ];
     }
-
-
-    /**
-     * @dataProvider addIsInt
-     */
-    public function testIsInt( $value, $max_length, $expected ) {
-        $result = $this->call( $this->echidna, 'is_int', [ $value, $max_length ] );
-        $this->assertEquals( $expected, $result );
-    }
-
-    public function addIsInt() {
-        return [
-            [ '', 2, false ],
-            [ '1', 2, false ],
-
-            [ 0, 0, true ],
-            [ 1, 0, false ],
-            [ 1, 1, true ],
-            [ 9, 1, true ],
-            [ 10, 1, false ],
-            [ 10, 2, true ],
-            [ 99, 2, true ],
-            [ 100, 2, false ],
-
-            [ -1, 0, false ],
-            [ -1, 1, true ],
-            [ -9, 1, true ],
-            [ -10, 1, false ],
-            [ -10, 2, true ],
-            [ -99, 2, true ],
-            [ -100, 2, false ],
-        ];
-    }
-
-
 
     /**
      * @dataProvider addIsKey
      */
-    public function testIsKey( $value, $max_length, $expected ) {
-        $result = $this->call( $this->echidna, 'is_key', [ $value, $max_length ] );
+    public function testIsKey( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_key', [ $value ] );
         $this->assertEquals( $expected, $result );
     }
 
     public function addIsKey() {
         return [
-            [ -1, 2, false ],
-            [ 0, 2, false ],
-            [ 1, 2, false ],
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
 
-            [ 'a', 1, true ],
-            [ 'aa', 2, true ],
-            [ 'aaa', 2, false ],
+            [ 'a', true ],
+            [ 'aa', true ],
+            [ 'aa', true ],
+            [ 'a1', true ],
+            [ 'a_', true ],
+            [ 'a-', true ],
+            [ 'a.', false ],
+            [ 'a,', false ],
+            [ 'a ', false ],
 
-            [ 'a1a', 3, true ],
-            [ 'a_a', 3, true ],
-            [ 'a-a', 3, true ],
-            [ 'a.a', 3, false ],
-            [ 'a,a', 3, false ],
-            [ 'a a', 3, false ],
-            
+            [ 'abcdefghijklmnopqrst', true ],
+            [ 'abcdefghijklmnopqrstu', false ],
         ];
     }
+
+    /**
+     * @dataProvider addIsValue
+     */
+    public function testIsValue( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_value', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsValue() {
+        return [
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+
+            [ '', true ],
+            [ '1', true ],
+            [ '-1', true ],
+            [ 'abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456', true ],
+            [ 'abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz01234567', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsDatetime
+     */
+    public function testIsDatetime( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_datetime', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsDatetime() {
+        return [
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+            [ date('U'), false ],
+
+            [ '0000-00-00 00:00:00', true ],
+            [ '0001-01-01 01:01:01', true ],
+            [ '1970-00-00 00:00:00', true ],
+            [ '2099-12-12 23:59:59', true ],
+
+            [ '2021-13-01 00:00:00', false ],
+            [ '2021-01-32 00:00:00', false ],
+            [ '2021-01-01 25:00:00', false ],
+            [ '2021-01-01 00:60:00', false ],
+            [ '2021-01-01 00:00:61', false ],
+            [ 'yyyy-mm-dd hh:mm:ss', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsToken
+     */
+    public function testIsToken( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_token', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsToken() {
+        return [
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd80719', true ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd807190', false ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
+            [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsHash
+     */
+    public function testIsHash( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_hash', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsHash() {
+        return [
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709', true ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd8070', false ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd807091', false ],
+            [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsEmail
+     */
+    public function testIsEmail( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_email', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsEmail() {
+        return [
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+
+            [ 'noreply@noreply.no', true ],
+            [ 'noreply.1@noreply.1.no', true ],
+            [ 'noreply.noreply@noreply.noreply.no', true ],
+            [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
+            [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
+
+            [ '@noreply.no', false ],
+            [ 'noreply@noreply', false ],
+            [ 'noreply@noreply.nono', false ],
+
+        ];
+    }
+
+
+
+
+
+
+
+
 
 }

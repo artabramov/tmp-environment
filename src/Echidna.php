@@ -11,7 +11,6 @@ class Echidna
         $this->pdo = $pdo;
     }
 
-    /*
     // __set
     public function __set( string $key, int|string $value ) {
 
@@ -47,57 +46,51 @@ class Echidna
         }
     }
 
-    // is empty
-    protected function is_empty( int|string $value ) {
-
-        $value = is_string( $value ) ? trim( $value ) : $value;
-        return !empty( $value );
-    }
-    */
-
-    // is empty
+    // is empty +
     protected function is_empty( int|string $value ) : bool {
         $value = is_string( $value ) ? trim( $value ) : $value;
         return empty( $value );
     }
 
-    // is int
-    protected function is_int( int|string $value, int $max_length = 1 ) : bool {
-        return is_int( $value ) and ceil( log10( abs( $value ) + 1 )) <= $max_length;
+    // is id (0-9 {1,20}) +
+    protected function is_id( int|string $value ) : bool {
+        return is_int( $value ) and ceil( log10( abs( $value ) + 1 )) <= 20;
     }
 
-    // is string
-    protected function is_string( int|string $value, int $max_length = 1 ) : bool {
-        return is_string( $value ) and mb_strlen( $value ) <= $max_length;
+    // is key (a-z0-9_- {1,20}) +
+    protected function is_key( int|string $value ) : bool {
+        return is_string( $value ) and preg_match("/^[a-z0-9_-]{1,20}$/", $value );
+    }
 
-        /*
-        if( !property_exists( $this, $key )) {
-            return false;
+    // is value {1,255} +
+    protected function is_value( int|string $value ) : bool {
+        return is_string( $value ) and mb_strlen( $value, 'UTF-8' ) <= 255;
+    }
 
-        } elseif( $key == 'id' and !is_int( $value )) {
-            return false;
-
-        } elseif( $key == 'user_status' and !in_array( $value, ['pending', 'approved', 'trash']) ) {
-            return false;
-
-        } elseif( $key == 'user_token' and ( !is_string( $value ) or strlen( $value ) != 80 )) {
-            return false;
-
-        } elseif( $key == 'user_email' and ( !is_string( $value ) or !preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value ))) {
-            return false;
-
-        } elseif( $key == 'user_hash' and ( !is_string( $value ) or strlen( $value ) != 40 )) {
+    // is datetime +
+    public function is_datetime( int|string $value ) : bool {
+        if( !is_string( $value ) or !preg_match("/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/", $value )) {
             return false;
         }
-
-        return true;
-        */
+        return is_int( strtotime( $value ));
     }
 
-    // is key (a-z0-9_-)
-    protected function is_key( int|string $value, int $max_length = 1 ) : bool {
-        return is_string( $value ) and preg_match("/^[a-z0-9_-]{1,40}$/", $value );
+    // is token (a-f0-9 {80}) +
+    public function is_token( int|string $value ) : bool {
+        return is_string( $value ) and preg_match("/^[a-f0-9]{80}$/", $value );
     }
+
+    // is hash (a-f0-9 {20}) +
+    public function is_hash( int|string $value ) : bool {
+        return is_string( $value ) and preg_match("/^[a-f0-9]{40}$/", $value );
+    }
+
+    // is email +
+    public function is_email( int|string $value ) : bool {
+        return is_string( $value ) and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
+    }
+
+
 
     // is exists
     protected function is_exists( string $table, array $args ) : bool {

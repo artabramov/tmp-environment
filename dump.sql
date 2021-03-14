@@ -4,7 +4,7 @@ SET sql_mode = '';
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_status VARCHAR(40)  NOT NULL DEFAULT '',
+    user_status VARCHAR(20)  NOT NULL DEFAULT '',
     user_token  VARCHAR(80)  NOT NULL,
     user_email  VARCHAR(255) NOT NULL,
     user_hash   VARCHAR(40)  NOT NULL DEFAULT '',
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS project.user_attribs (
     id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id      BIGINT(20)   NOT NULL,
-    attrib_key   VARCHAR(40)  NOT NULL,
+    attrib_key   VARCHAR(20)  NOT NULL,
     attrib_value VARCHAR(255) NOT NULL,
 
     PRIMARY KEY id           (id),
