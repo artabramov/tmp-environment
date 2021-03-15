@@ -1,2 +1,6 @@
-php phpunit.phar ./tests/EchidnaTest.php
-php phpunit.phar ./tests/UserTest.php
+search_dir="./tests"
+for entry in "$search_dir"/*
+do
+  echo -e "\n[ $entry ]\n"
+  php phpunit.phar $entry
+done
