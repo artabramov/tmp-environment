@@ -61,7 +61,7 @@ class Echidna
     }
 
     // is datetime +
-    public function is_datetime( int|string $value ) : bool {
+    protected function is_datetime( int|string $value ) : bool {
         if( !is_string( $value ) or !preg_match("/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $value )) {
             return false;
         }
@@ -69,22 +69,22 @@ class Echidna
     }
 
     // is token (a-f0-9 {80}) +
-    public function is_token( int|string $value ) : bool {
+    protected function is_token( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-f0-9]{80}$/", $value );
     }
 
     // is hash (a-f0-9 {20}) +
-    public function is_hash( int|string $value ) : bool {
+    protected function is_hash( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-f0-9]{40}$/", $value );
     }
 
     // is email +/-
-    public function is_email( int|string $value ) : bool {
+    protected function is_email( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
     }
 
     // is exists +
-    public function is_exists( string $table, array $args ) : bool {
+    protected function is_exists( string $table, array $args ) : bool {
 
         $where = '';
         foreach( $args as $arg ) {
@@ -115,7 +115,7 @@ class Echidna
     }
 
     // is insert +
-    public function is_insert( string $table, array $data ) : bool {
+    protected function is_insert( string $table, array $data ) : bool {
 
         try {
             $fields = '';
@@ -142,7 +142,7 @@ class Echidna
     }
 
     // is update
-    protected function is_update( array $args, array $data ) : bool {
+    protected function is_update( string $table, array $args, array $data ) : bool {
 
         $set = '';
         foreach( $data as $key=>$value ) {
@@ -252,7 +252,7 @@ class Echidna
         return empty( $this->error ) ? true : false;
     }
 
-    // get time
+    // get time +
     protected function get_time() : string {
 
         try {

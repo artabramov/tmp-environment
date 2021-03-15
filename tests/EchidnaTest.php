@@ -449,5 +449,23 @@ class EchidnaTest extends TestCase
 
     }
 
+    /**
+     * get_time
+     */
+    public function testGetTime() {
+
+        // is a string
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertIsString( $result );
+
+        // is not empty date
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertNotEquals( '0000-00-00 00:00:00', $result );
+
+        // is dateteime-format
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
+    }
+
 
 }
