@@ -12,11 +12,13 @@ class Echidna
     }
 
     // __set
+    /*
     public function __set( string $key, int|string $value ) {
         if( property_exists( $this, $key )) {
             $this->$key = $value;
         }
     }
+    */
 
     // __get
     public function __get( string $key ) {
@@ -33,11 +35,13 @@ class Echidna
     }
 
     // __unset
+    /*
     public function __unset( string $key ) {
         if( property_exists( $this, $key )) {
             $this->$key = '';
         }
     }
+    */
 
     // is empty +
     protected function is_empty( int|string $value ) : bool {
@@ -86,13 +90,13 @@ class Echidna
     // is exists +
     protected function is_exists( string $table, array $args ) : bool {
 
-        $where = '';
-        foreach( $args as $arg ) {
-            $where .= empty( $where ) ? 'WHERE ' : ' AND ';
-            $where .= $arg[0] . $arg[1] . ':' . $arg[0];
-        }
-
         try {
+            $where = '';
+            foreach( $args as $arg ) {
+                $where .= empty( $where ) ? 'WHERE ' : ' AND ';
+                $where .= $arg[0] . $arg[1] . ':' . $arg[0];
+            }
+        
             $stmt = $this->pdo->prepare( 'SELECT id FROM ' . $table . ' ' .$where . ' LIMIT 1' );
             foreach( $args as $arg ) {
 
@@ -108,7 +112,7 @@ class Echidna
             $rows_count = $stmt->rowCount();
 
         } catch( \PDOException $e ) {
-            $this->exception = $e;
+            $this->e = $e;
         }
 
         return !empty( $rows_count );
@@ -132,48 +136,53 @@ class Echidna
             }
 
             $stmt->execute();
-            $id = $this->pdo->lastInsertId();
+            $this->id = $this->pdo->lastInsertId();
 
         } catch( \PDOException $e ) {
-            $this->exception = $e;
+            $this->e = $e;
         }
 
-        return !empty( $id );
+        return empty( $this->e );
     }
 
-    // is update
+    // is update +
     public function is_update( string $table, array $args, array $data ) : bool {
 
-        $set = '';
-        foreach( $data as $key=>$value ) {
-            $set .= empty( $set ) ? 'SET ' : ', ';
-            $set .= $key . '=:' . $key;
-        }
-
-        $where = '';
-        foreach( $args as $arg ) {
-            $where .= empty( $where ) ? 'WHERE ' : ' AND ';
-            $where .= $arg[0] . $arg[1] . ':' . $arg[0];
-        }
-
-        $stmt = $this->pdo->prepare( 'UPDATE ' . $table . ' ' . $set . ' ' . $where );
-
-        foreach( $args as $arg ) {
-            if( $arg[0] == 'id' ) {
-                $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT );
-
-            } else {
-                $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
+        try {
+            $set = '';
+            foreach( $data as $key=>$value ) {
+                $set .= empty( $set ) ? 'SET ' : ', ';
+                $set .= $key . '=:' . $key;
             }
+
+            $where = '';
+            foreach( $args as $arg ) {
+                $where .= empty( $where ) ? 'WHERE ' : ' AND ';
+                $where .= $arg[0] . $arg[1] . ':' . $arg[0];
+            }
+
+            $stmt = $this->pdo->prepare( 'UPDATE ' . $table . ' ' . $set . ' ' . $where );
+
+            foreach( $args as $arg ) {
+                if( $arg[0] == 'id' ) {
+                    $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT );
+
+                } else {
+                    $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
+                }
+            }
+
+            foreach( $data as $key=>&$value ) {
+                $stmt->bindParam( ':' . $key, $value, \PDO::PARAM_STR );
+            }
+
+            $stmt->execute();
+
+        } catch( \PDOException $e ) {
+            $this->e = $e;
         }
 
-        foreach( $data as $key=>&$value ) {
-            $stmt->bindParam( ':' . $key, $value, \PDO::PARAM_STR );
-        }
-
-        $stmt->execute();
-
-        return true;
+        return empty( $this->e );
     }
 
     // is select
@@ -210,7 +219,7 @@ class Echidna
             $result = $this->pdo->query( 'SELECT NOW() as time' )->fetch();
 
         } catch( \PDOException $e ) {
-            $this->exception = $e;
+            $this->e = $e;
         }
 
         return isset( $result['time'] ) ? $result['time'] : '0000-00-00 00:00:00';

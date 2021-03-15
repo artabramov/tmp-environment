@@ -272,7 +272,7 @@ class EchidnaTest extends TestCase
 
         $id = $this->pdo->lastInsertId();
         if( $id ) {
-            $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE id=" . $id );
+            $stmt = $this->pdo->query( "DELETE FROM users WHERE id=" . $id );
         }
     }
 
@@ -324,11 +324,41 @@ class EchidnaTest extends TestCase
                 false
             ],
 
+            // empty table
+            [
+                '',
+                [
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                    'user_email'  => 'noreply@noreply.no', 
+                ], 
+                false
+            ],
+
+            // empty data
+            [
+                'users',
+                [], 
+                false
+            ],
+
 
             // user_token longer than field max length
             [
                 'users',
                 [
+                    'user_status' => 'pending', 
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
+                    'user_email'  => 'noreply@noreply.no', 
+                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
+                ], 
+                false
+            ],
+
+            // incorrect field
+            [
+                'users',
+                [
+                    'user_name'   => 'name', 
                     'user_status' => 'pending', 
                     'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
                     'user_email'  => 'noreply@noreply.no', 
@@ -351,14 +381,14 @@ class EchidnaTest extends TestCase
     public function testIsExists( $table, $data, $expected ) {
 
         // insert test data
-        $stmt = $this->pdo->query( "INSERT INTO " . $table . " ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
 
         // test case
         $result = $this->call( $this->echidna, 'is_exists', [ $table, $data ] );
         $this->assertEquals( $expected, $result );
 
         // delete test data
-        $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
 
     }
 
@@ -423,6 +453,23 @@ class EchidnaTest extends TestCase
                 true
             ],
 
+            // empty table
+            [
+                '',
+                [
+                    [ 'user_status', '=', 'pending' ], 
+                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
+                ], 
+                false
+            ],
+
+            // empty args
+            [
+                'users',
+                [], 
+                true
+            ],
+
             // false
             [
                 'users',
@@ -467,25 +514,19 @@ class EchidnaTest extends TestCase
         $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
     }
 
-
-
-
-
-
-
     /**
      * @dataProvider addIsUpdate
      */
     public function testIsUpdate( $table, $args, $data, $expected ) {
 
         // insert test data
-        $stmt = $this->pdo->query( "INSERT INTO " . $table . " ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
 
         $result = $this->call( $this->echidna, 'is_update', [ $table, $args, $data ] );
         $this->assertEquals( $expected, $result );
 
         // delete test data
-        $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
     }
 
     public function addIsUpdate() {
@@ -500,8 +541,115 @@ class EchidnaTest extends TestCase
                 ], 
                 [
                     'user_status' => 'trash', 
+                    'user_email' => 'no.reply@no.reply.no', 
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 ], 
                 true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    ['user_status', '=', 'pending'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_email' => 'no.reply@no.reply.no', 
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    ['user_status', '<>', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_email' => 'no.reply@no.reply.no', 
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                ], 
+                true
+            ],
+
+            // ok (but no affected rows)
+            [
+                'users',
+                [
+                    ['user_status', '=', 'pending'], 
+                    ['user_token', '=', '1'], 
+                ], 
+                [
+                    'user_email' => 'no.reply@no.reply.no', 
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                ], 
+                true
+            ],
+
+            
+            // empty table
+            [
+                '',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_status' => 'trash', 
+                    'user_email' => 'no.reply@no.reply.no', 
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                ], 
+                false
+            ],
+            
+            
+            // empty where
+            [
+                'users',
+                [], 
+                [
+                    'user_status' => 'trash', 
+                ], 
+                true
+            ],
+            
+            
+
+            // empty data
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [], 
+                false
+            ],
+            
+
+            // field length longer than maximum
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
+                ], 
+                false
+            ],
+
+            // incorrect field
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_name' => 'name', 
+                ], 
+                false
             ],
 
 

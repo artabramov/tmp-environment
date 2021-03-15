@@ -119,7 +119,6 @@ class UserTest extends TestCase
             [ '@noreply.no', false ],
             [ 'noreply@noreply', false ],
             [ 'noreply@noreply.nono', false ],
-
         ];
     }
 

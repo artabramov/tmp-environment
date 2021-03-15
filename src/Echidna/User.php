@@ -3,14 +3,14 @@ namespace artabramov\Echidna\Echidna;
 
 class User extends \artabramov\Echidna\Echidna
 {
-    private $error;
-    private $id;
-    private $date;
-    private $user_status;
-    private $user_token;
-    private $user_email;
-    private $user_pass;
-    private $user_hash;
+    protected $error;
+    protected $id;
+    protected $date;
+    protected $user_status;
+    protected $user_token;
+    protected $user_email;
+    protected $user_pass;
+    protected $user_hash;
 
     // get token +
     private function get_token() : string {
