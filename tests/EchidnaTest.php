@@ -345,11 +345,109 @@ class EchidnaTest extends TestCase
 
     }
 
+    /**
+     * @dataProvider addIsExists
+     */
+    public function testIsExists( $table, $data, $expected ) {
+
+        // insert test data
+        $stmt = $this->pdo->query( "INSERT INTO " . $table . " ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+
+        // test case
+        $result = $this->call( $this->echidna, 'is_exists', [ $table, $data ] );
+        $this->assertEquals( $expected, $result );
+
+        // delete test data
+        $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+
+    }
+
+    public function addIsExists() {
+
+        return [ 
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_email', '=', 'noreply@noreply.no' ], 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405' ], 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_email', '=', 'noreply@noreply.no' ], 
+                    [ 'user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405' ], 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_status', '=', 'pending' ], 
+                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    [ 'user_status', '<>', 'trash' ], 
+                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
+                ], 
+                true
+            ],
+
+            // false
+            [
+                'users',
+                [
+                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201' ], 
+                ], 
+                false
+            ],
+
+            //
+            [
+                'users',
+                [
+                    [ 'user_token', '<>', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201' ], 
+                ], 
+                true
+            ],
+
+
+        ];
+        
 
 
 
-
-
+    }
 
 
 }
