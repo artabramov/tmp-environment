@@ -11,15 +11,6 @@ class Echidna
         $this->pdo = $pdo;
     }
 
-    // __set
-    /*
-    public function __set( string $key, int|string $value ) {
-        if( property_exists( $this, $key )) {
-            $this->$key = $value;
-        }
-    }
-    */
-
     // __get
     public function __get( string $key ) {
         if( property_exists( $this, $key )) {
@@ -33,15 +24,6 @@ class Echidna
         $value = is_string( $value ) ? trim( $value ) : $value;
         return !empty( $value );
     }
-
-    // __unset
-    /*
-    public function __unset( string $key ) {
-        if( property_exists( $this, $key )) {
-            $this->$key = '';
-        }
-    }
-    */
 
     // is empty +
     protected function is_empty( int|string $value ) : bool {
@@ -119,7 +101,7 @@ class Echidna
     }
 
     // is insert +
-    public function is_insert( string $table, array $data ) : bool {
+    protected function is_insert( string $table, array $data ) : int|bool {
 
         try {
             $fields = '';
@@ -136,17 +118,17 @@ class Echidna
             }
 
             $stmt->execute();
-            $this->id = $this->pdo->lastInsertId();
+            $id = $this->pdo->lastInsertId();
 
         } catch( \PDOException $e ) {
             $this->e = $e;
         }
 
-        return empty( $this->e );
+        return empty( $this->e ) ? $id : false;
     }
 
     // is update +
-    public function is_update( string $table, array $args, array $data ) : bool {
+    protected function is_update( string $table, array $args, array $data ) : bool {
 
         try {
             $set = '';
@@ -185,31 +167,35 @@ class Echidna
         return empty( $this->e );
     }
 
-    // is select
-    protected function is_select( array $where ) : bool {
+    // is select +
+    protected function is_select( string $table, array $args ) : array|bool {
   
-        $this->clear();
+        try {
+            $where = '';
+            foreach( $args as $arg ) {
+                $where .= empty( $where ) ? 'WHERE ' : ' AND ';
+                $where .= $arg[0] . $arg[1] . ':' . $arg[0];
+            }
 
-        $user = $this->dbh
-            ->table( 'users' )
-            ->where( $where )
-            ->select( '*' )
-            ->first();
+            $stmt = $this->pdo->prepare( 'SELECT * FROM ' . $table . ' ' . $where . ' LIMIT 1' );
 
-        if( !empty( $user->id )) {
-            $this->id          = $user->id;
-            $this->date        = $user->date;
-            $this->user_status = $user->user_status;
-            $this->user_token  = $user->user_token;
-            $this->user_email  = $user->user_email;
-            $this->user_hash   = $user->user_hash;
-            $this->hash_date   = $user->hash_date;
+            foreach( $args as $arg ) {
+                if( $arg[0] == 'id' ) {
+                    $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT );
 
-        } else {
-            $this->error = 'user select error';
+                } else {
+                    $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
+                }
+            }
+
+            $stmt->execute();
+            $row = $stmt->fetch( \PDO::FETCH_ASSOC );
+
+        } catch( \PDOException $e ) {
+            $this->e = $e;
         }
 
-        return empty( $this->error ) ? true : false;
+        return empty( $this->e ) ? $row : false;
     }
 
     // get time +

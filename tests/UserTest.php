@@ -122,8 +122,6 @@ class UserTest extends TestCase
         ];
     }
 
-
-
     /*
     public function testGetPass() {
 

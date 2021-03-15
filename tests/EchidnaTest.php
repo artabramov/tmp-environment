@@ -268,6 +268,9 @@ class EchidnaTest extends TestCase
     public function testIsInsert( $table, $data, $expected ) {
 
         $result = $this->call( $this->echidna, 'is_insert', [ $table, $data ] );
+        if( is_int( $result ) and $result > 0 ) {
+            $result = true;
+        }
         $this->assertEquals( $expected, $result );
 
         $id = $this->pdo->lastInsertId();
@@ -661,6 +664,122 @@ class EchidnaTest extends TestCase
         
 
 
+
+    }
+
+    /**
+     * @dataProvider addIsSelect
+     */
+    public function testIsSelect( $table, $args, $expected ) {
+
+        // insert test data
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+
+        $result = $this->call( $this->echidna, 'is_select', [ $table, $args ] );
+        if( is_array( $result ) and isset( $result['id'] )) {
+            $result = true;
+        }
+        $this->assertEquals( $expected, $result );
+
+        // delete test data
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+    }
+
+    public function addIsSelect() {
+
+        return [ 
+
+            // ok
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                true
+            ],
+
+            // ...
+            [
+                'users',
+                [
+                    ['user_status', '=', 'pending'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                true
+            ],
+
+            // ...
+            [
+                'users',
+                [
+                    ['user_status', '<>', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                true
+            ],
+
+            // ...
+            [
+                'users',
+                [
+                    ['user_status', '=', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                false
+            ],
+
+            // empty table
+            [
+                '',
+                [
+                    ['user_status', '=', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                false
+            ],
+
+            // incorrect table
+            [
+                'tablename',
+                [
+                    ['user_status', '=', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                false
+            ],
+
+            // empty args (result is first any row)
+            [
+                'users',
+                [], 
+                true
+            ],
+
+            // empty table and args
+            [
+                '',
+                [], 
+                false
+            ],
+
+            // incorrect field name
+            [
+                'users',
+                [
+                    ['user_name', '=', 'name'], 
+                ], 
+                false
+            ],
+
+            // incorrect field name
+            [
+                'users',
+                [
+                    ['user_name', '<>', 'name'], 
+                ], 
+                false
+            ],
+        ];
 
     }
 
