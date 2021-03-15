@@ -13,17 +13,13 @@ class Echidna
 
     // __set
     public function __set( string $key, int|string $value ) {
-
-        //if( property_exists( $this, $key )) {
-        //    $this->$key = $value;
-        //}
-
-        $this->$key = $value;
+        if( property_exists( $this, $key )) {
+            $this->$key = $value;
+        }
     }
 
     // __get
     public function __get( string $key ) {
-
         if( property_exists( $this, $key )) {
             return $this->$key;
         }
@@ -31,16 +27,13 @@ class Echidna
 
     // __isset
     public function __isset( string $key ) {
-
-        //$value = property_exists( $this, $key ) ? $this->$key : null;
-        //$value = is_string( $value ) ? trim( $value ) : $value;
-        //return !empty( $value );
-        return property_exists( $this, $key ) and !empty( $this->key );
+        $value = property_exists( $this, $key ) ? $this->$key : null;
+        $value = is_string( $value ) ? trim( $value ) : $value;
+        return !empty( $value );
     }
 
     // __unset
     public function __unset( string $key ) {
-
         if( property_exists( $this, $key )) {
             $this->$key = '';
         }
@@ -72,7 +65,6 @@ class Echidna
         if( !is_string( $value ) or !preg_match("/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $value )) {
             return false;
         }
-
         return checkdate( substr( $value, 5, 2 ), substr( $value, 8, 2 ), substr( $value, 0, 4 ));
     }
 
@@ -91,19 +83,17 @@ class Echidna
         return is_string( $value ) and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
     }
 
-
-
     // is exists
-    protected function is_exists( string $table, array $args ) : bool {
+    public function is_exists( string $table, array $args ) : bool {
 
         $where = '';
         foreach( $args as $arg ) {
-            $where .= empty( $where ) ? ' WHERE ' : ' AND ';
+            $where .= empty( $where ) ? 'WHERE ' : ' AND ';
             $where .= $arg[0] . $arg[1] . ':' . $arg[0];
         }
 
         try {
-            $stmt = $this->pdo->prepare( 'SELECT id FROM users' . $where . ' LIMIT 1' );
+            $stmt = $this->pdo->prepare( 'SELECT id FROM ' . $table . ' ' .$where . ' LIMIT 1' );
             foreach( $args as $arg ) {
 
                 if( $arg[0] == 'id' ) {
@@ -124,32 +114,31 @@ class Echidna
         return !empty( $rows_count ) ? true : false;
     }
 
-    // is insert
-    protected function is_insert( array $data ) : bool {
+    // is insert +
+    public function is_insert( string $table, array $data ) : bool {
 
         try {
-            $into = '';
+            $fields = '';
             $values = '';
             foreach( $data as $key=>$value ) {
-                $into .= empty( $into ) ? $key : ', ' . $key;
+                $fields .= empty( $fields ) ? $key : ', ' . $key;
                 $values .= empty( $values ) ? ':' . $key : ', ' . ':' . $key;
             }
 
-            $stmt = $this->pdo->prepare( 'INSERT INTO users ( ' . $into . ' ) VALUES ( ' . $values . ' )' );
+            $stmt = $this->pdo->prepare( 'INSERT INTO ' . $table . ' ( ' . $fields . ' ) VALUES ( ' . $values . ' )' );
 
             foreach( $data as $key=>$value ) {
                 $stmt->bindParam( ':' . $key, $data[ $key ], \PDO::PARAM_STR );
             }
 
             $stmt->execute();
-            $user_id = $this->pdo->lastInsertId();
+            $id = $this->pdo->lastInsertId();
 
         } catch( \PDOException $e ) {
             $this->exception = $e;
         }
 
-        $this->id = !empty( $user_id ) ? $user_id : 0;
-        return !empty( $this->id );
+        return !empty( $id );
     }
 
     // is update

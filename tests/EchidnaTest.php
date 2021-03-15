@@ -262,4 +262,94 @@ class EchidnaTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addIsInsert
+     */
+    public function testIsInsert( $table, $data, $expected ) {
+
+        $result = $this->call( $this->echidna, 'is_insert', [ $table, $data ] );
+        $this->assertEquals( $expected, $result );
+
+        $id = $this->pdo->lastInsertId();
+        if( $id ) {
+            $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE id=" . $id );
+        }
+    }
+
+    public function addIsInsert() {
+
+        return [ 
+
+            // ok
+            [
+                'users',
+                [
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                    'user_email'  => 'noreply@noreply.no', 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    'user_status' => 'pending', 
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                    'user_email'  => 'noreply@noreply.no', 
+                ], 
+                true
+            ],
+
+            // ok
+            [
+                'users',
+                [
+                    'user_status' => 'pending', 
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                    'user_email'  => 'noreply@noreply.no', 
+                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
+                ], 
+                true
+            ],
+
+            // without required field
+            [
+                'users',
+                [
+                    'user_status' => 'pending', 
+                    'user_email'  => 'noreply@noreply.no', 
+                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
+                ], 
+                false
+            ],
+
+
+            // user_token longer than field max length
+            [
+                'users',
+                [
+                    'user_status' => 'pending', 
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
+                    'user_email'  => 'noreply@noreply.no', 
+                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
+                ], 
+                false
+            ],
+
+
+        ];
+        
+
+
+
+    }
+
+
+
+
+
+
+
+
 }
