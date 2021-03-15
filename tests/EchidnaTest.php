@@ -468,4 +468,52 @@ class EchidnaTest extends TestCase
     }
 
 
+
+
+
+
+
+    /**
+     * @dataProvider addIsUpdate
+     */
+    public function testIsUpdate( $table, $args, $data, $expected ) {
+
+        // insert test data
+        $stmt = $this->pdo->query( "INSERT INTO " . $table . " ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+
+        $result = $this->call( $this->echidna, 'is_update', [ $table, $args, $data ] );
+        $this->assertEquals( $expected, $result );
+
+        // delete test data
+        $stmt = $this->pdo->query( "DELETE FROM " . $table . " WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+    }
+
+    public function addIsUpdate() {
+
+        return [ 
+
+            // ok
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                [
+                    'user_status' => 'trash', 
+                ], 
+                true
+            ],
+
+
+
+
+
+
+        ];
+        
+
+
+
+    }
+
 }

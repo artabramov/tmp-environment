@@ -115,7 +115,7 @@ class Echidna
     }
 
     // is insert +
-    protected function is_insert( string $table, array $data ) : bool {
+    public function is_insert( string $table, array $data ) : bool {
 
         try {
             $fields = '';
@@ -142,87 +142,38 @@ class Echidna
     }
 
     // is update
-    protected function is_update( string $table, array $args, array $data ) : bool {
+    public function is_update( string $table, array $args, array $data ) : bool {
 
         $set = '';
         foreach( $data as $key=>$value ) {
-            $set .= empty( $set ) ? ' SET ' : ', ';
+            $set .= empty( $set ) ? 'SET ' : ', ';
             $set .= $key . '=:' . $key;
         }
 
         $where = '';
         foreach( $args as $arg ) {
-            $where .= empty( $where ) ? ' WHERE ' : ' AND ';
+            $where .= empty( $where ) ? 'WHERE ' : ' AND ';
             $where .= $arg[0] . $arg[1] . ':' . $arg[0];
         }
 
-        $stmt = $this->pdo->prepare( 'UPDATE users' . $set . $where );
+        $stmt = $this->pdo->prepare( 'UPDATE ' . $table . ' ' . $set . ' ' . $where );
 
         foreach( $args as $arg ) {
             if( $arg[0] == 'id' ) {
-                $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT, 20 );
+                $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT );
 
-            } elseif( $arg[0] == 'user_status' ) {
-                $stmt->bindParam( ':user_status', $arg[2], \PDO::PARAM_STR, 40 );
-
-            } elseif( $arg[0] == 'user_token' ) {
-                $stmt->bindParam( ':user_token', $arg[2], \PDO::PARAM_STR, 80 );
-
-            } elseif( $arg[0] == 'user_email' ) {
-                $stmt->bindParam( ':user_email', $arg[2], \PDO::PARAM_STR, 255 );
-
-            } elseif( $arg[0] == 'user_hash' ) {
-                $stmt->bindParam( ':user_hash', $arg[2], \PDO::PARAM_STR, 40 );
+            } else {
+                $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
             }
         }
 
-        foreach( $data as $key=>$value ) {
-            if( $key == 'id' ) {
-                $stmt->bindParam( ':id', $value, \PDO::PARAM_INT, 20 );
-
-            } elseif( $key == 'user_status' ) {
-                $stmt->bindParam( ':user_status', $value, \PDO::PARAM_STR, 40 );
-
-            } elseif( $key == 'user_token' ) {
-                $stmt->bindParam( ':user_token', $value, \PDO::PARAM_STR, 80 );
-
-            } elseif( $key == 'user_email' ) {
-                $stmt->bindParam( ':user_email', $value, \PDO::PARAM_STR, 255 );
-
-            } elseif( $key == 'user_hash' ) {
-                $stmt->bindParam( ':user_hash', $value, \PDO::PARAM_STR, 40 );
-            }
+        foreach( $data as $key=>&$value ) {
+            $stmt->bindParam( ':' . $key, $value, \PDO::PARAM_STR );
         }
 
         $stmt->execute();
 
         return true;
-
-        /*
-        $this->clear();
-
-        $affected_rows = $this->dbh
-            ->table('users')
-            ->where( $where )
-            ->update( $update );
-
-        if( is_int( $affected_rows ) ) {
-            foreach( $where as $value ) {
-                $this->data[$value[0]] = $value[2];
-            }
-
-            foreach( $update as $key=>$value ) {
-                $this->data[$key] = $value;
-            }
-
-        } else {
-            $this->error = 'user update error';
-        }
-
-        return empty( $this->error ) ? true : false;
-        */
-
-
     }
 
     // is select
