@@ -51,7 +51,7 @@ class User extends \artabramov\Echidna\Echidna
                 'user_hash'   => ''
             ];
 
-            if( !$this->is_insert( 'users', $data )) {
+            if( !$this->inserted( 'users', $data )) {
                 $this->error = 'user insert error';
             }
         }

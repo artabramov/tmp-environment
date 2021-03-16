@@ -263,11 +263,11 @@ class EchidnaTest extends TestCase
     }
 
     /**
-     * @dataProvider addIsInsert
+     * @dataProvider addInserted
      */
-    public function testIsInsert( $table, $data, $expected ) {
+    public function testInserted( $table, $data, $expected ) {
 
-        $result = $this->call( $this->echidna, 'is_insert', [ $table, $data ] );
+        $result = $this->call( $this->echidna, 'inserted', [ $table, $data ] );
         if( is_int( $result ) and $result > 0 ) {
             $result = true;
         }
@@ -279,7 +279,7 @@ class EchidnaTest extends TestCase
         }
     }
 
-    public function addIsInsert() {
+    public function addInserted() {
 
         return [ 
 
@@ -518,21 +518,21 @@ class EchidnaTest extends TestCase
     }
 
     /**
-     * @dataProvider addIsUpdate
+     * @dataProvider addUpdated
      */
-    public function testIsUpdate( $table, $args, $data, $expected ) {
+    public function testUpdated( $table, $args, $data, $expected ) {
 
         // insert test data
         $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
 
-        $result = $this->call( $this->echidna, 'is_update', [ $table, $args, $data ] );
+        $result = $this->call( $this->echidna, 'updated', [ $table, $args, $data ] );
         $this->assertEquals( $expected, $result );
 
         // delete test data
         $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
     }
 
-    public function addIsUpdate() {
+    public function addUpdated() {
 
         return [ 
 
@@ -671,44 +671,76 @@ class EchidnaTest extends TestCase
     }
 
     /**
-     * @dataProvider addIsSelect
+     * @dataProvider addSelected
      */
-    public function testIsSelect( $table, $args, $expected ) {
+    public function testSelect( $table, $args, $limit, $offset, $expected ) {
 
         // insert test data
         $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
 
-        $result = $this->call( $this->echidna, 'is_select', [ $table, $args ] );
-        if( is_array( $result ) and isset( $result['id'] )) {
-            $result = true;
+        $result = $this->call( $this->echidna, 'selected', [ $table, $args, $limit, $offset ] );
+
+        if( is_bool( $result )) {
+            $this->assertEquals( $expected, $result );
+
+        } else {
+            $this->assertEquals( $expected, count( $result ));
         }
-        $this->assertEquals( $expected, $result );
 
         // delete test data
         $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201'" );
     }
 
-    public function addIsSelect() {
+    public function addSelected() {
 
         return [ 
 
-            // ok
+            // one row
             [
                 'users',
                 [
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
                 ], 
-                true
+                1,
+                0,
+                1
             ],
 
-            // ...
+            // one row
+            [
+                'users',
+                [
+                    ['user_status', '=', 'pending'], 
+                ], 
+                1,
+                0,
+                1
+            ],
+
+            // two rows
+            [
+                'users',
+                [
+                    ['user_status', '=', 'pending'], 
+                ], 
+                2,
+                0,
+                2
+            ],
+
+            
+            // one row
             [
                 'users',
                 [
                     ['user_status', '=', 'pending'], 
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                true
+                ],
+                1,
+                0, 
+                1
             ],
 
             // ...
@@ -718,19 +750,25 @@ class EchidnaTest extends TestCase
                     ['user_status', '<>', 'trash'], 
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
                 ], 
-                true
+                1,
+                0,
+                1
             ],
 
-            // ...
+            
+            // no results
             [
                 'users',
                 [
                     ['user_status', '=', 'trash'], 
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
                 ], 
-                false
+                1,
+                0,
+                0
             ],
 
+            
             // empty table
             [
                 '',
@@ -738,9 +776,12 @@ class EchidnaTest extends TestCase
                     ['user_status', '=', 'trash'], 
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
                 ], 
+                1,
+                0,
                 false
             ],
 
+            
             // incorrect table
             [
                 'tablename',
@@ -748,53 +789,75 @@ class EchidnaTest extends TestCase
                     ['user_status', '=', 'trash'], 
                     ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
                 ], 
+                1,
+                0,
                 false
             ],
 
-            // empty args (result is first any row)
-            [
-                'users',
-                [], 
-                true
-            ],
-
+            
             // empty table and args
             [
                 '',
                 [], 
+                1,
+                0,
                 false
             ],
 
+            
             // incorrect field name
             [
                 'users',
                 [
                     ['user_name', '=', 'name'], 
                 ], 
+                1,
+                0,
                 false
             ],
 
+            
             // incorrect field name
             [
                 'users',
                 [
                     ['user_name', '<>', 'name'], 
                 ], 
+                1,
+                0,
                 false
             ],
+            
+
+
+
+
+
+
+            /*
+            // empty args (result is first any row)
+            [
+                'users',
+                [], 
+                true
+            ],
+            */
+
+
         ];
+        
 
     }
 
     /**
-     * @dataProvider addIsDelete
+     * @dataProvider addDeleted
      */
-    public function testIsDelete( $table, $args, $expected ) {
+    public function testDeleted( $table, $args, $expected ) {
 
         // insert test data
         $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
 
-        $result = $this->call( $this->echidna, 'is_delete', [ $table, $args ] );
+        $result = $this->call( $this->echidna, 'deleted', [ $table, $args ] );
         $this->assertEquals( $expected, $result );
 
         // delete test data
@@ -803,7 +866,7 @@ class EchidnaTest extends TestCase
         }
     }
 
-    public function addIsDelete() {
+    public function addDeleted() {
 
         return [ 
 

@@ -101,7 +101,7 @@ class Echidna
     }
 
     // is insert +
-    public function is_insert( string $table, array $data ) : int|bool {
+    public function inserted( string $table, array $data ) : int|bool {
 
         try {
             $fields = '';
@@ -128,7 +128,7 @@ class Echidna
     }
 
     // is update +
-    protected function is_update( string $table, array $args, array $data ) : int|bool {
+    protected function updated( string $table, array $args, array $data ) : int|bool {
 
         if( empty( $table ) or empty( $args ) or empty( $data )) {
             return 0;
@@ -173,7 +173,7 @@ class Echidna
     }
 
     // is select +
-    protected function is_select( string $table, array $args ) : array|bool {
+    public function selected( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
   
         try {
             $where = '';
@@ -182,7 +182,7 @@ class Echidna
                 $where .= $arg[0] . $arg[1] . ':' . $arg[0];
             }
 
-            $stmt = $this->pdo->prepare( 'SELECT * FROM ' . $table . ' ' . $where . ' LIMIT 1' );
+            $stmt = $this->pdo->prepare( 'SELECT * FROM ' . $table . ' ' . $where . ' LIMIT :limit OFFSET :offset' );
 
             foreach( $args as $arg ) {
                 if( $arg[0] == 'id' ) {
@@ -193,18 +193,21 @@ class Echidna
                 }
             }
 
+            $stmt->bindValue( ':limit', $limit, \PDO::PARAM_INT );
+            $stmt->bindValue( ':offset', $offset, \PDO::PARAM_INT );
+
             $stmt->execute();
-            $row = $stmt->fetch( \PDO::FETCH_ASSOC );
+            $rows = $stmt->fetchAll( \PDO::FETCH_ASSOC );
 
         } catch( \PDOException $e ) {
             $this->e = $e;
         }
 
-        return empty( $this->e ) ? $row : false;
+        return empty( $this->e ) ? $rows : false;
     }
 
-    // is delete
-    public function is_delete( string $table, array $args ) : int|bool {
+    // is delete +
+    public function deleted( string $table, array $args ) : int|bool {
 
         if( empty( $table ) or empty( $args )) {
             return 0;
@@ -250,7 +253,5 @@ class Echidna
 
         return isset( $result['time'] ) ? $result['time'] : '0000-00-00 00:00:00';
     }
-
-
 
 }
