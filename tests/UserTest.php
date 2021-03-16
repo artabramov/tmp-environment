@@ -62,21 +62,35 @@ class UserTest extends TestCase
     }
 
     /**
-     * get_token
+     * create_token
      */
-    public function testGetToken() {
+    public function testCreateToken() {
 
         // is a string
-        $result = $this->call( $this->user, 'get_token' );
+        $result = $this->call( $this->user, 'create_token' );
         $this->assertIsString( $result );
 
         // is 80-signs length
-        $result = strlen( $this->call( $this->user, 'get_token' ) ) == 80 ? true : false;
+        $result = strlen( $this->call( $this->user, 'create_token' ) ) == 80 ? true : false;
         $this->assertTrue( $result );
 
         // is HEX-signs only
-        $result = $this->call( $this->user, 'get_token' );
+        $result = $this->call( $this->user, 'create_token' );
         $this->assertMatchesRegularExpression( '/[a-f0-9]{80}/', $result );
+    }
+
+    /**
+     * create_pass
+     */
+    public function testCreatePass() {
+
+        // numeric, 4 signs (also default args)
+        $result = $this->call( $this->user, 'create_pass', [ 4, '0123456789' ] );
+        $this->assertMatchesRegularExpression( '/[0-9]{4}/', $result );
+
+        // letters, 8 signs
+        $result = $this->call( $this->user, 'create_pass', [ 8, 'abcdefghijklmnopqrstuvwxyz0123456789' ] );
+        $this->assertMatchesRegularExpression( '/[a-z0-9]{8}/', $result );
     }
 
     /**

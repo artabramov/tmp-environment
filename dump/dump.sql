@@ -1,6 +1,6 @@
 SET sql_mode = '';
 
-# Users
+
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -17,39 +17,23 @@ CREATE TABLE IF NOT EXISTS project.users (
             KEY user_hash   (user_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-# Users attributes
-CREATE TABLE IF NOT EXISTS project.user_attribs (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)   NOT NULL,
-    attrib_key   VARCHAR(20)  NOT NULL,
-    attrib_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id           (id),
-            KEY date         (date),
-            KEY user_id      (user_id),
-            KEY attrib_key   (attrib_key),
-            KEY attrib_value (attrib_value)
+CREATE TABLE IF NOT EXISTS project.user_attributes (
+    id              BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id         BIGINT(20)   NOT NULL,
+    attribute_key   VARCHAR(20)  NOT NULL,
+    attribute_value VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY id              (id),
+            KEY date            (date),
+            KEY user_id         (user_id),
+            KEY attribute_key   (attribute_key),
+            KEY attribute_value (attribute_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Users groups
-CREATE TABLE IF NOT EXISTS project.groups (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)   NOT NULL,
-    group_status VARCHAR(20)  NOT NULL, # private | public | trash
-    group_name   VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id           (id),
-            KEY date         (date),
-            KEY user_id      (user_id),
-            KEY group_status (group_status),
-            KEY group_name   (group_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# User roles
 CREATE TABLE IF NOT EXISTS project.user_roles (
     id        BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -65,7 +49,21 @@ CREATE TABLE IF NOT EXISTS project.user_roles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Posts
+CREATE TABLE IF NOT EXISTS project.groups (
+    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id      BIGINT(20)   NOT NULL,
+    group_status VARCHAR(20)  NOT NULL, # private | public | trash
+    group_name   VARCHAR(255) NOT NULL,
+
+    PRIMARY KEY id           (id),
+            KEY date         (date),
+            KEY user_id      (user_id),
+            KEY group_status (group_status),
+            KEY group_name   (group_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 CREATE TABLE IF NOT EXISTS project.posts (
     id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -86,25 +84,23 @@ CREATE TABLE IF NOT EXISTS project.posts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Posts tags
-CREATE TABLE IF NOT EXISTS project.post_tags (
-    id        BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id   BIGINT(20)   NOT NULL,
-    post_id   BIGINT(20)   NOT NULL,
-    tag_key   VARCHAR(20)  NOT NULL,
-    tag_value VARCHAR(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS project.post_meta (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    post_id    BIGINT(20)   NOT NULL,
+    meta_key   VARCHAR(20)  NOT NULL,
+    meta_value VARCHAR(255) NOT NULL,
 
-    PRIMARY KEY id        (id),
-            KEY date      (date),
-            KEY user_id   (user_id),
-            KEY post_id   (post_id),
-            KEY tag_key   (tag_key),
-            KEY tag_value (tag_value)
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY post_id    (post_id),
+            KEY meta_key   (meta_key),
+            KEY meta_value (meta_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-# Posts uploads
 CREATE TABLE IF NOT EXISTS project.post_uploads (
     id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -125,22 +121,4 @@ CREATE TABLE IF NOT EXISTS project.post_uploads (
             KEY upload_mime   (upload_mime),
             KEY upload_size   (upload_size),
      UNIQUE KEY upload_file   (upload_file)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-# Posts timers
-CREATE TABLE IF NOT EXISTS project.post_timers (
-    id          BIGINT(20)  NOT NULL AUTO_INCREMENT,
-    date        DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id     BIGINT(20)  NOT NULL,
-    post_id     BIGINT(20)  NOT NULL,
-    timer_key   VARCHAR(20) NOT NULL,
-    timer_value DATETIME    NOT NULL,
-
-    PRIMARY KEY id          (id),
-            KEY date        (date),
-            KEY user_id     (user_id),
-            KEY post_id     (post_id),
-            KEY timer_key   (timer_key),
-            KEY timer_value (timer_value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

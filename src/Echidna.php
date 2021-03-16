@@ -242,7 +242,7 @@ class Echidna
     }
 
     // get time +
-    protected function get_time() : string {
+    public function get_time() : string {
 
         try {
             $result = $this->pdo->query( 'SELECT NOW() as time' )->fetch();
