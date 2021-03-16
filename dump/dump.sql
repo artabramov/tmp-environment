@@ -33,52 +33,51 @@ CREATE TABLE IF NOT EXISTS project.user_attributes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+CREATE TABLE IF NOT EXISTS project.hubs (
+    id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id    BIGINT(20)   NOT NULL,
+    hub_status VARCHAR(20)  NOT NULL, # private | public | trash
+    hub_name   VARCHAR(255) NOT NULL,
 
-CREATE TABLE IF NOT EXISTS project.user_roles (
+    PRIMARY KEY id         (id),
+            KEY date       (date),
+            KEY user_id    (user_id),
+            KEY hub_status (hub_status),
+            KEY hub_name   (hub_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS project.hub_users (
     id        BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date      DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    hub_id    BIGINT(20)  NOT NULL,
     user_id   BIGINT(20)  NOT NULL,
-    group_id  BIGINT(20)  NOT NULL,
     user_role VARCHAR(20) NOT NULL, # admin | editor | reader | invited
 
     PRIMARY KEY id        (id),
             KEY date      (date),
+            KEY hub_id    (hub_id),
             KEY user_id   (user_id),
-            KEY group_id  (group_id),
             KEY user_role (user_role)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-CREATE TABLE IF NOT EXISTS project.groups (
-    id           BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)   NOT NULL,
-    group_status VARCHAR(20)  NOT NULL, # private | public | trash
-    group_name   VARCHAR(255) NOT NULL,
-
-    PRIMARY KEY id           (id),
-            KEY date         (date),
-            KEY user_id      (user_id),
-            KEY group_status (group_status),
-            KEY group_name   (group_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE IF NOT EXISTS project.posts (
     id           BIGINT(20)  NOT NULL AUTO_INCREMENT,
     date         DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id      BIGINT(20)  NOT NULL,
-    group_id     BIGINT(20)  NOT NULL,
     parent_id    BIGINT(20)  NOT NULL,
+    user_id      BIGINT(20)  NOT NULL,
+    hub_id       BIGINT(20)  NOT NULL,
     post_status  VARCHAR(20) NOT NULL, # parent: todo | doing | done | trash, child: inherit | trash
     post_type    VARCHAR(20) NOT NULL, # document | comment
     post_content TEXT        NOT NULL,
 
     PRIMARY KEY id          (id),
             KEY date        (date),
-            KEY user_id     (user_id),
-            KEY group_id    (group_id),
             KEY parent_id   (parent_id),
+            KEY user_id     (user_id),
+            KEY hub_id      (hub_id),
             KEY post_status (post_status),
             KEY post_type   (post_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

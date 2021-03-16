@@ -29,6 +29,12 @@ class Attribute extends \artabramov\Echidna\Echidna
     }
 
     /**
+     * Select all attributes of the user.
+     */
+    public function select_all( int $user_id ) : arra {
+    }
+
+    /**
      * Delete attribute of the user.
      */
     public function delete( int $user_id, string $attribute_key ) : bool {
