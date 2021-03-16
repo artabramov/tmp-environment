@@ -547,7 +547,7 @@ class EchidnaTest extends TestCase
                     'user_email' => 'no.reply@no.reply.no', 
                     'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 ], 
-                true
+                1
             ],
 
             // ok
@@ -561,7 +561,7 @@ class EchidnaTest extends TestCase
                     'user_email' => 'no.reply@no.reply.no', 
                     'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 ], 
-                true
+                1
             ],
 
             // ok
@@ -575,10 +575,10 @@ class EchidnaTest extends TestCase
                     'user_email' => 'no.reply@no.reply.no', 
                     'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 ], 
-                true
+                1
             ],
 
-            // ok (but no affected rows)
+            // ok
             [
                 'users',
                 [
@@ -589,7 +589,7 @@ class EchidnaTest extends TestCase
                     'user_email' => 'no.reply@no.reply.no', 
                     'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
                 ], 
-                true
+                0
             ],
 
             
@@ -606,6 +606,7 @@ class EchidnaTest extends TestCase
                 ], 
                 false
             ],
+
             
             
             // empty where
@@ -615,11 +616,11 @@ class EchidnaTest extends TestCase
                 [
                     'user_status' => 'trash', 
                 ], 
-                true
+                false
             ],
             
             
-
+            
             // empty data
             [
                 'users',
@@ -631,6 +632,7 @@ class EchidnaTest extends TestCase
             ],
             
 
+            
             // field length longer than maximum
             [
                 'users',
@@ -643,6 +645,7 @@ class EchidnaTest extends TestCase
                 false
             ],
 
+            
             // incorrect field
             [
                 'users',
@@ -655,7 +658,7 @@ class EchidnaTest extends TestCase
                 false
             ],
 
-
+            
 
 
 
@@ -779,6 +782,97 @@ class EchidnaTest extends TestCase
                 ], 
                 false
             ],
+        ];
+
+    }
+
+    /**
+     * @dataProvider addIsDelete
+     */
+    public function testIsDelete( $table, $args, $expected ) {
+
+        // insert test data
+        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+
+        $result = $this->call( $this->echidna, 'is_delete', [ $table, $args ] );
+        $this->assertEquals( $expected, $result );
+
+        // delete test data
+        if( !$result ) {
+            $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
+        }
+    }
+
+    public function addIsDelete() {
+
+        return [ 
+
+            // delete 1 row
+            [
+                'users',
+                [
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                1
+            ],
+
+            // delete 1 row
+            [
+                'users',
+                [
+                    ['user_email', '=', 'noreply@noreply.no'], 
+                    ['user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405'], 
+                ], 
+                1
+            ],
+
+            // delete 1 row
+            [
+                'users',
+                [
+                    ['user_status', '<>', 'trash'], 
+                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], 
+                1
+            ],
+
+            // empty table
+            [
+                '',
+                [
+                    ['user_email', '=', 'noreply@noreply.no'], 
+                ], 
+                false
+            ],
+
+            // empty args
+            [
+                'users',
+                [], 
+                false
+            ],
+
+            // empty all
+            [
+                '',
+                [], 
+                false
+            ],
+
+            // incorrect fieldname
+            [
+                'users',
+                [
+                    ['user_name', '=', 'no@no.no'], 
+                ], 
+                false
+            ],
+
+
+
+
+
+
         ];
 
     }

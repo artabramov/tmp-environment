@@ -101,7 +101,7 @@ class Echidna
     }
 
     // is insert +
-    protected function is_insert( string $table, array $data ) : int|bool {
+    public function is_insert( string $table, array $data ) : int|bool {
 
         try {
             $fields = '';
@@ -128,7 +128,11 @@ class Echidna
     }
 
     // is update +
-    protected function is_update( string $table, array $args, array $data ) : bool {
+    protected function is_update( string $table, array $args, array $data ) : int|bool {
+
+        if( empty( $table ) or empty( $args ) or empty( $data )) {
+            return 0;
+        }
 
         try {
             $set = '';
@@ -143,7 +147,7 @@ class Echidna
                 $where .= $arg[0] . $arg[1] . ':' . $arg[0];
             }
 
-            $stmt = $this->pdo->prepare( 'UPDATE ' . $table . ' ' . $set . ' ' . $where );
+            $stmt = $this->pdo->prepare( 'UPDATE ' . $table . ' ' . $set . ' ' . $where . ' LIMIT 1' );
 
             foreach( $args as $arg ) {
                 if( $arg[0] == 'id' ) {
@@ -159,12 +163,13 @@ class Echidna
             }
 
             $stmt->execute();
+            $rows = $stmt->rowCount();
 
         } catch( \PDOException $e ) {
             $this->e = $e;
         }
 
-        return empty( $this->e );
+        return empty( $this->e ) ? $rows : false;
     }
 
     // is select +
@@ -196,6 +201,41 @@ class Echidna
         }
 
         return empty( $this->e ) ? $row : false;
+    }
+
+    // is delete
+    public function is_delete( string $table, array $args ) : int|bool {
+
+        if( empty( $table ) or empty( $args )) {
+            return 0;
+        }
+
+        try {
+            $where = '';
+            foreach( $args as $arg ) {
+                $where .= empty( $where ) ? 'WHERE ' : ' AND ';
+                $where .= $arg[0] . $arg[1] . ':' . $arg[0];
+            }
+
+            $stmt = $this->pdo->prepare( 'DELETE FROM ' . $table . ' ' . $where . ' LIMIT 1' );
+
+            foreach( $args as $arg ) {
+                if( $arg[0] == 'id' ) {
+                    $stmt->bindParam( ':id', $arg[2], \PDO::PARAM_INT );
+
+                } else {
+                    $stmt->bindParam( ':' . $arg[0], $arg[2], \PDO::PARAM_STR );
+                }
+            }
+
+            $stmt->execute();
+            $rows = $stmt->rowCount();
+
+        } catch( \PDOException $e ) {
+            $this->e = $e;
+        }
+
+        return empty( $this->e ) ? $rows : false;
     }
 
     // get time +
