@@ -30,7 +30,7 @@ class Attribute extends \artabramov\Echidna\Echidna
         } elseif( $this->is_empty( $attribute_value )) {
             $this->error = 'attribute_value is empty';
 
-        } elseif( !$this->is_key( $attribute_value )) {
+        } elseif( !$this->is_value( $attribute_value )) {
             $this->error = 'attribute_value is incorrect';
 
         } else {
@@ -75,7 +75,7 @@ class Attribute extends \artabramov\Echidna\Echidna
     /**
      * Check attribute of the user is exists.
      */
-    public function is_exists( int $user_id, string $attribute_key ) : bool {
+    public function exists( int $user_id, string $attribute_key ) : bool {
     }
 
 
