@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/config/config.php';
 require_once __DIR__.'/../src/Echidna.php';
 
 class EchidnaTest extends TestCase
@@ -34,20 +35,14 @@ class EchidnaTest extends TestCase
 
     protected function setUp() : void {
 
-        $pdo_host    = 'localhost';
-        $pdo_user    = 'root';
-        $pdo_pass    = '123456';
-        $pdo_dbase   = 'project';
-        $pdo_charset = 'utf8';
-
-        $dsn = 'mysql:host=' . $pdo_host . ';dbname=' . $pdo_dbase . ';charset=' . $pdo_charset;
+        $dsn = 'mysql:host=' . PDO_HOST . ';dbname=' . PDO_DBASE . ';charset=' . PDO_CHARSET;
         $args = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
 
-        $this->pdo = new PDO( $dsn, $pdo_user, $pdo_pass, $args );
+        $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
         $this->echidna = new \artabramov\Echidna\Echidna( $this->pdo );
     }
 
@@ -66,16 +61,19 @@ class EchidnaTest extends TestCase
 
     public function addIsEmpty() {
         return [
-            [ -1, false ],
-            [ 0, true ],
-            [ 1, false ],
 
+            // TRUE: various empty values
             [ '', true ],
             [ ' ', true ],
             [ '0', true ],
             [ ' 0', true ],
             [ '0 ', true ],
             [ ' 0 ', true ],
+            [ 0, true ],
+
+            // FALSE: various not empty values
+            [ 1, false ],
+            [ -1, false ],
             [ '1', false ],
             [ ' 1', false ],
             [ '1 ', false ],
@@ -93,19 +91,19 @@ class EchidnaTest extends TestCase
 
     public function addIsId() {
         return [
+
+            // TRUE: various correct values (int|string)
+            [ 0, true ],
+            [ 1, true ],
+            [ 9223372036854775807, true ],
+ 
+            // FALSE: various not correct values (int|string)
+            [ -1, false ],
             [ '', false ],
             [ '0', false ],
             [ '1', false ],
             [ '-1', false ],
-
-            [ 0, true ],
-            [ 1, true ],
-            [ -1, true ],
-
-            [ 999999999999999999, true ],
-            [ -999999999999999999, true ],
-            [ 10000000000000000000, false ],
-            [ -10000000000000000000, false ],
+            
         ];
     }
 
@@ -119,21 +117,20 @@ class EchidnaTest extends TestCase
 
     public function addIsKey() {
         return [
+
+            // TRUE: variuous correct values (int|string)
+            [ 'a', true ],
+            [ 'abcdefghijklmnopqrst', true ],
+            [ 'abcde_fghij_klmno_pq', true ],
+            [ 'abcde-fghij-klmno-pq', true ],
+            [ 'abcde-1-fghij-2-klmn', true ],
+
+            // FALSE: various incorrect values (int|string)
             [ 0, false ],
             [ 1, false ],
             [ -1, false ],
-
-            [ 'a', true ],
-            [ 'aa', true ],
-            [ 'aa', true ],
-            [ 'a1', true ],
-            [ 'a_', true ],
-            [ 'a-', true ],
-            [ 'a.', false ],
-            [ 'a,', false ],
-            [ 'a ', false ],
-
-            [ 'abcdefghijklmnopqrst', true ],
+            [ 'abcde fghij klmno pq', false ],
+            [ 'abcde,fghij.klmno+pq', false ],
             [ 'abcdefghijklmnopqrstu', false ],
         ];
     }
@@ -148,17 +145,23 @@ class EchidnaTest extends TestCase
 
     public function addIsValue() {
         return [
+
+            // TRUE: variuous correct values (int|string)
+            [ '', true ],
+            [ ' ', true ],
+            [ '0', true ],
+            [ '1', true ],
+            [ '-1', true ],
+            [ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor i', true ],
+
+            // FALSE: various incorrect values (int|string)
             [ 0, false ],
             [ 1, false ],
             [ -1, false ],
-
-            [ '', true ],
-            [ '1', true ],
-            [ '-1', true ],
-            [ 'abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456', true ],
-            [ 'abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz0123456789 abcdefghijklmnopqrstuvwxyz01234567', false ],
+            [ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in', false ],
         ];
     }
+
 
     /**
      * @dataProvider addIsDatetime
@@ -170,14 +173,15 @@ class EchidnaTest extends TestCase
 
     public function addIsDatetime() {
         return [
-            [ 0, false ],
-            [ 1, false ],
-            [ -1, false ],
-            [ date('U'), false ],
 
+            // TRUE: variuous correct values (int|string)
             [ '0001-01-01 01:01:01', true ],
             [ '2099-12-12 23:59:59', true ],
 
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
             [ '0000-00-00 00:00:00', false ],
             [ '1970-00-00 00:00:00', false ],
             [ '2021-13-01 00:00:00', false ],
@@ -193,6 +197,7 @@ class EchidnaTest extends TestCase
         ];
     }
 
+
     /**
      * @dataProvider addIsToken
      */
@@ -203,16 +208,20 @@ class EchidnaTest extends TestCase
 
     public function addIsToken() {
         return [
+
+            // TRUE: correct value (int|string)
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd80719', true ],
+
+            // FALSE: various incorrect values (int|string)
             [ 0, false ],
             [ 1, false ],
-            [ -1, false ],
-
-            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd80719', true ],
+            [ -1, false ],            
             [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd807190', false ],
             [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
             [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
         ];
     }
+
 
     /**
      * @dataProvider addIsHash
@@ -224,11 +233,14 @@ class EchidnaTest extends TestCase
 
     public function addIsHash() {
         return [
+
+            // TRUE: variuous correct values (int|string)
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709', true ],
+
+            // FALSE: various incorrect values (int|string)
             [ 0, false ],
             [ 1, false ],
-            [ -1, false ],
-
-            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709', true ],
+            [ -1, false ],            
             [ 'da39a3ee5e6b4b0d3255bfef95601890afd8070', false ],
             [ 'da39a3ee5e6b4b0d3255bfef95601890afd807091', false ],
             [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709', false ],
@@ -245,16 +257,18 @@ class EchidnaTest extends TestCase
 
     public function addIsEmail() {
         return [
-            [ 0, false ],
-            [ 1, false ],
-            [ -1, false ],
 
+            // TRUE: variuous correct values (int|string)
             [ 'noreply@noreply.no', true ],
             [ 'noreply.1@noreply.1.no', true ],
             [ 'noreply.noreply@noreply.noreply.no', true ],
             [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
             [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
 
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
             [ '@noreply.no', false ],
             [ 'noreply@noreply', false ],
             [ 'noreply@noreply.nono', false ],
@@ -262,280 +276,170 @@ class EchidnaTest extends TestCase
         ];
     }
 
+
     /**
      * @dataProvider addInserted
      */
     public function testInserted( $table, $data, $expected ) {
 
-        $result = $this->call( $this->echidna, 'inserted', [ $table, $data ] );
-        if( is_int( $result ) and $result > 0 ) {
-            $result = true;
-        }
-        $this->assertEquals( $expected, $result );
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
-        $id = $this->pdo->lastInsertId();
-        if( $id ) {
-            $stmt = $this->pdo->query( "DELETE FROM users WHERE id=" . $id );
-        }
+        // test
+        $result = $this->call( $this->echidna, 'inserted', [ $table, $data ] );
+        $this->assertEquals( $expected, $result );
     }
 
     public function addInserted() {
 
         return [ 
 
-            // ok
-            [
-                'users',
-                [
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                    'user_email'  => 'noreply@noreply.no', 
-                ], 
-                true
+            // 1: correct data, full dataset
+            [ 
+                'users', [
+                'id'          => 1,
+                'date'        => date('Y-m-d H:i:s'),
+                'user_status' => 'user_status',
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], 1
             ],
 
-            // ok
-            [
-                'users',
-                [
-                    'user_status' => 'pending', 
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                    'user_email'  => 'noreply@noreply.no', 
-                ], 
-                true
+            // 1: correct data, not full dataset
+            [ 
+                'users', [
+                'date'        => date('Y-m-d H:i:s'),
+                'user_status' => 'user_status',
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], 1
             ],
 
-            // ok
-            [
-                'users',
-                [
-                    'user_status' => 'pending', 
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                    'user_email'  => 'noreply@noreply.no', 
-                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
-                ], 
-                true
+            // 1: correct data, not full dataset
+            [ 
+                'users', [
+                'user_status' => 'user_status',
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], 1
             ],
 
-            // without required field
-            [
-                'users',
-                [
-                    'user_status' => 'pending', 
-                    'user_email'  => 'noreply@noreply.no', 
-                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
-                ], 
-                false
+            // 1: correct data, not full dataset
+            [ 
+                'users', [
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], 1
             ],
 
-            // empty table
-            [
-                '',
-                [
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                    'user_email'  => 'noreply@noreply.no', 
-                ], 
-                false
+            // 1: correct data, not full dataset (only UNIQUE KEY fields)
+            [ 
+                'users', [
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                ], 1
             ],
 
-            // empty data
-            [
-                'users',
-                [], 
-                false
+            // FALSE: without required field (UNIQUE KEY user_token)
+            [ 
+                'users', [
+                'user_status' => 'user_status',
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], false 
             ],
 
-
-            // user_token longer than field max length
-            [
-                'users',
-                [
-                    'user_status' => 'pending', 
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
-                    'user_email'  => 'noreply@noreply.no', 
-                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
-                ], 
-                false
+            // FALSE: without table
+            [ 
+                '', [
+                'user_status' => 'user_status',
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], false 
             ],
 
-            // incorrect field
-            [
-                'users',
-                [
-                    'user_name'   => 'name', 
-                    'user_status' => 'pending', 
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
-                    'user_email'  => 'noreply@noreply.no', 
-                    'user_hash'   => 'cf83e1357eefb8bdf1542850d66d8007d620e405'
-                ], 
-                false
+            // FALSE: with incorrect table name (_users)
+            [ 
+                '_users', [
+                'user_status' => 'user_status',
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], false 
             ],
 
+            // FALSE: without dataset
+            [ 'users', [], false ],
+
+            // FALSE: with incorrect field name (user_name)
+            [ 
+                'users', [
+                'user_name'  => 'John Doe',
+                'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email' => 'noreply@noreply.no',
+                'user_hash'  =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], false 
+            ],
+
+            // FALSE: with field length bigger than maximum (user_status)
+            [ 
+                'users', [
+                'user_status' => 'user_status_user_stat',
+                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
+                'user_email'  => 'noreply@noreply.no',
+                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
+                ], false
+            ],
 
         ];
-        
-
-
 
     }
 
-    /**
-     * @dataProvider addIsExists
-     */
-    public function testIsExists( $table, $data, $expected ) {
+    public function testInsertedTwice() {
 
-        // insert test data
-        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
-        // test case
-        $result = $this->call( $this->echidna, 'is_exists', [ $table, $data ] );
-        $this->assertEquals( $expected, $result );
+        // insert one UNIQUE KEY attribute twice
+        $result = $this->call( $this->echidna, 'inserted', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        $this->assertEquals( 1, $result );
 
-        // delete test data
-        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
-
+        $result = $this->call( $this->echidna, 'inserted', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        $this->assertFalse( $result );
     }
 
-    public function addIsExists() {
-
-        return [ 
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
-                ], 
-                true
-            ],
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_email', '=', 'noreply@noreply.no' ], 
-                ], 
-                true
-            ],
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405' ], 
-                ], 
-                true
-            ],
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_email', '=', 'noreply@noreply.no' ], 
-                    [ 'user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405' ], 
-                ], 
-                true
-            ],
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_status', '=', 'pending' ], 
-                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
-                ], 
-                true
-            ],
-
-            // ok
-            [
-                'users',
-                [
-                    [ 'user_status', '<>', 'trash' ], 
-                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
-                ], 
-                true
-            ],
-
-            // empty table
-            [
-                '',
-                [
-                    [ 'user_status', '=', 'pending' ], 
-                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' ], 
-                ], 
-                false
-            ],
-
-            // empty args
-            [
-                'users',
-                [], 
-                true
-            ],
-
-            // false
-            [
-                'users',
-                [
-                    [ 'user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201' ], 
-                ], 
-                false
-            ],
-
-            //
-            [
-                'users',
-                [
-                    [ 'user_token', '<>', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201' ], 
-                ], 
-                true
-            ],
-
-
-        ];
-        
-
-
-
-    }
-
-    /**
-     * get_time
-     */
-    public function testGetTime() {
-
-        // is a string
-        $result = $this->call( $this->echidna, 'get_time' );
-        $this->assertIsString( $result );
-
-        // is not empty date
-        $result = $this->call( $this->echidna, 'get_time' );
-        $this->assertNotEquals( '0000-00-00 00:00:00', $result );
-
-        // is dateteime-format
-        $result = $this->call( $this->echidna, 'get_time' );
-        $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
-    }
 
     /**
      * @dataProvider addUpdated
      */
     public function testUpdated( $table, $args, $data, $expected ) {
 
-        // insert test data
-        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
         $result = $this->call( $this->echidna, 'updated', [ $table, $args, $data ] );
         $this->assertEquals( $expected, $result );
-
-        // delete test data
-        $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
     }
 
+    // TODO
     public function addUpdated() {
 
         return [ 
 
+            // 1: entry updated
+            [
+                'users', [
+                ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                ], [
+                'user_status' => 'trash', 
+                ], 1
+            ],
+
+            /*
             // ok
             [
                 'users',
@@ -657,7 +561,7 @@ class EchidnaTest extends TestCase
                 ], 
                 false
             ],
-
+            */
             
 
 
@@ -669,10 +573,73 @@ class EchidnaTest extends TestCase
 
 
     }
+    
+
+
+    /**
+     * @dataProvider addIsExists
+     */
+    public function testIsExists( $table, $data, $expected ) {
+
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        // TEST
+        $result = $this->call( $this->echidna, 'is_exists', [ $table, $data ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsExists() {
+        return [
+
+            // TRUE: entry exists (also empty dataset)
+            [ 'users', [], true ],
+            [ 'users', [['id', '=', 1]], true ],
+            [ 'users', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], true ],
+            [ 'users', [['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=', '1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], true ],
+            [ 'users', [['id', '=', 1], ['date', '>', '1990-01-01 00:00:00']], true ],
+
+            // FALSE: entry not found
+            [ 'users', [['id', '=', 2]], false ],
+
+            // FALSE: empty table name
+            [ '', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], false ],
+
+            // FALSE: incorrect table name
+            [ '_users', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], false ],
+
+            // FALSE: incorrect field in dataset
+            [ '_users', [['id', '=', 1], ['user_name', '=', 'John Doe']], false ],
+
+        ];
+    }
+
+
+    /**
+     * get_time
+     */
+    /*
+    public function testGetTime() {
+
+        // is a string
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertIsString( $result );
+
+        // is not empty date
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertNotEquals( '0000-00-00 00:00:00', $result );
+
+        // is dateteime-format
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
+    }
+    */
 
     /**
      * @dataProvider addSelected
      */
+    /*
     public function testSelect( $table, $args, $limit, $offset, $expected ) {
 
         // insert test data
@@ -834,24 +801,24 @@ class EchidnaTest extends TestCase
 
 
 
-            /*
             // empty args (result is first any row)
             [
                 'users',
                 [], 
                 true
             ],
-            */
 
 
         ];
         
 
     }
+    */
 
     /**
      * @dataProvider addDeleted
      */
+    /*
     public function testDeleted( $table, $args, $expected ) {
 
         // insert test data
@@ -939,5 +906,6 @@ class EchidnaTest extends TestCase
         ];
 
     }
+    */
 
 }

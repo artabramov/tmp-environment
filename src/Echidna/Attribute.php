@@ -33,6 +33,9 @@ class Attribute extends \artabramov\Echidna\Echidna
         } elseif( !$this->is_value( $attribute_value )) {
             $this->error = 'attribute_value is incorrect';
 
+        } elseif( $this->is_exists( 'user_attributes', [['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key]] )) {
+            $this->error = 'attribute is occupied';
+
         } else {
             $data = [
                 'user_id'         => $user_id,
@@ -55,6 +58,12 @@ class Attribute extends \artabramov\Echidna\Echidna
     }
 
     /**
+     * Delete attribute of the user.
+     */
+    public function delete( int $user_id, string $attribute_key ) : bool {
+    }
+
+    /**
      * Select attribute of the user.
      */
     public function select( int $user_id, string $attribute_key ) : array|bool {
@@ -65,18 +74,5 @@ class Attribute extends \artabramov\Echidna\Echidna
      */
     public function select_all( int $user_id ) : arra {
     }
-
-    /**
-     * Delete attribute of the user.
-     */
-    public function delete( int $user_id, string $attribute_key ) : bool {
-    }
-
-    /**
-     * Check attribute of the user is exists.
-     */
-    public function exists( int $user_id, string $attribute_key ) : bool {
-    }
-
 
 }

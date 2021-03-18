@@ -33,7 +33,7 @@ class Echidna
 
     // is id (0-9 {1,20}) +
     protected function is_id( int|string $value ) : bool {
-        return is_int( $value ) and ceil( log10( abs( $value ) + 1 )) <= 20;
+        return is_int( $value ) and $value >= 0;
     }
 
     // is key (a-z0-9_- {1,20}) +

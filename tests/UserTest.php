@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/config/config.php';
 require_once __DIR__.'/../src/Echidna.php';
 require_once __DIR__.'/../src/Echidna/User.php';
 
@@ -35,24 +36,14 @@ class UserTest extends TestCase
 
     protected function setUp() : void {
 
-        // Параметры подключения к базе данных
-        $pdo_host    = 'localhost';
-        $pdo_user    = 'root';
-        $pdo_pass    = '123456';
-        $pdo_dbase   = 'project';
-        $pdo_charset = 'utf8';
-
-        // Подключаемся к базе данных
-        $dsn = 'mysql:host=' . $pdo_host . ';dbname=' . $pdo_dbase . ';charset=' . $pdo_charset;
+        $dsn = 'mysql:host=' . PDO_HOST . ';dbname=' . PDO_DBASE . ';charset=' . PDO_CHARSET;
         $args = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
 
-        // создаем объект подключения
-        $this->pdo = new PDO( $dsn, $pdo_user, $pdo_pass, $args );
-
+        $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
         $this->user = new \artabramov\Echidna\Echidna\User( $this->pdo );
     }
 
@@ -98,79 +89,49 @@ class UserTest extends TestCase
      */
     public function testRegister( $user_email, $expected ) {
 
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+
         $result = $this->call( $this->user, 'register', [ $user_email ] );
         $this->assertEquals( $expected, $result );
-
-        // check is exists
-        if( $result ) {
-            $exists_result = $this->call( $this->user, 'register', [ $user_email ] );
-            $this->assertFalse( $exists_result );
-        }
-
-        // delete test data
-        if( $result ) {
-            $stmt = $this->pdo->query( "DELETE FROM users WHERE user_email='" . $user_email . "'" );
-        }
     }
 
     public function addRegister() {
         return [
 
+            // TRUE: various user_email
             [ 'noreply@noreply.no', true ],
             [ 'noreply.1@noreply.1.no', true ],
             [ 'noreply.noreply@noreply.noreply.no', true ],
             [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
             [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
 
+            // FALSE: incorrect user_email
             [ '', false ],
             [ ' ', false ],
-            [ '0', false ],
-            [ ' 0', false ],
-            [ '0 ', false ],
+            [ 'noreply', false ],
             [ 'noreply.no', false ],
             [ 'noreply@', false ],
             [ '@noreply', false ],
             [ '@noreply.no', false ],
             [ 'noreply@noreply', false ],
             [ 'noreply@noreply.nono', false ],
+
         ];
     }
 
-    /*
-    public function testGetPass() {
+    public function testRegisterTwice() {
 
-        // can be empty
-        $result = str_replace( ' ', '',  $this->call( $this->user, 'get_pass', [20, ' '] ));
-        $this->assertEmpty( $result );
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
-        // is 20-signs length
-        $result = strlen( $this->call( $this->user, 'get_pass', [20] )) == 20 ? true : false;
+        // register one user_email twice
+        $result = $this->call( $this->user, 'register', [ 'noreply@noreply.no' ] );
         $this->assertTrue( $result );
 
-        // can be only numbers
-        $result = $this->call( $this->user, 'get_pass', [20, '0123456789'] );
-        $this->assertIsNumeric( $result );
-
-        // can be only letters
-        $result = $this->call( $this->user, 'get_pass', [20, 'abcdefghijklmnopqrstuvwxyz'] );
-        $this->assertIsString( $result );
-
-        // can be any signs
-        $result = $this->call( $this->user, 'get_pass', [20, '0123456789abcdefghijklmnopqrstuvwxyz'] );
-        $this->assertMatchesRegularExpression( '/[a-z0-9]{20}/', $result );
+        $result = $this->call( $this->user, 'register', [ 'noreply@noreply.no' ] );
+        $this->assertFalse( $result );
     }
 
-    public function testGetHash() {
-
-        $result = $this->call( $this->user, 'get_hash', [ '' ] );
-        $this->assertEquals( sha1(''), $result );
-
-        $result = $this->call( $this->user, 'get_hash', [ '1' ] );
-        $this->assertEquals( sha1('1'), $result );
-
-        $result = $this->call( $this->user, 'get_hash', [ '2' ] );
-        $this->assertEquals( sha1('2'), $result );
-    }
-    */
 
 }
