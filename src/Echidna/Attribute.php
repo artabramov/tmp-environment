@@ -14,6 +14,38 @@ class Attribute extends \artabramov\Echidna\Echidna
      * Insert attribute for the user.
      */
     public function insert( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->is_empty( $attribute_key )) {
+            $this->error = 'attribute_key is empty';
+
+        } elseif( !$this->is_key( $attribute_key )) {
+            $this->error = 'attribute_key is incorrect';
+
+        } elseif( $this->is_empty( $attribute_value )) {
+            $this->error = 'attribute_value is empty';
+
+        } elseif( !$this->is_key( $attribute_value )) {
+            $this->error = 'attribute_value is incorrect';
+
+        } else {
+            $data = [
+                'user_id'         => $user_id,
+                'attribute_key'   => $attribute_key,
+                'attribute_value' => $attribute_value
+            ];
+
+            if( !$this->inserted( 'user_attributes', $data )) {
+                $this->error = 'attribute insert error';
+            }
+        }
+
+        return empty( $this->error );
     }
 
     /**
