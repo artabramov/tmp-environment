@@ -54,20 +54,20 @@ class AttributeTest extends TestCase
 
 
     /**
-     * @dataProvider addInsert
+     * @dataProvider addSet
      */
-    public function testInsert( $user_id, $attribute_key, $attribute_value, $expected ) {
+    public function testSet( $user_id, $attribute_key, $attribute_value, $expected ) {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
 
         // test
-        $result = $this->call( $this->attribute, 'insert', [ $user_id, $attribute_key, $attribute_value ] );
+        $result = $this->call( $this->attribute, 'set', [ $user_id, $attribute_key, $attribute_value ] );
         $this->assertEquals( $expected, $result );
 
     }
 
-    public function addInsert() {
+    public function addSet() {
         return [
 
             // TRUE: various correct user_id (int)
@@ -100,16 +100,16 @@ class AttributeTest extends TestCase
         ];
     }
 
-    public function testInsertTwice() {
+    public function testSetTwice() {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
 
         // insert one attribute twice
-        $result = $this->call( $this->attribute, 'insert', [ 1, 'attribute_key', 'attribute value' ] );
+        $result = $this->call( $this->attribute, 'set', [ 1, 'attribute_key', 'attribute value' ] );
         $this->assertTrue( $result );
 
-        $result = $this->call( $this->attribute, 'insert', [ 1, 'attribute_key', 'attribute value' ] );
+        $result = $this->call( $this->attribute, 'set', [ 1, 'attribute_key', 'attribute value' ] );
         $this->assertFalse( $result );
     }
 

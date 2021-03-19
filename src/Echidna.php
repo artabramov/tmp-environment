@@ -25,23 +25,23 @@ class Echidna
         return !empty( $value );
     }
 
-    // is empty +
+    // is empty
     protected function is_empty( int|string $value ) : bool {
         $value = is_string( $value ) ? trim( $value ) : $value;
         return empty( $value );
     }
 
-    // is id (0-9 {1,20}) +
+    // is id (0-9 {1,20})
     protected function is_id( int|string $value ) : bool {
         return is_int( $value ) and $value >= 0;
     }
 
-    // is key (a-z0-9_- {1,20}) +
+    // is key (a-z0-9_- {1,20})
     protected function is_key( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-z0-9_-]{1,20}$/", $value );
     }
 
-    // is value {1,255} +
+    // is value {1,255}
     protected function is_value( int|string $value ) : bool {
         return is_string( $value ) and mb_strlen( $value, 'UTF-8' ) <= 255;
     }
@@ -54,12 +54,12 @@ class Echidna
         return checkdate( substr( $value, 5, 2 ), substr( $value, 8, 2 ), substr( $value, 0, 4 ));
     }
 
-    // is token (a-f0-9 {80}) +
+    // is token (a-f0-9 {80})
     protected function is_token( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-f0-9]{80}$/", $value );
     }
 
-    // is hash (a-f0-9 {20}) +
+    // is hash (a-f0-9 {20})
     protected function is_hash( int|string $value ) : bool {
         return is_string( $value ) and preg_match("/^[a-f0-9]{40}$/", $value );
     }
@@ -69,7 +69,7 @@ class Echidna
         return is_string( $value ) and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
     }
 
-    // is exists +
+    // is exists
     protected function is_exists( string $table, array $args ) : bool {
 
         try {
@@ -100,8 +100,8 @@ class Echidna
         return !empty( $rows_count );
     }
 
-    // is insert +
-    public function inserted( string $table, array $data ) : int|bool {
+    // is insert
+    public function insert( string $table, array $data ) : int|bool {
 
         try {
             $fields = '';
@@ -127,8 +127,8 @@ class Echidna
         return empty( $this->e ) ? $id : false;
     }
 
-    // is update +
-    protected function updated( string $table, array $args, array $data ) : int|bool {
+    // update
+    protected function update( string $table, array $args, array $data ) : int|bool {
 
         if( empty( $table ) or empty( $args ) or empty( $data )) {
             return 0;
@@ -172,8 +172,8 @@ class Echidna
         return empty( $this->e ) ? $rows : false;
     }
 
-    // is select +
-    public function selected( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
+    // is select
+    public function select( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
   
         try {
             $where = '';
@@ -206,8 +206,8 @@ class Echidna
         return empty( $this->e ) ? $rows : false;
     }
 
-    // is delete +
-    public function deleted( string $table, array $args ) : int|bool {
+    // is delete
+    public function delete( string $table, array $args ) : int|bool {
 
         if( empty( $table ) or empty( $args )) {
             return 0;
@@ -241,7 +241,7 @@ class Echidna
         return empty( $this->e ) ? $rows : false;
     }
 
-    // get time +
+    // get time
     public function get_time() : string {
 
         try {

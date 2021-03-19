@@ -13,7 +13,7 @@ class Attribute extends \artabramov\Echidna\Echidna
     /**
      * Insert attribute for the user.
      */
-    public function insert( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
+    public function set( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -43,7 +43,7 @@ class Attribute extends \artabramov\Echidna\Echidna
                 'attribute_value' => $attribute_value
             ];
 
-            if( !$this->inserted( 'user_attributes', $data )) {
+            if( !$this->insert( 'user_attributes', $data )) {
                 $this->error = 'attribute insert error';
             }
         }
@@ -54,25 +54,25 @@ class Attribute extends \artabramov\Echidna\Echidna
     /**
      * Update attribure of the user.
      */
-    public function update( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
+    public function put( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
     }
 
     /**
      * Delete attribute of the user.
      */
-    public function delete( int $user_id, string $attribute_key ) : bool {
+    public function unset( int $user_id, string $attribute_key ) : bool {
     }
 
     /**
      * Select attribute of the user.
      */
-    public function select( int $user_id, string $attribute_key ) : array|bool {
+    public function get( int $user_id, string $attribute_key ) : array|bool {
     }
 
     /**
      * Select all attributes of the user.
      */
-    public function select_all( int $user_id ) : arra {
+    public function get_all( int $user_id ) : arra {
     }
 
 }

@@ -278,19 +278,19 @@ class EchidnaTest extends TestCase
 
 
     /**
-     * @dataProvider addInserted
+     * @dataProvider addInsert
      */
-    public function testInserted( $table, $data, $expected ) {
+    public function testInsert( $table, $data, $expected ) {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
         // test
-        $result = $this->call( $this->echidna, 'inserted', [ $table, $data ] );
+        $result = $this->call( $this->echidna, 'insert', [ $table, $data ] );
         $this->assertEquals( $expected, $result );
     }
 
-    public function addInserted() {
+    public function addInsert() {
 
         return [ 
 
@@ -398,22 +398,22 @@ class EchidnaTest extends TestCase
 
     }
 
-    public function testInsertedTwice() {
+    public function testInsertTwice() {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
         // insert one UNIQUE KEY attribute twice
-        $result = $this->call( $this->echidna, 'inserted', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        $result = $this->call( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
         $this->assertEquals( 1, $result );
 
-        $result = $this->call( $this->echidna, 'inserted', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        $result = $this->call( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
         $this->assertFalse( $result );
     }
 
 
     /**
-     * @dataProvider addUpdated
+     * @dataProvider addUpdate
      */
     public function testUpdated( $table, $args, $data, $expected ) {
 
@@ -421,156 +421,110 @@ class EchidnaTest extends TestCase
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
-        $result = $this->call( $this->echidna, 'updated', [ $table, $args, $data ] );
+        $result = $this->call( $this->echidna, 'update', [ $table, $args, $data ] );
         $this->assertEquals( $expected, $result );
     }
 
-    // TODO
-    public function addUpdated() {
+    public function addUpdate() {
 
         return [ 
 
-            // 1: entry updated
+            // 1: update all dataset by id
             [
                 'users', [
-                ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
+                    ['id', '=', 1], 
                 ], [
-                'user_status' => 'trash', 
+                    'date'        => date('Y-m-d H:i:s'),
+                    'user_status' => 'user_status',
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
+                    'user_email'  => 'no@no.no',
+                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
                 ], 1
             ],
 
-            /*
-            // ok
+            // 1: update part of dataset by some fields
             [
-                'users',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_status' => 'trash', 
-                    'user_email' => 'no.reply@no.reply.no', 
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                ], 
-                1
-            ],
-
-            // ok
-            [
-                'users',
-                [
+                'users', [
+                    ['id', '=', 1], 
                     ['user_status', '=', 'pending'], 
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_email' => 'no.reply@no.reply.no', 
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                ], 
-                1
+                ], [
+                    'date'        => date('Y-m-d H:i:s'),
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
+                    'user_email'  => 'no@no.no',
+                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
+                ], 1
             ],
 
-            // ok
+            // 1: update part of dataset by some fields
             [
-                'users',
-                [
+                'users', [
+                    ['id', '=', 1], 
                     ['user_status', '<>', 'trash'], 
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_email' => 'no.reply@no.reply.no', 
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                ], 
-                1
+                ], [
+                    'date'        => date('Y-m-d H:i:s'),
+                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
+                    'user_email'  => 'no@no.no',
+                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
+                ], 1
             ],
-
-            // ok
+            
+            // 0: update field to his old value
             [
-                'users',
-                [
-                    ['user_status', '=', 'pending'], 
-                    ['user_token', '=', '1'], 
-                ], 
-                [
-                    'user_email' => 'no.reply@no.reply.no', 
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                ], 
+                'users', 
+                [ ['id', '=', 1] ], 
+                [ 'user_status' => 'pending' ], 
+                0
+            ],
+            
+            // 0: update not existing row
+            [
+                'users', 
+                [ ['id', '=', 2] ], 
+                [ 'user_status' => 'trash' ], 
+                0
+            ],
+            
+            // 0: empty table name
+            [
+                '', 
+                [ ['id', '=', 1] ], 
+                [ 'user_status' => 'trash' ], 
                 0
             ],
 
-            
-            // empty table
+            // 0: incorrect table name
             [
-                '',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_status' => 'trash', 
-                    'user_email' => 'no.reply@no.reply.no', 
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                ], 
-                false
+                '_users', 
+                [ ['id', '=', 1] ], 
+                [ 'user_status' => 'trash' ], 
+                0
             ],
 
-            
-            
-            // empty where
+            // 0: empty dataset
             [
-                'users',
+                'users', 
+                [ ['id', '=', 1] ], 
                 [], 
-                [
-                    'user_status' => 'trash', 
-                ], 
-                false
+                0
             ],
-            
-            
-            
-            // empty data
+
+            // 0: incorrect field in dataset
             [
                 'users',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [], 
-                false
+                [ ['id', '=', 1], ], 
+                [ 'user_name' => 'Jogn Doe'], 
+                0
             ],
-            
 
-            
-            // field length longer than maximum
+            // 0: field longer than maximum length
             [
-                'users',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_hash' => '0b5715dc83f4a921d36ce9ce47d0d13c5d85f2001', 
-                ], 
-                false
+                'users', 
+                [ ['id', '=', 1] ], 
+                [ 'user_status' => 'user_ststus_user_stst' ], 
+                0
             ],
-
-            
-            // incorrect field
-            [
-                'users',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                [
-                    'user_name' => 'name', 
-                ], 
-                false
-            ],
-            */
-            
-
-
-
 
         ];
-        
-
-
 
     }
     
