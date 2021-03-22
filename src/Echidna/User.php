@@ -149,7 +149,34 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // signout
+    // signout +
+    public function signout( int $user_id ) : bool {
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( !$this->is_exists( 'users', [['id', '=', $user_id], ['user_status', '=', 'approved']] )) {
+            $this->error = 'user not found';
+
+        } else {
+
+            $user_token = $this->create_token();
+
+            $args = [[ 'id', '=', $user_id ]];
+            $data = [ 'user_token' => $user_token ];
+
+            if( $this->update( 'users', $args, $data )) {
+                $this->user_token = $data['user_token'];
+                
+            } else {
+                $this->error = 'user update error';
+            }
+        }
+        return empty( $this->error );
+    }
 
     // auth
 
@@ -160,5 +187,17 @@ class User extends \artabramov\Echidna\Echidna
     // set
 
     // unset
+
+    // clear
+    public function clear() {
+        $this->error = null;
+        $this->id = null;
+        $this->date = null;
+        $this->user_status = null;
+        $this->user_token = null;
+        $this->user_email = null;
+        $this->user_pass = null;
+        $this->user_hash = null;
+    }
 
 }

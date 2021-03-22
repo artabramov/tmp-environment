@@ -209,4 +209,40 @@ class UserTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addSignout
+     */
+    public function testSignout( $user_id, $expected ) {
+
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply.1@noreply.no', '');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202', 'noreply.2@noreply.no', '');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (3, '2000-01-01 00:00:00', 'trash', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', 'noreply.3@noreply.no', '');" );
+
+        $result = $this->call( $this->user, 'signout', [ $user_id ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addSignout() {
+        return [
+
+            // TRUE: approved user
+            [ 1, true ],
+
+            // FALSE: pending user
+            [ 2, false ],
+
+            // FALSE: trashed user
+            [ 3, false ],
+
+            // FALSE: user_id is null
+            [ 0, false ],
+
+            // FALSE: user_id not exists
+            [ 4, false ],
+
+        ];
+    }
+
 }
