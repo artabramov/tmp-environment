@@ -162,7 +162,6 @@ class User extends \artabramov\Echidna\Echidna
             $this->error = 'user not found';
 
         } else {
-
             $user_token = $this->create_token();
 
             $args = [[ 'id', '=', $user_id ]];
