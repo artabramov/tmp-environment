@@ -214,58 +214,16 @@ class UserTest extends TestCase
      */
     public function testSignout( $user_id, $expected ) {
 
-        // mysql datasets for testing (user_pass is 123456)
-        $data = [
-            1 => ['2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', '1.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-            2 => ['2000-01-01 00:00:00', 'pending',  'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202', '2.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-            3 => ['2000-01-01 00:00:00', 'trash',    'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', '3.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-        ];
-
         // truncate table users and insert datasets
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        foreach( $data as $key => $value ) {
-            $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (" . $key . ", '" . $value[0] . "', '" . $value[1] . "', '" . $value[2] . "', '" . $value[3] . "', '" . $value[4] . "');" );
-        }
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', '1.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending',  'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202', '2.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (3, '2000-01-01 00:00:00', 'trash',    'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', '3.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
 
         // do test
         $result = $this->call( $this->user, 'signout', [ $user_id ] );
         $this->assertEquals( $expected, $result );
 
-        
-        /*
-        // mysql datasets for testing (user_pass is 123456)
-        $data = [
-            1 => ['user_status' => 'approved', 'user_email' => 'noreply.approved@noreply.no', 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_hash' => '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-            2 => ['user_status' => 'pending',  'user_email' => 'noreply.pending@noreply.no',  'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'user_hash' => '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-            3 => ['user_status' => 'trash',    'user_email' => 'noreply.trash@noreply.no',    'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202', 'user_hash' => '7c4a8d09ca3762af61e59520943dc26494f8941b'],
-        ];
-
-        // truncate table users and insert datasets
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        foreach( $data as $key => $value ) {
-            $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (" . $key . ", '2000-01-01 00:00:00', '" . $value['user_status'] . "', '" . $value['user_token'] . "', '" . $value['user_email'] . "', '" . $value['user_hash'] . "');" );
-        }
-
-        // do action and get response
-        $response = $this->call( $this->user, 'signout', [ $user_id ] );
-
-        // select dataset from mysql after action
-        $stmt = $this->pdo->query( "SELECT * FROM " . PDO_DBASE . ".users WHERE id=" . $user_id . ";" );
-        $user = $stmt->fetch( \PDO::FETCH_ASSOC );
-
-        // compare action response and mysql dataset
-        if( $response and $user['user_token'] != $data[ $user_id ]['user_token'] ) {
-            $result = true;
-
-        } elseif( $response and $user['user_token'] != $data[ $user_id ]['user_token'] ) {
-            $result = false;
-
-        } else {
-            $result = false;
-        }
-
-        $this->assertEquals( $expected, $result );
-        */
     }
 
     public function addSignout() {
