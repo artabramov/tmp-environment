@@ -175,6 +175,10 @@ class Echidna
     // is select
     public function select( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
   
+        if( empty( $table ) or empty( $args )) {
+            return 0;
+        }
+
         try {
             $where = '';
             foreach( $args as $arg ) {
@@ -251,7 +255,7 @@ class Echidna
             $this->e = $e;
         }
 
-        return isset( $result['time'] ) ? $result['time'] : '0000-00-00 00:00:00';
+        return empty( $this->e ) ? $result['time'] : '0000-00-00 00:00:00';
     }
 
 }
