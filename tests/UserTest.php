@@ -133,5 +133,39 @@ class UserTest extends TestCase
         $this->assertFalse( $result );
     }
 
+    /**
+     * @dataProvider addRestore
+     */
+    public function testRestore( $user_email, $expected ) {
+
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'trash', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'no@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        $result = $this->call( $this->user, 'restore', [ $user_email ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addRestore() {
+        return [
+
+            // TRUE: correct user_email
+            [ 'noreply@noreply.no', true ],
+
+            // FALSE: user_email is empty
+            [ '', false ],
+
+            // FALSE: user_email is incorrect
+            [ 'noreply-noreply.no', false ],
+
+            // FALSE: user_email not exists
+            [ '_noreply@noreply.no', false ],
+
+            // FALSE: user_status is trash
+            [ 'no@no.no', false ],
+
+        ];
+    }
 
 }

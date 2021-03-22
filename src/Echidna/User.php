@@ -12,7 +12,7 @@ class User extends \artabramov\Echidna\Echidna
     protected $user_pass;
     protected $user_hash;
 
-    // create token
+    // create token +
     private function create_token() : string {
 
         do {
@@ -29,7 +29,7 @@ class User extends \artabramov\Echidna\Echidna
         return $user_token;
     }
 
-    // create pass
+    // create pass +
     private function create_pass( int $pass_len, string $pass_symbs ) : string {
 
         $user_pass = '';
@@ -47,7 +47,7 @@ class User extends \artabramov\Echidna\Echidna
         return sha1( $user_pass );
     }
 
-    // register
+    // register +
     public function register( string $user_email ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -75,7 +75,7 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // restore
+    // restore +
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -91,7 +91,7 @@ class User extends \artabramov\Echidna\Echidna
             $user_pass = $this->create_pass( $pass_len, $pass_symbs );
             $user_hash = $this->get_hash( $user_pass );
 
-            if( $this->updated( 'users', [[ 'user_email', '=', $user_email ]], [ 'user_hash' => $user_hash ] )) {
+            if( $this->update( 'users', [[ 'user_email', '=', $user_email ]], [ 'user_hash' => $user_hash ] )) {
                 $this->user_pass = $user_pass;
                 $this->user_hash = $user_hash;
 
@@ -99,6 +99,8 @@ class User extends \artabramov\Echidna\Echidna
                 $this->error = 'user update error';
             }
         }
+
+        return empty( $this->error );
     }
 
     // signin
