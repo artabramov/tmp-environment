@@ -149,7 +149,7 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // signout +
+    // signout
     public function signout( int $user_id ) : bool {
 
         if( $this->is_empty( $user_id )) {
@@ -181,7 +181,7 @@ class User extends \artabramov\Echidna\Echidna
 
     // get
 
-    // some
+    // get_some
 
     // set
 
