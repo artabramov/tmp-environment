@@ -101,7 +101,7 @@ class Echidna
     }
 
     // is insert
-    public function insert( string $table, array $data ) : int|bool {
+    protected function insert( string $table, array $data ) : int|bool {
 
         try {
             $fields = '';
@@ -173,7 +173,7 @@ class Echidna
     }
 
     // is select
-    public function select( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
+    protected function select( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
   
         if( empty( $table ) or empty( $args )) {
             return 0;
@@ -211,7 +211,7 @@ class Echidna
     }
 
     // is delete
-    public function delete( string $table, array $args ) : int|bool {
+    protected function delete( string $table, array $args ) : int|bool {
 
         if( empty( $table ) or empty( $args )) {
             return 0;

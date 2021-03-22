@@ -12,7 +12,7 @@ class User extends \artabramov\Echidna\Echidna
     protected $user_pass;
     protected $user_hash;
 
-    // get token +
+    // create token
     private function create_token() : string {
 
         do {
@@ -29,7 +29,7 @@ class User extends \artabramov\Echidna\Echidna
         return $user_token;
     }
 
-    // generate pass +
+    // create pass
     private function create_pass( int $pass_len, string $pass_symbs ) : string {
 
         $user_pass = '';
@@ -47,7 +47,7 @@ class User extends \artabramov\Echidna\Echidna
         return sha1( $user_pass );
     }
 
-    // user register +
+    // register
     public function register( string $user_email ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -75,7 +75,7 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // user restore
+    // restore
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -101,16 +101,18 @@ class User extends \artabramov\Echidna\Echidna
         }
     }
 
-    // user signin
+    // signin
 
-    // user signout
+    // signout
 
-    // user auth
+    // auth
 
-    // user select
+    // get
 
-    // user update
+    // get_some
 
-    // user trash
+    // set
+
+    // unset
 
 }
