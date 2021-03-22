@@ -655,7 +655,6 @@ class EchidnaTest extends TestCase
                 0
             ],
 
-
             // INCORRECT: empty table
             [
                 '',
@@ -691,98 +690,90 @@ class EchidnaTest extends TestCase
         ];
     }
 
-
     /**
-     * @dataProvider addDeleted
+     * @dataProvider addDelete
      */
-    /*
-    public function testDeleted( $table, $args, $expected ) {
+    public function testDelete( $table, $args, $expected ) {
 
-        // insert test data
-        $stmt = $this->pdo->query( "INSERT INTO users ( user_status, user_token, user_email, user_hash ) VALUES ( 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', 'cf83e1357eefb8bdf1542850d66d8007d620e405' )" );
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
-        $result = $this->call( $this->echidna, 'deleted', [ $table, $args ] );
+        $result = $this->call( $this->echidna, 'delete', [ $table, $args ] );
         $this->assertEquals( $expected, $result );
 
-        // delete test data
-        if( !$result ) {
-            $stmt = $this->pdo->query( "DELETE FROM users WHERE user_token='cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'" );
-        }
     }
 
-    public function addDeleted() {
+    public function addDelete() {
 
         return [ 
 
-            // delete 1 row
+
+            // CORRECT: delete 1 row
             [
                 'users',
-                [
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                1
+                [ ['id', '=', 1], ], 
+                True
             ],
 
-            // delete 1 row
+            // CORRECT: delete 1 row
             [
                 'users',
-                [
-                    ['user_email', '=', 'noreply@noreply.no'], 
-                    ['user_hash', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e405'], 
-                ], 
-                1
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                True
             ],
 
-            // delete 1 row
+            // CORRECT: delete 1 row
             [
                 'users',
-                [
-                    ['user_status', '<>', 'trash'], 
-                    ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], 
-                ], 
-                1
+                [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 
+                True
             ],
 
-            // empty table
+            // CORRECT: delete 1 row
+            [
+                'users',
+                [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 
+                True
+            ],
+
+            // CORRECT: delete 1 row
+            [
+                'users',
+                [ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=' ,'1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], 
+                True
+            ],
+
+            // INCORRECT: empty table
             [
                 '',
-                [
-                    ['user_email', '=', 'noreply@noreply.no'], 
-                ], 
-                false
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                False
             ],
 
-            // empty args
+            // INCORRECT: incorrect table name
+            [
+                '_users',
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                False
+            ],
+
+            // INCORRECT: incorrect field name
+            [
+                'users',
+                [ ['user_name', '=', 'John Doe'], ], 
+                False
+            ],
+
+            // INCORRECT: empty args
             [
                 'users',
                 [], 
-                false
+                False
             ],
-
-            // empty all
-            [
-                '',
-                [], 
-                false
-            ],
-
-            // incorrect fieldname
-            [
-                'users',
-                [
-                    ['user_name', '=', 'no@no.no'], 
-                ], 
-                false
-            ],
-
-
-
-
-
 
         ];
 
     }
-    */
 
 }
