@@ -168,4 +168,45 @@ class UserTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addSignin
+     */
+    public function testSignin( $user_email, $user_pass, $expected ) {
+
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'trash', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'no@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+
+        $result = $this->call( $this->user, 'signin', [ $user_email, $user_pass ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addSignin() {
+        return [
+
+            // TRUE: correct user_email and correct user_pass
+            [ 'noreply@noreply.no', '123456', true ],
+
+            // FALSE: empty user_email
+            [ '', '123456', false ],
+
+            // FALSE: incorrect user_email
+            [ 'noreply-noreply.no', '123456', false ],
+            
+            // FALSE: user_email not exists
+            [ '_noreply@noreply.no', '123456', false ],
+
+            // FALSE: user_pass is empty
+            [ 'noreply@noreply.no', '', false ],
+
+            // FALSE: incorrect user_pass
+            [ 'noreply@noreply.no', '12345', false ],
+
+            // FALSE: user_status is trash
+            [ 'no@noreply.no', '123456', false ],
+
+        ];
+    }
+
 }

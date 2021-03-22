@@ -12,7 +12,7 @@ class User extends \artabramov\Echidna\Echidna
     protected $user_pass;
     protected $user_hash;
 
-    // create token +
+    // create token
     private function create_token() : string {
 
         do {
@@ -29,7 +29,7 @@ class User extends \artabramov\Echidna\Echidna
         return $user_token;
     }
 
-    // create pass +
+    // create pass
     private function create_pass( int $pass_len, string $pass_symbs ) : string {
 
         $user_pass = '';
@@ -47,7 +47,7 @@ class User extends \artabramov\Echidna\Echidna
         return sha1( $user_pass );
     }
 
-    // register +
+    // register
     public function register( string $user_email ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -66,16 +66,23 @@ class User extends \artabramov\Echidna\Echidna
                 'user_email'  => $user_email,
                 'user_hash'   => ''
             ];
+            $user_id = $this->insert( 'users', $data );
 
-            if( !$this->insert( 'users', $data )) {
+            if( !empty( $user_id )) {
+                $this->id = $user_id;
+                $this->user_status = $data['user_status'];
+                $this->user_token = $data['user_token'];
+                $this->user_email = $data['user_email'];
+                $this->user_hash = '';
+
+            } else {
                 $this->error = 'user insert error';
             }
         }
-
         return empty( $this->error );
     }
 
-    // restore +
+    // restore
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -91,7 +98,10 @@ class User extends \artabramov\Echidna\Echidna
             $user_pass = $this->create_pass( $pass_len, $pass_symbs );
             $user_hash = $this->get_hash( $user_pass );
 
-            if( $this->update( 'users', [[ 'user_email', '=', $user_email ]], [ 'user_hash' => $user_hash ] )) {
+            $args = [[ 'user_email', '=', $user_email ]];
+            $data = [ 'user_hash' => $user_hash ];
+
+            if( $this->update( 'users', $args, $data )) {
                 $this->user_pass = $user_pass;
                 $this->user_hash = $user_hash;
 
@@ -99,11 +109,45 @@ class User extends \artabramov\Echidna\Echidna
                 $this->error = 'user update error';
             }
         }
-
         return empty( $this->error );
     }
 
     // signin
+    public function signin( string $user_email, string $user_pass ) : bool {
+
+        $user_hash = $this->get_hash( $user_pass );
+
+        if( $this->is_empty( $user_email )) {
+            $this->error = 'user_email is empty';
+
+        } elseif( !$this->is_email( $user_email )) {
+            $this->error = 'user_email is incorrect';
+
+        } elseif( $this->is_empty( $user_pass )) {
+            $this->error = 'user_pass is empty';
+
+        } elseif( !$this->is_exists( 'users', [[ 'user_email', '=', $user_email ], [ 'user_hash', '=', $user_hash ], [ 'user_status', '<>', 'trash' ]] )) {
+            $this->error = 'user not found';
+
+        } else {
+
+            $args = [[ 'user_email', '=', $user_email ]];
+
+            $data = [
+                'user_status' => 'approved',
+                'user_hash'   => ''
+            ];
+
+            if( $this->update( 'users', $args, $data )) {
+                $this->user_status = $data['user_status'];
+                $this->user_hash = $data['user_hash'];
+
+            } else {
+                $this->error = 'user update error';
+            }
+        }
+        return empty( $this->error );
+    }
 
     // signout
 
@@ -111,7 +155,7 @@ class User extends \artabramov\Echidna\Echidna
 
     // get
 
-    // get_some
+    // some
 
     // set
 
