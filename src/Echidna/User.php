@@ -251,12 +251,6 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // get_some
-
-    // set
-
-    // unset
-
     // clear
     public function clear() {
         $this->error = null;
@@ -268,5 +262,11 @@ class User extends \artabramov\Echidna\Echidna
         $this->user_pass = null;
         $this->user_hash = null;
     }
+
+    /**
+     * TODO:
+     * get_some()
+     * trash()
+     */
 
 }

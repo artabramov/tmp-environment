@@ -285,8 +285,6 @@ class UserTest extends TestCase
         ];
     }
 
-
-
     /**
      * @dataProvider addGet
      */

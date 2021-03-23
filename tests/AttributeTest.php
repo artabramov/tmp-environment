@@ -52,7 +52,6 @@ class AttributeTest extends TestCase
         $this->attribute = null;
     }
 
-
     /**
      * @dataProvider addSet
      */
@@ -112,10 +111,45 @@ class AttributeTest extends TestCase
         $result = $this->call( $this->attribute, 'set', [ 1, 'attribute_key', 'attribute value' ] );
         $this->assertFalse( $result );
     }
-
-
     
+    /**
+     * @dataProvider addPut
+     */
+    public function testPu( $user_id, $attribute_key, $attribute_value, $expected ) {
 
+        // truncate table before testing and prepare test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+
+        // test
+        $result = $this->call( $this->attribute, 'put', [ $user_id, $attribute_key, $attribute_value ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addPut() {
+        return [
+
+            // TRUE: correct data
+            [ 1, 'user_name', 'Sarah Connor', true ],
+
+            // FALSE: empty user_id (int)
+            [ 0, 'user_name', 'Sarah Connor', false ],
+
+            // FALSE: incorrect user_id (int)
+            [ 2, 'user_name', 'Sarah Connor', false ],
+
+            // FALSE: incorrect attribute_key (str)
+            [ 1, '', 'Sarah Connor', false ],
+            [ 1, '_user_name_', 'Sarah Connor', false ],
+            [ 1, 'attribute_key_attribu', 'Sarah Connor', false ],
+
+            // FALSE: incorrect attribute_value (str)
+            [ 1, 'user_name', '', false ],
+            [ 1, 'user_name', 'Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Con', false ],
+
+        ];
+    }
 
 
 
