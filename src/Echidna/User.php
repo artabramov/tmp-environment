@@ -3,15 +3,6 @@ namespace artabramov\Echidna\Echidna;
 
 class User extends \artabramov\Echidna\Echidna
 {
-    protected $error;
-    protected $id;
-    protected $date;
-    protected $user_status;
-    protected $user_token;
-    protected $user_email;
-    protected $user_pass;
-    protected $user_hash;
-
     // create token
     private function create_token() : string {
 
@@ -50,8 +41,6 @@ class User extends \artabramov\Echidna\Echidna
     // register
     public function register( string $user_email ) : bool {
 
-        $this->clear();
-
         if( $this->is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -62,32 +51,23 @@ class User extends \artabramov\Echidna\Echidna
             $this->error = 'user_email is occupied';
 
         } else {
+
             $data = [
                 'user_status' => 'pending',
                 'user_token'  => $this->create_token(),
                 'user_email'  => $user_email,
                 'user_hash'   => ''
             ];
-            $user_id = $this->insert( 'users', $data );
 
-            if( !empty( $user_id )) {
-                $this->id = $user_id;
-                $this->user_status = $data['user_status'];
-                $this->user_token = $data['user_token'];
-                $this->user_email = $data['user_email'];
-                $this->user_hash = '';
-
-            } else {
+            if( !$this->insert( 'users', $data ) ) {
                 $this->error = 'user insert error';
-            }
+            }            
         }
         return empty( $this->error );
     }
 
     // restore
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
-
-        $this->clear();
 
         if( $this->is_empty( $user_email )) {
             $this->error = 'user_email is empty';
@@ -105,11 +85,7 @@ class User extends \artabramov\Echidna\Echidna
             $args = [[ 'user_email', '=', $user_email ]];
             $data = [ 'user_hash' => $user_hash ];
 
-            if( $this->update( 'users', $args, $data )) {
-                $this->user_pass = $user_pass;
-                $this->user_hash = $user_hash;
-
-            } else {
+            if( !$this->update( 'users', $args, $data )) {
                 $this->error = 'user update error';
             }
         }
@@ -119,7 +95,6 @@ class User extends \artabramov\Echidna\Echidna
     // signin
     public function signin( string $user_email, string $user_pass ) : bool {
 
-        $this->clear();
         $user_hash = $this->get_hash( $user_pass );
 
         if( $this->is_empty( $user_email )) {
@@ -137,17 +112,12 @@ class User extends \artabramov\Echidna\Echidna
         } else {
 
             $args = [[ 'user_email', '=', $user_email ]];
-
             $data = [
                 'user_status' => 'approved',
                 'user_hash'   => ''
             ];
 
-            if( $this->update( 'users', $args, $data )) {
-                $this->user_status = $data['user_status'];
-                $this->user_hash = $data['user_hash'];
-
-            } else {
+            if( !$this->update( 'users', $args, $data )) {
                 $this->error = 'user update error';
             }
         }
@@ -156,8 +126,6 @@ class User extends \artabramov\Echidna\Echidna
 
     // signout
     public function signout( int $user_id ) : bool {
-
-        $this->clear();
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -169,15 +137,12 @@ class User extends \artabramov\Echidna\Echidna
             $this->error = 'user not found';
 
         } else {
-            $user_token = $this->create_token();
 
+            $user_token = $this->create_token();
             $args = [[ 'id', '=', $user_id ]];
             $data = [ 'user_token' => $user_token ];
 
-            if( $this->update( 'users', $args, $data )) {
-                $this->user_token = $data['user_token'];
-                
-            } else {
+            if( !$this->update( 'users', $args, $data )) {
                 $this->error = 'user update error';
             }
         }
@@ -198,21 +163,16 @@ class User extends \artabramov\Echidna\Echidna
 
         } else {
 
-            $user = $this->select( 'users', [['user_token', '=', $user_token], ['user_status', '=', 'approved']] );
+            $args = [['user_token', '=', $user_token], ['user_status', '=', 'approved']];
+            $rows = $this->select( 'users', $args );
 
-            if( !empty( $user[0] )) {
-
-                $this->id          = $user[0]['id'];
-                $this->date        = $user[0]['date'];
-                $this->user_status = $user[0]['user_status'];
-                $this->user_token  = $user[0]['user_token'];
-                $this->user_email  = $user[0]['user_email'];
-                $this->user_pass   = '';
-                $this->user_hash   = $user[0]['user_hash'];
+            if( !empty( $rows[0] )) {
+                $this->rows = $rows;
 
             } else {
                 $this->error = 'user auth error';
             }
+
         }
 
         return empty( $this->error );
@@ -231,17 +191,11 @@ class User extends \artabramov\Echidna\Echidna
 
         } else {
 
-            $user = $this->select( 'users', [['id', '=', $user_id]] );
+            $args = [['id', '=', $user_id]];
+            $rows = $this->select( 'users', $args );
 
-            if( !empty( $user[0] )) {
-
-                $this->id          = $user[0]['id'];
-                $this->date        = $user[0]['date'];
-                $this->user_status = $user[0]['user_status'];
-                $this->user_token  = $user[0]['user_token'];
-                $this->user_email  = $user[0]['user_email'];
-                $this->user_pass   = '';
-                $this->user_hash   = $user[0]['user_hash'];
+            if( !empty( $rows[0] )) {
+                $this->rows = $rows;
 
             } else {
                 $this->error = 'user select error';
@@ -249,18 +203,6 @@ class User extends \artabramov\Echidna\Echidna
         }
 
         return empty( $this->error );
-    }
-
-    // clear
-    public function clear() {
-        $this->error = null;
-        $this->id = null;
-        $this->date = null;
-        $this->user_status = null;
-        $this->user_token = null;
-        $this->user_email = null;
-        $this->user_pass = null;
-        $this->user_hash = null;
     }
 
     /**

@@ -6,6 +6,9 @@ class Echidna
     protected $pdo;
     protected $e;
 
+    protected $error = null;
+    protected $rows = [];
+
     // __construct
     public function __construct( \PDO $pdo ) {
         $this->pdo = $pdo;
@@ -256,6 +259,14 @@ class Echidna
         }
 
         return empty( $this->e ) ? $result['time'] : '0000-00-00 00:00:00';
+    }
+
+    /**
+     * Clear error and rows.
+     */
+    public function clear() {
+        $this->error = '';
+        $this->rows = [];
     }
 
 }

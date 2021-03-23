@@ -5,9 +5,6 @@ class Attribute extends \artabramov\Echidna\Echidna
 {
     const SELECT_LIMIT = 100;
 
-    protected $error = null;
-    protected $rows = [];
-
     /**
      * Insert an attribute for the user.
      * @param int $user_id
@@ -135,7 +132,9 @@ class Attribute extends \artabramov\Echidna\Echidna
      * @param string $attribute_key
      * @return bool
      */
-    public function get( int $user_id, string $attribute_key ) : bool {
+    public function get( int $user_id, string $attribute_key, int $limit = 1, int $offset = 0 ) : bool {
+
+        $this->clear();
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -174,6 +173,8 @@ class Attribute extends \artabramov\Echidna\Echidna
      */
     public function get_all( int $user_id ) : array|bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
@@ -192,15 +193,6 @@ class Attribute extends \artabramov\Echidna\Echidna
         }
 
         return empty( $this->error );
-    }
-
-    /**
-     * Clear error and rows.
-     * @return bool
-     */
-    public function clear() : bool {
-        $this->error = '';
-        $this->rows = [];
     }
 
 }
