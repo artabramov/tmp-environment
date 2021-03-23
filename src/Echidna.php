@@ -248,7 +248,10 @@ class Echidna
         return empty( $this->e ) ? $rows : false;
     }
 
-    // get time
+    /**
+     * Get current database time.
+     * @return string
+     */
     public function get_time() : string {
 
         try {

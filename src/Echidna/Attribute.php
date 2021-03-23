@@ -3,7 +3,7 @@ namespace artabramov\Echidna\Echidna;
 
 class Attribute extends \artabramov\Echidna\Echidna
 {
-    const SELECT_LIMIT = 100;
+    const SELECT_LIMIT = 40;
 
     /**
      * Insert an attribute for the user.
@@ -132,7 +132,7 @@ class Attribute extends \artabramov\Echidna\Echidna
      * @param string $attribute_key
      * @return bool
      */
-    public function get( int $user_id, string $attribute_key, int $limit = 1, int $offset = 0 ) : bool {
+    public function get( int $user_id, string $attribute_key ) : bool {
 
         $this->clear();
 
@@ -171,7 +171,7 @@ class Attribute extends \artabramov\Echidna\Echidna
      * @param int $user_id
      * @return bool
      */
-    public function get_all( int $user_id ) : array|bool {
+    public function all( int $user_id ) : bool {
 
         $this->clear();
 
