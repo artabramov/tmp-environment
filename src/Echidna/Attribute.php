@@ -138,7 +138,7 @@ class Attribute extends \artabramov\Echidna\Echidna
      * @param string $attribute_key
      * @return bool
      */
-    public function get( int $user_id, string $attribute_key ) : array|bool {
+    public function get( int $user_id, string $attribute_key ) : bool {
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -178,7 +178,7 @@ class Attribute extends \artabramov\Echidna\Echidna
     /**
      * Select all attributes of the user.
      */
-    public function get_all( int $user_id ) : arra {
+    public function get_all( int $user_id ) : array|bool {
     }
 
 }
