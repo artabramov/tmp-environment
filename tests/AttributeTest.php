@@ -186,6 +186,45 @@ class AttributeTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addGet
+     */
+    public function testGet( $user_id, $attribute_key, $expected ) {
+
+        // truncate table user_attributes and insert datasets
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+
+        // do test
+        $result = $this->call( $this->attribute, 'get', [ $user_id, $attribute_key ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addGet() {
+        return [
+
+            // TRUE: correct args
+            [ 1, 'user_name', true ],
+
+            // FALSE: user_id not exists
+            [ 2, 'user_name', false ],
+
+            // FALSE: user_id is null
+            [ 0, 'user_id', false ],
+
+            // TRUE: empty attribute_key
+            [ 1, '', false ],
+
+            // TRUE: incorrect attribute_key
+            [ 1, '_user_name_', false ],
+
+            // TRUE: incorrect attribute_key
+            [ 1, '_user_name_user_name_', false ],
+
+        ];
+    }
+
 
 
 }
