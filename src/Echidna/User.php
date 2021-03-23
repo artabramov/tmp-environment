@@ -174,10 +174,41 @@ class User extends \artabramov\Echidna\Echidna
                 $this->error = 'user update error';
             }
         }
+        
         return empty( $this->error );
     }
 
     // auth
+    public function auth( string $user_token ) : bool {
+
+        if( $this->is_empty( $user_token )) {
+            $this->error = 'user_token is empty';
+
+        } elseif( !$this->is_token( $user_token )) {
+            $this->error = 'user_token is incorrect';
+
+        } else {
+
+            $user = $this->select( 'users', [['user_token', '=', $user_token], ['user_status', '=', 'approved']] );
+
+            if( !empty( $user[0] )) {
+
+                $this->id          = $user[0]['id'];
+                $this->date        = $user[0]['date'];
+                $this->user_status = $user[0]['user_status'];
+                $this->user_token  = $user[0]['user_token'];
+                $this->user_email  = $user[0]['user_email'];
+                $this->user_pass   = '';
+                $this->user_hash   = $user[0]['user_hash'];
+
+            } else {
+                $this->error = 'user auth error';
+            }
+
+        }
+
+        return empty( $this->error );
+    }
 
     // get
 
