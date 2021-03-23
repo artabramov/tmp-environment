@@ -115,7 +115,7 @@ class AttributeTest extends TestCase
     /**
      * @dataProvider addPut
      */
-    public function testPu( $user_id, $attribute_key, $attribute_value, $expected ) {
+    public function testPut( $user_id, $attribute_key, $attribute_value, $expected ) {
 
         // truncate table before testing and prepare test dataset
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
@@ -147,6 +147,41 @@ class AttributeTest extends TestCase
             // FALSE: incorrect attribute_value (str)
             [ 1, 'user_name', '', false ],
             [ 1, 'user_name', 'Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Con', false ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addUnset
+     */
+    public function testUnset( $user_id, $attribute_key, $expected ) {
+
+        // truncate table before testing and prepare test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+
+        // test
+        $result = $this->call( $this->attribute, 'unset', [ $user_id, $attribute_key ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addUnset() {
+        return [
+
+            // TRUE: correct data
+            [ 1, 'user_name', true ],
+
+            // FALSE: empty user_id (int)
+            [ 0, 'user_name', false ],
+
+            // FALSE: incorrect user_id (int)
+            [ 2, 'user_name', false ],
+
+            // FALSE: incorrect attribute_key (str)
+            [ 1, '', false ],
+            [ 1, '_user_name_', false ],
+            [ 1, 'attribute_key_attribu', false ],
+
 
         ];
     }

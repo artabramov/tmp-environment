@@ -98,9 +98,37 @@ class Attribute extends \artabramov\Echidna\Echidna
     }
 
     /**
-     * Delete attribute of the user.
+     * Delete the attribute of the user.
+     * @param int $user_id
+     * @param string $attribute_key
+     * @return bool
      */
     public function unset( int $user_id, string $attribute_key ) : bool {
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->is_empty( $attribute_key )) {
+            $this->error = 'attribute_key is empty';
+
+        } elseif( !$this->is_key( $attribute_key )) {
+            $this->error = 'attribute_key is incorrect';
+
+        } elseif( !$this->is_exists( 'user_attributes', [['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key]] )) {
+            $this->error = 'attribute not found';
+
+        } else {
+            $args = [ ['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key] ];
+
+            if( !$this->delete( 'user_attributes', $args )) {
+                $this->error = 'attribute delete error';
+            }
+        }
+
+        return empty( $this->error );
     }
 
     /**
