@@ -3,13 +3,10 @@ namespace artabramov\Echidna\Echidna;
 
 class Attribute extends \artabramov\Echidna\Echidna
 {
-    protected $error;
-    protected $id;
-    protected $date;
-    protected $user_id;
-    protected $attribute_key;
-    protected $attribute_value;
-    //protected $rows;
+    const SELECT_LIMIT = 100;
+
+    protected $error = null;
+    protected $rows = [];
 
     /**
      * Insert an attribute for the user.
@@ -157,15 +154,10 @@ class Attribute extends \artabramov\Echidna\Echidna
 
         } else {
 
-            $attribute = $this->select( 'user_attributes', [['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key]] );
+            $rows = $this->select( 'user_attributes', [['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key]] );
 
-            if( !empty( $attribute[0] )) {
-
-                $this->id              = $attribute[0]['id'];
-                $this->date            = $attribute[0]['date'];
-                $this->user_id         = $attribute[0]['user_id'];
-                $this->attribute_key   = $attribute[0]['attribute_key'];
-                $this->attribute_value = $attribute[0]['attribute_value'];
+            if( !empty( $rows[0] )) {
+                $this->rows = $rows;
 
             } else {
                 $this->error = 'attribute select error';
@@ -177,8 +169,38 @@ class Attribute extends \artabramov\Echidna\Echidna
 
     /**
      * Select all attributes of the user.
+     * @param int $user_id
+     * @return bool
      */
     public function get_all( int $user_id ) : array|bool {
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } else {
+            $rows = $this->select( 'user_attributes', [['user_id', '=', $user_id]], self::SELECT_LIMIT );
+
+            if( !empty( $rows[0] )) {
+                $this->rows = $rows;
+
+            } else {
+                $this->error = 'attribute select error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * Clear error and rows.
+     * @return bool
+     */
+    public function clear() : bool {
+        $this->error = '';
+        $this->rows = [];
     }
 
 }

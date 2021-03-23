@@ -119,7 +119,7 @@ class AttributeTest extends TestCase
 
         // truncate table before testing and prepare test dataset
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'John Doe');" );
 
         // test
         $result = $this->call( $this->attribute, 'put', [ $user_id, $attribute_key, $attribute_value ] );
@@ -158,7 +158,7 @@ class AttributeTest extends TestCase
 
         // truncate table before testing and prepare test dataset
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'John Doe');" );
 
         // test
         $result = $this->call( $this->attribute, 'unset', [ $user_id, $attribute_key ] );
@@ -193,7 +193,8 @@ class AttributeTest extends TestCase
 
         // truncate table user_attributes and insert datasets
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_attributes;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'Jong Doe');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (1, '2000-01-01 00:00:00', 1, 'user_name', 'John Doe');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_attributes (id, date, user_id, attribute_key, attribute_value) VALUES (2, '2000-01-01 00:00:00', 1, 'user_city', 'New York');" );
 
         // do test
         $result = $this->call( $this->attribute, 'get', [ $user_id, $attribute_key ] );
