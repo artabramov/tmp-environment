@@ -50,6 +50,8 @@ class User extends \artabramov\Echidna\Echidna
     // register
     public function register( string $user_email ) : bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -85,6 +87,8 @@ class User extends \artabramov\Echidna\Echidna
     // restore
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -115,6 +119,7 @@ class User extends \artabramov\Echidna\Echidna
     // signin
     public function signin( string $user_email, string $user_pass ) : bool {
 
+        $this->clear();
         $user_hash = $this->get_hash( $user_pass );
 
         if( $this->is_empty( $user_email )) {
@@ -152,6 +157,8 @@ class User extends \artabramov\Echidna\Echidna
     // signout
     public function signout( int $user_id ) : bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
@@ -174,12 +181,14 @@ class User extends \artabramov\Echidna\Echidna
                 $this->error = 'user update error';
             }
         }
-        
+
         return empty( $this->error );
     }
 
     // auth
     public function auth( string $user_token ) : bool {
+
+        $this->clear();
 
         if( $this->is_empty( $user_token )) {
             $this->error = 'user_token is empty';
@@ -204,13 +213,43 @@ class User extends \artabramov\Echidna\Echidna
             } else {
                 $this->error = 'user auth error';
             }
-
         }
 
         return empty( $this->error );
     }
 
-    // get
+    // get single user
+    public function get( int $user_id ) : bool {
+
+        $this->clear();
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } else {
+
+            $user = $this->select( 'users', [['id', '=', $user_id]] );
+
+            if( !empty( $user[0] )) {
+
+                $this->id          = $user[0]['id'];
+                $this->date        = $user[0]['date'];
+                $this->user_status = $user[0]['user_status'];
+                $this->user_token  = $user[0]['user_token'];
+                $this->user_email  = $user[0]['user_email'];
+                $this->user_pass   = '';
+                $this->user_hash   = $user[0]['user_hash'];
+
+            } else {
+                $this->error = 'user select error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
     // get_some
 

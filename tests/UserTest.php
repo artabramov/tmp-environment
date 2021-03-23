@@ -285,4 +285,44 @@ class UserTest extends TestCase
         ];
     }
 
+
+
+    /**
+     * @dataProvider addGet
+     */
+    public function testGet( $user_id, $expected ) {
+
+        // truncate table users and insert datasets
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', '1.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending',  'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f202', '2.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (3, '2000-01-01 00:00:00', 'trash',    'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', '3.noreply.approved@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
+
+        // do test
+        $result = $this->call( $this->user, 'get', [ $user_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addGet() {
+        return [
+
+            // TRUE: approved user
+            [ 1, true ],
+
+            // FALSE: pending user
+            [ 2, true ],
+
+            // FALSE: trashed user
+            [ 3, true ],
+
+            // FALSE: user_id is null
+            [ 0, false ],
+
+            // FALSE: user_id not exists
+            [ 4, false ],
+
+        ];
+    }
+
 }
