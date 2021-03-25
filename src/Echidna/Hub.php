@@ -15,7 +15,7 @@ class Hub extends \artabramov\Echidna\Echidna
      * @param string $hub_name
      * @return bool
      */
-    public function set( int $user_id, string $hub_status, string $hub_name ) : bool {
+    public function setup( int $user_id, string $hub_status, string $hub_name ) : bool {
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -55,7 +55,7 @@ class Hub extends \artabramov\Echidna\Echidna
     }
 
     /**
-     * Rename the hub.
+     * Rename the hub (update the hub_name).
      * @param int $hub_id
      * @param string $hub_name
      * @return bool
@@ -89,12 +89,43 @@ class Hub extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
+    /**
+     * Trash the hub (update hub_status from public to trash).
+     * @param int $hub_id
+     * @return bool
+     */
+    public function trash( int $hub_id ) : bool {
+
+        if( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( !$this->is_exists( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'public']] )) {
+            $this->error = 'hub not found';
+
+        } else {
+            $args = [ ['id', '=', $hub_id] ];
+            $data = [ 'hub_status' => 'trash' ];
+
+            if( !$this->update( 'hubs', $args, $data )) {
+                $this->error = 'hub trash error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
 
 
-    public function unset() : bool {}
 
-    public function get() : bool {}
+
+    public function recover() : bool {}
+
+    public function remove() : bool {}
+
+    public function one() : bool {}
 
     public function some() : bool {}
 

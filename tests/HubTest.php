@@ -53,20 +53,20 @@ class HubTest extends TestCase
     }
 
     /**
-     * @dataProvider addSet
+     * @dataProvider addSetup
      */
-    public function testSet( $user_id, $hub_status, $hub_name, $expected ) {
+    public function testSetup( $user_id, $hub_status, $hub_name, $expected ) {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
 
         // test
-        $result = $this->call( $this->hub, 'set', [ $user_id, $hub_status, $hub_name ] );
+        $result = $this->call( $this->hub, 'setup', [ $user_id, $hub_status, $hub_name ] );
         $this->assertEquals( $expected, $result );
 
     }
 
-    public function addSet() {
+    public function addSetup() {
         return [
 
             // TRUE: various correct user_id
@@ -139,6 +139,34 @@ class HubTest extends TestCase
             [ 1, '0', false ],
             [ 1, '0 ', false ],
             [ 1, 'hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hubs', false ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addTrash
+     */
+    public function testTrash( $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'Hub name');" );
+
+        // test
+        $result = $this->call( $this->hub, 'trash', [ $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addTrash() {
+        return [
+
+            // TRUE
+            [ 1, true ],
+
+            // FALSE: incorrect hub_id (int only)
+            [ 0, false ],
+            [ -1, false  ],
 
         ];
     }
