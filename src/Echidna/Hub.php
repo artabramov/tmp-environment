@@ -172,10 +172,41 @@ class Hub extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
+    /**
+     * Select one hub.
+     * @param int $hub_id
+     * @return bool
+     */
+    public function one( int $hub_id ) : bool {
+
+        $this->clear();
+
+        if( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( !$this->is_exists( 'hubs', [['id', '=', $hub_id]] )) {
+            $this->error = 'hub not found';
+
+        } else {
+
+            $rows = $this->select( 'hubs', [['id', '=', $hub_id]] );
+
+            if( !empty( $rows[0] )) {
+                $this->rows = $rows;
+
+            } else {
+                $this->error = 'hub select error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
 
 
-    public function one() : bool {}
 
     public function some() : bool {}
 

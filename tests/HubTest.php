@@ -227,4 +227,32 @@ class HubTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addOne
+     */
+    public function testOne( $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'Hub name');" );
+
+        // test
+        $result = $this->call( $this->hub, 'one', [ $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addOne() {
+        return [
+
+            // TRUE
+            [ 1, true ],
+
+            // FALSE: incorrect hub_id
+            [ 0, false ],
+            [ -1, false  ],
+
+        ];
+    }
+
 }
