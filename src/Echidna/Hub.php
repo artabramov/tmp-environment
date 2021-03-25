@@ -205,9 +205,4 @@ class Hub extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-
-
-
-    public function some() : bool {}
-
 }

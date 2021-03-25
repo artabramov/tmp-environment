@@ -109,6 +109,8 @@ class UserTest extends TestCase
             // FALSE: incorrect user_email
             [ '', false ],
             [ ' ', false ],
+            [ '0', false ],
+            [ '0 ', false ],
             [ 'noreply', false ],
             [ 'noreply.no', false ],
             [ 'noreply@', false ],
@@ -155,6 +157,9 @@ class UserTest extends TestCase
 
             // FALSE: user_email is empty
             [ '', false ],
+            [ ' ', false ],
+            [ '0', false ],
+            [ '0 ', false ],
 
             // FALSE: user_email is incorrect
             [ 'noreply-noreply.no', false ],
@@ -190,6 +195,9 @@ class UserTest extends TestCase
 
             // FALSE: empty user_email
             [ '', '123456', false ],
+            [ ' ', '123456', false ],
+            [ '0', '123456', false ],
+            [ '0 ', '123456', false ],
 
             // FALSE: incorrect user_email
             [ 'noreply-noreply.no', '123456', false ],
@@ -277,7 +285,9 @@ class UserTest extends TestCase
             [ 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', false ],
 
             // FALSE: user_token is null
-            [ 0, false ],
+            [ '', false ],
+            [ '0', false ],
+            [ '0 ', false ],
 
             // FALSE: user_token not exists
             [ 'cccce1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f203', false ],

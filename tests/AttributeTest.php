@@ -87,13 +87,16 @@ class AttributeTest extends TestCase
             // FALSE: various incorrect attribute_key (string)
             [ 1, '', 'attribute value', false ],
             [ 1, ' ', 'attribute value', false ],
-            [ 1, ' .', 'attribute value', false ],
+            [ 1, '0', 'attribute value', false ],
+            [ 1, '0 ', 'attribute value', false ],
             [ 1, 'attribute key', 'attribute value', false ],
             [ 1, 'attribute_key_attribu', 'attribute value', false ],
 
             // FALSE: various incorrect attribute_value (string)
             [ 1, 'attribute_key', '', false ],
             [ 1, 'attribute_key', ' ', false ],
+            [ 1, 'attribute_key', '0', false ],
+            [ 1, 'attribute_key', '0 ', false ],
             [ 1, 'attribute_key', 'attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value attribute value ', false ],
 
         ];
@@ -141,11 +144,15 @@ class AttributeTest extends TestCase
 
             // FALSE: incorrect attribute_key (str)
             [ 1, '', 'Sarah Connor', false ],
+            [ 1, '0', 'Sarah Connor', false ],
+            [ 1, '0 ', 'Sarah Connor', false ],
             [ 1, '_user_name_', 'Sarah Connor', false ],
             [ 1, 'attribute_key_attribu', 'Sarah Connor', false ],
 
             // FALSE: incorrect attribute_value (str)
             [ 1, 'user_name', '', false ],
+            [ 1, 'user_name', '0', false ],
+            [ 1, 'user_name', '0 ', false ],
             [ 1, 'user_name', 'Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Connor Sarah Con', false ],
 
         ];
@@ -179,6 +186,8 @@ class AttributeTest extends TestCase
 
             // FALSE: incorrect attribute_key (str)
             [ 1, '', false ],
+            [ 1, '0', false ],
+            [ 1, '0 ', false ],
             [ 1, '_user_name_', false ],
             [ 1, 'attribute_key_attribu', false ],
 
@@ -216,6 +225,8 @@ class AttributeTest extends TestCase
 
             // TRUE: empty attribute_key
             [ 1, '', false ],
+            [ 1, '0', false ],
+            [ 1, '0 ', false ],
 
             // TRUE: incorrect attribute_key
             [ 1, '_user_name_', false ],
