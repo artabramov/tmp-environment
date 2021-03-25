@@ -23,7 +23,6 @@ class Hub extends \artabramov\Echidna\Echidna
         } elseif( !$this->is_id( $user_id )) {
             $this->error = 'user_id is incorrect';
 
-
         } elseif( $this->is_empty( $hub_status )) {
             $this->error = 'hub_status is empty';
 
@@ -55,7 +54,43 @@ class Hub extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    public function put() : bool {}
+    /**
+     * Rename the hub.
+     * @param int $hub_id
+     * @param string $hub_name
+     * @return bool
+     */
+    public function rename( int $hub_id, string $hub_name ) : bool {
+
+        if( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( $this->is_empty( $hub_name )) {
+            $this->error = 'hub_name is empty';
+
+        } elseif( !$this->is_value( $hub_name )) {
+            $this->error = 'hub_name is incorrect';
+
+        } elseif( !$this->is_exists( 'hubs', [['id', '=', $hub_id], ['hub_status', '<>', 'trash']] )) {
+            $this->error = 'hub not found';
+
+        } else {
+            $args = [ ['id', '=', $hub_id] ];
+            $data = [ 'hub_name' => $hub_name ];
+
+            if( !$this->update( 'hubs', $args, $data )) {
+                $this->error = 'hub rename error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+
+
 
     public function unset() : bool {}
 

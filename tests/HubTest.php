@@ -107,17 +107,40 @@ class HubTest extends TestCase
         ];
     }
 
-    public function testSetTwice() {
+    /**
+     * @dataProvider addRename
+     */
+    public function testRename( $hub_id, $hub_name, $expected ) {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'Hub name');" );
 
-        // insert one attribute twice
-        $result = $this->call( $this->hub, 'set', [ 1, 'public', 'hub name', false ] );
-        $this->assertTrue( $result );
+        // test
+        $result = $this->call( $this->hub, 'rename', [ $hub_id, $hub_name ] );
+        $this->assertEquals( $expected, $result );
 
-        $result = $this->call( $this->hub, 'set', [ 1, 'public', 'hub name', false ] );
-        $this->assertFalse( $result );
+    }
+
+    public function addRename() {
+        return [
+
+            // TRUE: various correct hub_name (string only)
+            [ 1, 'h', true ],
+            [ 1, 'hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub', true ],
+
+            // FALSE: incorrect hub_id (int only)
+            [ 0, 'hub name!', false ],
+            [ -1, 'hub name!', false  ],
+
+            // FALSE: various incorrect hub_name (string only)
+            [ 1, '', false ],
+            [ 1, ' ', false ],
+            [ 1, '0', false ],
+            [ 1, '0 ', false ],
+            [ 1, 'hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hub name hubs', false ],
+
+        ];
     }
 
 }
