@@ -164,7 +164,63 @@ class HubTest extends TestCase
             // TRUE
             [ 1, true ],
 
-            // FALSE: incorrect hub_id (int only)
+            // FALSE: incorrect hub_id
+            [ 0, false ],
+            [ -1, false  ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addRecover
+     */
+    public function testRecover( $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'trash', 'Hub name');" );
+
+        // test
+        $result = $this->call( $this->hub, 'recover', [ $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addRecover() {
+        return [
+
+            // TRUE
+            [ 1, true ],
+
+            // FALSE: incorrect hub_id
+            [ 0, false ],
+            [ -1, false  ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addRemove
+     */
+    public function testRemove( $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'trash', 'Hub name');" );
+
+        // test
+        $result = $this->call( $this->hub, 'remove', [ $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addRemove() {
+        return [
+
+            // TRUE
+            [ 1, true ],
+
+            // FALSE: incorrect hub_id
             [ 0, false ],
             [ -1, false  ],
 

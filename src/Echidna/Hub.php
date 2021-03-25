@@ -117,13 +117,63 @@ class Hub extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
+    /**
+     * Recover the hub (update hub_status from trash to public).
+     * @param int $hub_id
+     * @return bool
+     */
+    public function recover( int $hub_id ) : bool {
+
+        if( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( !$this->is_exists( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'trash']] )) {
+            $this->error = 'hub not found';
+
+        } else {
+            $args = [ ['id', '=', $hub_id] ];
+            $data = [ 'hub_status' => 'public' ];
+
+            if( !$this->update( 'hubs', $args, $data )) {
+                $this->error = 'hub recover error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * Permanently delete the hub (which hub_status is trash).
+     * @param int $hub_id
+     * @return bool
+     */
+    public function remove( int $hub_id ) : bool {
+
+        if( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( !$this->is_exists( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'trash']] )) {
+            $this->error = 'hub not found';
+
+        } else {
+            $args = [ ['id', '=', $hub_id] ];
+
+            if( !$this->delete( 'hubs', $args )) {
+                $this->error = 'hub delete error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
 
 
-
-    public function recover() : bool {}
-
-    public function remove() : bool {}
 
     public function one() : bool {}
 
