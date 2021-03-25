@@ -47,7 +47,7 @@ class EchidnaTest extends TestCase
     }
 
     protected function tearDown() : void {
-        $this->db = null;
+        $this->pdo = null;
         $this->echidna = null;
     }
 
