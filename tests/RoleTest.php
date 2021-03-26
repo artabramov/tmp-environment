@@ -94,10 +94,6 @@ class RoleTest extends TestCase
         ];
     }
 
-
-
-
-
     /**
      * @dataProvider addReset
      */
@@ -135,6 +131,44 @@ class RoleTest extends TestCase
             [ 1, 1, '0', false ],
             [ 1, 1, '0 ', false ],
             [ 1, 1, 'editor_editor_editor_', false ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addGetOne
+     */
+    public function testGetOne( $user_id, $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_roles;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (1, '2000-01-01 00:00:00', 1, 1, 'admin');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (2, '2000-01-01 00:00:00', 1, 2, 'editor');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (3, '2000-01-01 00:00:00', 2, 1, 'reader');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (4, '2000-01-01 00:00:00', 2, 2, 'invited');" );
+
+        // test
+        $result = $this->call( $this->role, 'get_one', [ $user_id, $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addGetOne() {
+        return [
+
+            // TRUE: various correct cases
+            [ 1, 1, true ],
+            [ 1, 2, true ],
+            [ 2, 1, true ],
+            [ 2, 2, true ],
+
+            // FALSE: incorrect user_id (int only)
+            [ 0, 1, 'editor', false ],
+            [ -1, 1, 'editor', false ],
+
+            // FALSE: incorrect hub_id (int only)
+            [ 1, 0, 'editor', false ],
+            [ 1, -1, 'editor', false ],
 
         ];
     }
