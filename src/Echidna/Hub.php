@@ -118,7 +118,7 @@ class Hub extends \artabramov\Echidna\Echidna
     }
 
     /**
-     * Recover the hub (update hub_status from trash to public).
+     * Recover the hub from trash (update hub_status from trash to public).
      * @param int $hub_id
      * @return bool
      */
