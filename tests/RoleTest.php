@@ -163,12 +163,50 @@ class RoleTest extends TestCase
             [ 2, 2, true ],
 
             // FALSE: incorrect user_id (int only)
-            [ 0, 1, 'editor', false ],
-            [ -1, 1, 'editor', false ],
+            [ 0, 1, false ],
+            [ -1, 1, false ],
 
             // FALSE: incorrect hub_id (int only)
-            [ 1, 0, 'editor', false ],
-            [ 1, -1, 'editor', false ],
+            [ 1, 0, false ],
+            [ 1, -1, false ],
+
+        ];
+    }
+
+
+
+
+
+    /**
+     * @dataProvider addRemove
+     */
+    public function testRemove( $user_id, $hub_id, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_roles;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (1, '2000-01-01 00:00:00', 1, 1, 'admin');" );
+
+        // test
+        $result = $this->call( $this->role, 'remove', [ $user_id, $hub_id ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addRemove() {
+        return [
+
+            // TRUE: correct case
+            [ 1, 1, true ],
+
+            // FALSE: incorrect user_id (int only)
+            [ 0, 1, false ],
+            [ 2, 1, false ],
+            [ -1, 1, false ],
+
+            // FALSE: incorrect hub_id (int only)
+            [ 1, 0, false ],
+            [ 1, -1, false ],
+            [ 1, 2, false ],
 
         ];
     }

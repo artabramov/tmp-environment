@@ -143,6 +143,41 @@ class Role extends \artabramov\Echidna\Echidna
      * @param int $hub_id
      * @return bool
      */
-    public function remove( int $user_id, int $hub_id ) : bool {}
+    public function remove( int $user_id, int $hub_id ) : bool {
+
+        $this->clear();
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( !$this->is_exists( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] )) {
+            $this->error = 'role not found';
+
+        /*
+        TODO:
+        } elseif( $this->user_role == 'admin' and $this->count( [['group_id', '=', $group_id], ['user_role', '=', 'admin']] ) <= 1 ) {
+            $this->error = 'this is last admin role';
+        */
+
+        } else {
+
+            $args = [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]];
+
+            if( !$this->delete( 'user_roles', $args )) {
+                $this->error = 'role delete error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
 }
