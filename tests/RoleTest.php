@@ -94,4 +94,49 @@ class RoleTest extends TestCase
         ];
     }
 
+
+
+
+
+    /**
+     * @dataProvider addReset
+     */
+    public function testReset( $user_id, $hub_id, $user_role, $expected ) {
+
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_roles;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (1, '2000-01-01 00:00:00', 1, 1, 'admin');" );
+
+        // test
+        $result = $this->call( $this->role, 'reset', [ $user_id, $hub_id, $user_role ] );
+        $this->assertEquals( $expected, $result );
+
+    }
+
+    public function addReset() {
+        return [
+
+            // TRUE: various correct cases
+            [ 1, 1, 'editor', true ],
+            [ 1, 1, 'e', true ],
+            [ 1, 1, 'editor_editor_editor', true ],
+
+            // FALSE: incorrect user_id (int only)
+            [ 0, 1, 'editor', false ],
+            [ -1, 1, 'editor', false ],
+
+            // FALSE: incorrect hub_id (int only)
+            [ 1, 0, 'editor', false ],
+            [ 1, -1, 'editor', false ],
+
+            // FALSE: various incorrect user_role (string only)
+            [ 1, 1, '', false ],
+            [ 1, 1, ' ', false ],
+            [ 1, 1, '0', false ],
+            [ 1, 1, '0 ', false ],
+            [ 1, 1, 'editor_editor_editor_', false ],
+
+        ];
+    }
+
 }

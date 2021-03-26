@@ -62,7 +62,40 @@ class Role extends \artabramov\Echidna\Echidna
      * @param string $user_role
      * @return bool
      */
-    public function reset( int $user_id, int $hub_id, string $user_role ) : bool {}
+    public function reset( int $user_id, int $hub_id, string $user_role ) : bool {
+
+        if( $this->is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !$this->is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !$this->is_id( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( $this->is_empty( $user_role )) {
+            $this->error = 'user_role is empty';
+
+        } elseif( !$this->is_key( $user_role )) {
+            $this->error = 'user_role is incorrect';
+
+        } elseif( !$this->is_exists( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] )) {
+            $this->error = 'role not found';
+
+        } else {
+            $args = [ ['user_id', '=', $user_id], ['hub_id', '=', $hub_id] ];
+            $data = [ 'user_role' => $user_role ];
+
+            if( !$this->update( 'user_roles', $args, $data )) {
+                $this->error = 'role reset error';
+            }
+        }
+
+        return empty( $this->error );
+    }
 
     /**
      * Select role of the user in the hub.
