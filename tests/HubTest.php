@@ -53,20 +53,20 @@ class HubTest extends TestCase
     }
 
     /**
-     * @dataProvider addSetup
+     * @dataProvider addSet
      */
-    public function testSetup( $user_id, $hub_status, $hub_name, $expected ) {
+    public function testSet( $user_id, $hub_status, $hub_name, $expected ) {
 
         // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
 
         // test
-        $result = $this->call( $this->hub, 'setup', [ $user_id, $hub_status, $hub_name ] );
+        $result = $this->call( $this->hub, 'set', [ $user_id, $hub_status, $hub_name ] );
         $this->assertEquals( $expected, $result );
 
     }
 
-    public function addSetup() {
+    public function addSet() {
         return [
 
             // TRUE: various correct user_id

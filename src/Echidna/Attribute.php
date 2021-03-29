@@ -14,6 +14,8 @@ class Attribute extends \artabramov\Echidna\Echidna
      */
     public function set( int $user_id, string $attribute_key, int|string $attribute_value ) : bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
@@ -42,7 +44,12 @@ class Attribute extends \artabramov\Echidna\Echidna
                 'attribute_value' => $attribute_value
             ];
 
-            if( !$this->insert( 'user_attributes', $data )) {
+            $attribute_id = $this->insert( 'user_attributes', $data );
+
+            if( !empty( $attribute_id )) {
+                $this->rows[0]['id'] = $attribute_id;
+
+            } else {
                 $this->error = 'attribute insert error';
             }
         }

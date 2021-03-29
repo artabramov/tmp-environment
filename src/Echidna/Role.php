@@ -17,6 +17,8 @@ class Role extends \artabramov\Echidna\Echidna
      * @return bool
      */
     public function set( int $user_id, int $hub_id, string $user_role ) : bool {
+
+        $this->clear();
         
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -47,7 +49,12 @@ class Role extends \artabramov\Echidna\Echidna
                 'user_role' => $user_role
             ];
 
-            if( !$this->insert( 'user_roles', $data )) {
+            $role_id = $this->insert( 'user_roles', $data );
+
+            if( !empty( $role_id )) {
+                $this->rows[0]['id'] = $role_id;
+
+            } else {
                 $this->error = 'role insert error';
             }
         }

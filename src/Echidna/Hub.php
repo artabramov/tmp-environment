@@ -15,7 +15,9 @@ class Hub extends \artabramov\Echidna\Echidna
      * @param string $hub_name
      * @return bool
      */
-    public function setup( int $user_id, string $hub_status, string $hub_name ) : bool {
+    public function set( int $user_id, string $hub_status, string $hub_name ) : bool {
+
+        $this->clear();
 
         if( $this->is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -46,7 +48,12 @@ class Hub extends \artabramov\Echidna\Echidna
                 'hub_name'   => $hub_name
             ];
 
-            if( !$this->insert( 'hubs', $data )) {
+            $hub_id = $this->insert( 'hubs', $data );
+
+            if( !empty( $hub_id )) {
+                $this->rows[0]['id'] = $hub_id;
+
+            } else {
                 $this->error = 'hub insert error';
             }
         }

@@ -58,6 +58,8 @@ class User extends \artabramov\Echidna\Echidna
      */
     public function register( string $user_email ) : bool {
 
+        $this->clear();
+
         if( $this->is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -76,7 +78,12 @@ class User extends \artabramov\Echidna\Echidna
                 'user_hash'   => ''
             ];
 
-            if( !$this->insert( 'users', $data ) ) {
+            $user_id = $this->insert( 'users', $data );
+
+            if( !empty( $user_id )) {
+                $this->rows[0]['id'] = $user_id;
+
+            } else {
                 $this->error = 'user insert error';
             }            
         }
