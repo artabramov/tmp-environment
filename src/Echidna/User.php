@@ -3,7 +3,11 @@ namespace artabramov\Echidna\Echidna;
 
 class User extends \artabramov\Echidna\Echidna
 {
-    // create token
+
+    /**
+     * Create 40-signs unique token.
+     * @return string
+     */
     private function create_token() : string {
 
         do {
@@ -20,7 +24,12 @@ class User extends \artabramov\Echidna\Echidna
         return $user_token;
     }
 
-    // create pass
+    /**
+     * Generate non-unique one-time password.
+     * @param int $pass_len
+     * @param string $pass_symbs
+     * @return string
+     */
     private function create_pass( int $pass_len, string $pass_symbs ) : string {
 
         $user_pass = '';
@@ -33,12 +42,20 @@ class User extends \artabramov\Echidna\Echidna
         return $user_pass;
     }
 
-    // get hash
+    /**
+     * Get hash (sha1) of the password.
+     * @param string $user_pass
+     * @return string
+     */
     private function get_hash( string $user_pass ) : string {
         return sha1( $user_pass );
     }
 
-    // register
+    /**
+     * Register a new user.
+     * @param int $user_email
+     * @return bool
+     */
     public function register( string $user_email ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -66,7 +83,13 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // restore
+    /**
+     * Restore a user.
+     * @param string $user_email
+     * @param int $pass_len
+     * @param string $pass_symbs
+     * @return bool
+     */
     public function restore( string $user_email, int $pass_len = 4, string $pass_symbs = '0123456789' ) : bool {
 
         if( $this->is_empty( $user_email )) {
@@ -92,7 +115,12 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // signin
+    /**
+     * Signin.
+     * @param string $user_email
+     * @param string $user_pass
+     * @return bool
+     */
     public function signin( string $user_email, string $user_pass ) : bool {
 
         $user_hash = $this->get_hash( $user_pass );
@@ -124,7 +152,11 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // signout
+    /**
+     * Signout.
+     * @param int $user_id
+     * @return bool
+     */
     public function signout( int $user_id ) : bool {
 
         if( $this->is_empty( $user_id )) {
@@ -150,7 +182,12 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // auth
+    /**
+     * User auth.
+     * @param string $user_token
+     * @return bool
+     * 
+     */
     public function auth( string $user_token ) : bool {
 
         $this->clear();
@@ -178,7 +215,11 @@ class User extends \artabramov\Echidna\Echidna
         return empty( $this->error );
     }
 
-    // get single user
+    /**
+     * Select a user.
+     * @param int $user_id
+     * @return bool
+     */
     public function get( int $user_id ) : bool {
 
         $this->clear();
@@ -204,11 +245,5 @@ class User extends \artabramov\Echidna\Echidna
 
         return empty( $this->error );
     }
-
-    /**
-     * TODO:
-     * get_some()
-     * trash()
-     */
 
 }
