@@ -40,4 +40,21 @@ class Echidna
     }
 
 
+    protected function query() {}
+
+    protected function count() {}
+
+    protected function insert() {}
+
+    protected function select() {}
+
+    protected function update() {}
+
+    protected function delete() {}
+
+    public function time() {}
+
+
+
+
 }
