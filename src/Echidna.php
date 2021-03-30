@@ -39,12 +39,13 @@ class Echidna
         return is_int( $this->key ) and $this->key >= 0;
     }
 
+    protected function is_key( string $key ) : bool {}
 
-    protected function query() {}
+
 
     protected function count() {}
 
-    protected function insert() {}
+    protected function insert( string $table, array $keys ) {}
 
     protected function select() {}
 
@@ -52,7 +53,7 @@ class Echidna
 
     protected function delete() {}
 
-    public function time() {}
+    protected function time() {}
 
 
 
