@@ -24,24 +24,12 @@ class Echidna
     }
 
     public function __isset( string $key ) {
-        if( !property_exists( $this, $key )) {
-            return false;
-        }
-        return !empty( is_string( $this->$key ) ? trim( $this->$key ) : $this->$key );
+        return property_exists( $this, $key );
     }
 
-    /**
-     * Check is attribute numeric up to 20 signs.
-     * @param string $key
-     * @return bool
-     */
-    protected function is_id( string $key ) : bool {
-        return is_int( $this->key ) and $this->key >= 0;
-    }
+    protected function query() {} // time
 
-    protected function is_key( string $key ) : bool {}
-
-
+    protected function is_exists() {}
 
     protected function count() {}
 
@@ -52,10 +40,5 @@ class Echidna
     protected function update() {}
 
     protected function delete() {}
-
-    protected function time() {}
-
-
-
 
 }
