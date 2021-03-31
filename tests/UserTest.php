@@ -5,6 +5,7 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__.'/../src/Echidna.php';
 require_once __DIR__.'/../src/Core/User.php';
+require_once __DIR__.'/../src/Utils/Validator.php';
 
 class UserTest extends TestCase
 {
@@ -61,14 +62,45 @@ class UserTest extends TestCase
         $this->callMethod( $this->user, 'set_token' );
         $result = $this->getProperty($this->user, 'user_token');
 
-        // is string
-        $this->assertIsString( $result );
-        
-        // is 80-signs length
-        $this->assertTrue( strlen( $result ) == 80 );
-
-        // is HEX-signs only
+        // is correct
         $this->assertMatchesRegularExpression( '/[a-f0-9]{80}/', $result );
+    }
+
+    /**
+     * set_pass
+     */
+    public function testSetPass() {
+        
+        $this->callMethod( $this->user, 'set_pass', ['abcddefghijklmnopqrstuvwxyz0123456789', 6] );
+        $result = $this->getProperty($this->user, 'user_pass');
+
+        // is correct
+        $this->assertMatchesRegularExpression( '/[a-z0-9]{6}/', $result );
+    }
+
+    /**
+     * set_hash
+     */
+    public function testSetHash() {
+        
+        $this->callMethod( $this->user, 'set_hash' );
+        $result = $this->getProperty($this->user, 'user_hash');
+
+        // is correct
+        $this->assertMatchesRegularExpression( '/[a-f0-9]{40}/', $result );
+    }
+
+
+    /**
+     * register
+     */
+    public function testRegister() {
+        
+        $result = $this->callMethod( $this->user, 'register', ['noreply@noreply.no'] );
+        $this->assertEquals( True, $result );
+
+        $result = $this->callMethod( $this->user, 'register', ['noreply@noreply.n'] );
+        $this->assertEquals( False, $result );
     }
 
 }

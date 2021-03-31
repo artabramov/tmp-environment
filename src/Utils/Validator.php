@@ -8,7 +8,7 @@ class Validator
      * @param int|string $value
      * @return bool
      */
-    public function is_empty( int|string $value ) : bool {
+    public static function is_empty( int|string $value ) : bool {
         return empty( is_string( $value ) ? trim( $value ) : $value );
     }
 
@@ -66,11 +66,10 @@ class Validator
     /**
      * Check is value a correct email string.
      * @param int|string $value
-     * @param int $length
      * @return bool
      */
-    public static function is_email( int|string $value, int $length ) : bool {
-        return is_string( $value ) and mb_strlen( $value ) <= $length and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
+    public static function is_email( int|string $value ) : bool {
+        return is_string( $value ) and preg_match("/^[a-z0-9._-]{2,80}@(([a-z0-9_-]+\.)+(com|net|org|mil|"."edu|gov|arpa|info|biz|inc|name|[a-z]{2})|[0-9]{1,3}\.[0-9]{1,3}\.[0-"."9]{1,3}\.[0-9]{1,3})$/", $value );
     }
 
 }
