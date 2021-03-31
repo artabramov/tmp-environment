@@ -37,7 +37,7 @@ class ValidatorTest extends TestCase
      */
     public function testIsEmpty( $value, $expected ) {
 
-        $result = $this->call( $this->validator, 'isEmpty', [ $value ] );
+        $result = $this->call( $this->validator, 'is_empty', [ $value ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -68,7 +68,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsId
      */
     public function testIsId( $value, $expected ) {
-        $result = $this->call( $this->validator, 'isId', [ $value ] );
+        $result = $this->call( $this->validator, 'is_id', [ $value ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -94,7 +94,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsKey
      */
     public function testIsKey( $value, $length, $expected ) {
-        $result = $this->call( $this->validator, 'isKey', [ $value, $length ] );
+        $result = $this->call( $this->validator, 'is_key', [ $value, $length ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -121,7 +121,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsString
      */
     public function testIsString( $value, $length, $expected ) {
-        $result = $this->call( $this->validator, 'isString', [ $value, $length ] );
+        $result = $this->call( $this->validator, 'is_string', [ $value, $length ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -148,7 +148,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsDatetime
      */
     public function testIsDatetime( $value, $expected ) {
-        $result = $this->call( $this->validator, 'isDatetime', [ $value ] );
+        $result = $this->call( $this->validator, 'is_datetime', [ $value ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -182,7 +182,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsHex
      */
     public function testIsHex( $value, $length, $expected ) {
-        $result = $this->call( $this->validator, 'isHex', [ $value, $length ] );
+        $result = $this->call( $this->validator, 'is_hex', [ $value, $length ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -206,7 +206,7 @@ class ValidatorTest extends TestCase
      * @dataProvider addIsEmail
      */
     public function testIsEmail( $value, $length, $expected ) {
-        $result = $this->call( $this->validator, 'isEmail', [ $value, $length ] );
+        $result = $this->call( $this->validator, 'is_email', [ $value, $length ] );
         $this->assertEquals( $expected, $result );
     }
 
