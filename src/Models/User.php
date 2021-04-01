@@ -2,6 +2,10 @@
 namespace artabramov\Echidna\Models;
 use \artabramov\Echidna\Services\Filter;
 
+/**
+ * User class.
+ * @implements Sequenceable
+ */
 class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echidna\Interfaces\Sequenceable
 {
     private $error;
@@ -84,12 +88,10 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
     /**
      * Register a new user.
-     * @param string $user_email
+     * @param mixed $user_email
      * @return bool
      */
-    public function register( string $user_email ) : bool {
-
-        $this->clear();
+    public function register( mixed $user_email ) : bool {
 
         if( Filter::is_empty( $user_email )) {
             $this->error = 'user_email is empty';
@@ -101,29 +103,188 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user_email is occupied';
 
         } else {
+            $this->clear();
             $this->set_token();
+            $this->$user_email = $user_email;
 
             $data = [
                 'user_status' => 'pending',
                 'user_token'  => $this->user_token,
-                'user_email'  => $user_email,
+                'user_email'  => $this->user_email,
                 'user_hash'   => ''
             ];
 
-            $user_id = $this->insert( 'users', $data );
+            $this->id = $this->insert( 'users', $data );
 
-            if( !empty( $user_id )) {
-                $this->id = $user_id;
-
-            } else {
+            if( !empty( $this->id )) {
                 $this->error = 'user insert error';
             }            
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * Restore a user.
+     * @param mixed $user_email
+     * @param int $pass_len
+     * @param string $pass_symbs
+     * @return bool
+     */
+    public function restore( mixed $user_email, int $pass_length = 6, string $pass_symbols = '0123456789' ) : bool {
+
+        if( Filter::is_empty( $user_email )) {
+            $this->error = 'user_email is empty';
+
+        } elseif( !Filter::is_email( $user_email )) {
+            $this->error = 'user_email is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'user_email', '=', $user_email ]] ) == 0 ) {
+            $this->error = 'user not found';
+
+        } else {
+            $this->clear();
+            $this->user_email = $user_email;
+            $this->set_pass( $pass_symbols, $pass_length );
+            $this->set_hash();
+
+            $args = [[ 'user_email', '=', $this->user_email ]];
+            $data = [ 'user_hash' => $this->user_hash ];
+
+            if( !$this->update( 'users', $args, $data )) {
+                $this->error = 'user update error';
+            }
         }
         return empty( $this->error );
     }
 
-    public function getone( $user_id ) {
-        $this->id = $user_id;
+    /**
+     * Signin.
+     * @param mixed $user_email
+     * @param mixed $user_pass
+     * @return bool
+     */
+    public function signin( mixed $user_email, mixed $user_pass ) : bool {
+
+        if( Filter::is_empty( $user_email )) {
+            $this->error = 'user_email is empty';
+
+        } elseif( !Filter::is_email( $user_email )) {
+            $this->error = 'user_email is incorrect';
+
+        } elseif( Filter::is_empty( $user_pass )) {
+            $this->error = 'user_pass is empty';
+
+        } elseif( $this->count( 'users', [[ 'user_email', '=', $this->user_email ], [ 'user_hash', '=', $this->user_hash ], [ 'user_status', '<>', 'trash' ]] ) == 0 ) {
+            $this->error = 'user not found';
+
+        } else {
+            $this->clear();
+            $this->user_email = $user_email;
+            $this->user_pass = $user_pass;
+            $this->set_hash();
+
+            $args = [[ 'user_email', '=', $this->user_email ]];
+            $data = ['user_status' => 'approved', 'user_hash' => '' ];
+
+            if( !$this->update( 'users', $args, $data )) {
+                $this->error = 'user update error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * Signout.
+     * @param mixed $user_id
+     * @return bool
+     */
+    public function signout( mixed $user_id ) : bool {
+
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'id', '=', $user_id ], ['user_status', '=', 'approved']] ) == 0 ) {
+            $this->error = 'user not found';
+        
+        } else {
+            $this->clear();
+            $this->id = $user_id;
+            $this->set_token();
+
+            $args = [[ 'id', '=', $this->user_id ]];
+            $data = [ 'user_token' => $this->user_token ];
+
+            if( !$this->update( 'users', $args, $data )) {
+                $this->error = 'user update error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * User auth.
+     * @param mixed $user_token
+     * @return bool
+     * 
+     */
+    public function auth( mixed $user_token ) : bool {
+
+        if( Filter::is_empty( $user_token )) {
+            $this->error = 'user_token is empty';
+
+        } elseif( !Filter::is_hex( $user_token, 80 )) {
+            $this->error = 'user_token is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'user_token', '=', $user_token ], ['user_status', '=', 'approved']] ) == 0 ) {
+            $this->error = 'user not found';
+
+        } else {
+            $this->clear();
+            $this->user_token = $user_token;
+
+            $args = [['user_token', '=', $this->user_token]];
+            $rows = $this->select( '*', 'users', $args, 1, 0 );
+
+            foreach( $rows[0] as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
+     * This is a part of interface Sequence.
+     */
+    public function get( mixed $user_id ) : bool {
+
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_id( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'id', '=', $user_id ]] ) == 0 ) {
+            $this->error = 'user not found';
+
+        } else {
+            $this->clear();
+            $this->id = $user_id;
+
+            $rows = $this->select( '*', 'users', [[ 'id', '=', $this->id ]], 1, 0 );
+
+            foreach( $rows[0] as $key=>$value ) {
+                $this->$key = $value;
+            }
+        }
+
+        return empty( $this->error );
     }
 
 }
