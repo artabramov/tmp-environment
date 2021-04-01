@@ -11,13 +11,12 @@ class Echidna
     }
 
     /**
-     * Insert a new entry in the table.
      * @param string $table
      * @param array $data
-     * @return int|bool
+     * @return mixed
      * @throws \PDOException
      */
-    protected function insert( string $table, array $data ) : int|bool {
+    protected function insert( string $table, array $data ) : mixed {
 
         $keys = '';
         $values = '';
@@ -43,14 +42,13 @@ class Echidna
     }
 
     /**
-     * Update an entry.
      * @param string $table
      * @param array $args
      * @param array $data
-     * @return int|bool
+     * @return mixed
      * @throws \PDOException
      */
-    protected function update( string $table, array $args, array $data ) : int|bool {
+    protected function update( string $table, array $args, array $data ) : mixed {
 
         $set = '';
         foreach( $data as $key=>$value ) {
@@ -91,15 +89,14 @@ class Echidna
     }
 
     /**
-     * Select an entry.
      * @param string $table
      * @param array $args
      * @param int $limit
      * @param int $offset
-     * @return array|bool
+     * @return mixed
      * @throws \PDOException
      */
-    protected function select( string $fields, string $table, array $args, int $limit, int $offset ) : array|bool {
+    protected function select( string $fields, string $table, array $args, int $limit, int $offset ) : mixed {
 
         $where = '';
         foreach( $args as $arg ) {
@@ -133,15 +130,14 @@ class Echidna
     }
 
     /**
-     * Select an entry.
      * @param string $table
      * @param array $args
      * @param int $limit
      * @param int $offset
-     * @return int|bool
+     * @return mixed
      * @throws \PDOException
      */
-    protected function delete( string $table, array $args ) : int|bool {
+    protected function delete( string $table, array $args ) : mixed {
 
         $where = '';
         foreach( $args as $arg ) {
@@ -171,6 +167,12 @@ class Echidna
         return empty( $this->e ) ? $rows : false;
     }
 
+    /**
+     * @param string $table
+     * @param array $args
+     * @return int
+     * @throws \PDOException
+     */
     protected function count( string $table, array $args ) : int {
 
         $where = '';
@@ -202,7 +204,20 @@ class Echidna
         return 0;
     }
 
-    // TODO: custom query
-    protected function query() {}
+    /**
+     * @return string
+     * @throws \PDOException
+     */
+    public function datetime() : string {
+
+        try {
+            $result = $this->pdo->query( 'SELECT NOW() as datetime' )->fetch();
+
+        } catch( \PDOException $e ) {
+            $this->e = $e;
+        }
+
+        return empty( $this->e ) ? $result['datetime'] : '0000-00-00 00:00:00';
+    }
 
 }

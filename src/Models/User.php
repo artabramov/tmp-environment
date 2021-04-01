@@ -44,7 +44,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
     
     /**
-     * Set 40-signs unique user_token.
+     * Set unique user_token.
      */
     private function set_token() {
 
@@ -87,7 +87,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * Register a new user.
      * @param mixed $user_email
      * @return bool
      */
@@ -125,7 +124,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * Restore a user.
      * @param mixed $user_email
      * @param int $pass_len
      * @param string $pass_symbs
@@ -159,7 +157,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * Signin.
      * @param mixed $user_email
      * @param mixed $user_pass
      * @return bool
@@ -196,7 +193,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * Signout.
      * @param mixed $user_id
      * @return bool
      */
@@ -228,10 +224,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * User auth.
      * @param mixed $user_token
      * @return bool
-     * 
      */
     public function auth( mixed $user_token ) : bool {
 
@@ -260,7 +254,9 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * This is a part of interface Sequence.
+     * This is a part of the Sequence interface.
+     * @param mixed $user_id
+     * @return bool
      */
     public function get( mixed $user_id ) : bool {
 
