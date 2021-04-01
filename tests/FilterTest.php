@@ -3,9 +3,9 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__.'/../src/Utils/Validator.php';
+require_once __DIR__.'/../src/Services/Filter.php';
 
-class ValidatorTest extends TestCase
+class FilterTest extends TestCase
 {
     private $validator;
 
@@ -25,7 +25,7 @@ class ValidatorTest extends TestCase
     }
 
     protected function setUp() : void {
-        $this->validator = new \artabramov\Echidna\Utils\Validator();
+        $this->validator = new \artabramov\Echidna\Services\Filter();
     }
 
     protected function tearDown() : void {

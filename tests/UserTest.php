@@ -3,9 +3,10 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__.'/../src/Echidna.php';
-require_once __DIR__.'/../src/Core/User.php';
-require_once __DIR__.'/../src/Utils/Validator.php';
+require_once __DIR__.'/../src/Interfaces/Sequenceable.php';
+require_once __DIR__.'/../src/Models/Echidna.php';
+require_once __DIR__.'/../src/Models/User.php';
+require_once __DIR__.'/../src/Services/Filter.php';
 
 class UserTest extends TestCase
 {
@@ -44,8 +45,8 @@ class UserTest extends TestCase
         ];
 
         $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
-        $this->echidna = new \artabramov\Echidna\Echidna( $this->pdo );
-        $this->user = new \artabramov\Echidna\Core\User( $this->pdo );
+        $this->echidna = new \artabramov\Echidna\Models\Echidna( $this->pdo );
+        $this->user = new \artabramov\Echidna\Models\User( $this->pdo );
     }
 
     protected function tearDown() : void {
@@ -90,17 +91,42 @@ class UserTest extends TestCase
         $this->assertMatchesRegularExpression( '/[a-f0-9]{40}/', $result );
     }
 
-
     /**
-     * register
+     * @dataProvider addRegister
      */
-    public function testRegister() {
-        
-        $result = $this->callMethod( $this->user, 'register', ['noreply@noreply.no'] );
-        $this->assertEquals( True, $result );
+    public function testRegister( $user_email, $expected ) {
 
-        $result = $this->callMethod( $this->user, 'register', ['noreply@noreply.n'] );
-        $this->assertEquals( False, $result );
+        // truncate table before testing
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+
+        $result = $this->callMethod( $this->user, 'register', [ $user_email ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addRegister() {
+        return [
+
+            // TRUE: various user_email
+            [ 'noreply@noreply.no', true ],
+            [ 'noreply.1@noreply.1.no', true ],
+            [ 'noreply.noreply@noreply.noreply.no', true ],
+            [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
+            [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
+
+            // FALSE: incorrect user_email
+            [ '', false ],
+            [ ' ', false ],
+            [ '0', false ],
+            [ '0 ', false ],
+            [ 'noreply', false ],
+            [ 'noreply.no', false ],
+            [ 'noreply@', false ],
+            [ '@noreply', false ],
+            [ '@noreply.no', false ],
+            [ 'noreply@noreply', false ],
+            [ 'noreply@noreply.nono', false ],
+
+        ];
     }
 
 }

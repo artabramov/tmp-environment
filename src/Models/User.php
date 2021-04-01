@@ -1,8 +1,8 @@
 <?php
-namespace artabramov\Echidna\Core;
-use \artabramov\Echidna\Utils\Validator;
+namespace artabramov\Echidna\Models;
+use \artabramov\Echidna\Services\Filter;
 
-class User extends \artabramov\Echidna\Echidna
+class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echidna\Interfaces\Sequenceable
 {
     private $error;
     private $id;
@@ -22,7 +22,7 @@ class User extends \artabramov\Echidna\Echidna
 
     public function __isset( string $key ) {
         if( property_exists( $this, $key )) {
-            return !empty( $this->key );
+            return !empty( $this->$key );
         }
         return false;
     }
@@ -91,10 +91,10 @@ class User extends \artabramov\Echidna\Echidna
 
         $this->clear();
 
-        if( Validator::is_empty( $user_email )) {
+        if( Filter::is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
-        } elseif( !Validator::is_email( $user_email )) {
+        } elseif( !Filter::is_email( $user_email )) {
             $this->error = 'user_email is incorrect';
 
         } elseif( $this->count( 'users', [[ 'user_email', '=', $user_email ]] ) > 0 ) {
@@ -120,6 +120,10 @@ class User extends \artabramov\Echidna\Echidna
             }            
         }
         return empty( $this->error );
+    }
+
+    public function getone( $user_id ) {
+        $this->id = $user_id;
     }
 
 }

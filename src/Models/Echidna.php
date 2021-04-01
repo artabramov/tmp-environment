@@ -1,5 +1,5 @@
 <?php
-namespace artabramov\Echidna;
+namespace artabramov\Echidna\Models;
 
 class Echidna
 {
@@ -52,10 +52,6 @@ class Echidna
      */
     protected function update( string $table, array $args, array $data ) : int|bool {
 
-        if( empty( $table ) or empty( $args ) or empty( $data )) {
-            return 0;
-        }
-
         $set = '';
         foreach( $data as $key=>$value ) {
             $set .= empty( $set ) ? 'SET ' : ', ';
@@ -103,11 +99,7 @@ class Echidna
      * @return array|bool
      * @throws \PDOException
      */
-    protected function select( string $table, array $args, int $limit = 1, int $offset = 0 ) : array|bool {
-  
-        if( empty( $table ) or empty( $args )) {
-            return 0;
-        }
+    protected function select( string $fields, string $table, array $args, int $limit, int $offset ) : array|bool {
 
         $where = '';
         foreach( $args as $arg ) {
@@ -116,7 +108,7 @@ class Echidna
         }
 
         try {
-            $stmt = $this->pdo->prepare( 'SELECT * FROM ' . $table . ' ' . $where . ' LIMIT :limit OFFSET :offset' );
+            $stmt = $this->pdo->prepare( 'SELECT ' . $fields . ' FROM ' . $table . ' ' . $where . ' LIMIT :limit OFFSET :offset' );
 
             foreach( $args as $arg ) {
                 if( $arg[0] == 'id' ) {
@@ -150,10 +142,6 @@ class Echidna
      * @throws \PDOException
      */
     protected function delete( string $table, array $args ) : int|bool {
-
-        if( empty( $table ) or empty( $args )) {
-            return 0;
-        }
 
         $where = '';
         foreach( $args as $arg ) {

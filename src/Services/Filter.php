@@ -1,7 +1,7 @@
 <?php
-namespace artabramov\Echidna\Utils;
+namespace artabramov\Echidna\Services;
 
-class Validator
+class Filter
 {
     /**
      * Check is value empty string or zero.

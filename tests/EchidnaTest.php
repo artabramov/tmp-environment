@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__.'/../src/Echidna.php';
+require_once __DIR__.'/../src/Models/Echidna.php';
 
 class EchidnaTest extends TestCase
 {
@@ -43,7 +43,7 @@ class EchidnaTest extends TestCase
         ];
 
         $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
-        $this->echidna = new \artabramov\Echidna\Echidna( $this->pdo );
+        $this->echidna = new \artabramov\Echidna\Models\Echidna( $this->pdo );
     }
 
     protected function tearDown() : void {
@@ -304,14 +304,14 @@ class EchidnaTest extends TestCase
     /**
      * @dataProvider addSelect
      */
-    public function testSelect( $table, $args, $limit, $offset, $expected ) {
+    public function testSelect( $fields, $table, $args, $limit, $offset, $expected ) {
 
         // PREPARE: truncate table before testing and insert test dataset
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
-        $tmp = $this->call( $this->echidna, 'select', [ $table, $args, $limit, $offset ] );
+        $tmp = $this->call( $this->echidna, 'select', [ $fields, $table, $args, $limit, $offset ] );
         $result = is_array( $tmp ) ? count( $tmp ) : 0;
         $this->assertEquals( $expected, $result );
     }
@@ -320,93 +320,23 @@ class EchidnaTest extends TestCase
 
         return [ 
 
-            // CORRECT: select 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ], 
-                1, 0,
-                1
-            ],
+            // CORRECT
+            [ '*', 'users', [ ['id', '=', 1], ], 1, 0, 1 ],
+            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'] ], 1, 0, 1 ],
+            [ '*', 'users', [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 1, 0, 1 ],
+            [ '*', 'users', [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 1, 0, 1 ],
+            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'], ['user_status', '<>', 'trash']], 1, 0, 1 ],
+            [ '*', 'users', [ ['user_status', '<>', 'trash']], 2, 0, 2 ],
+            [ '*', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            [ '*', 'users', [], 1, 0, 1 ],
+            [ 'id', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            [ 'date', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
 
-            // CORRECT: select 1 row
-            [
-                'users',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                1, 0,
-                1
-            ],
-
-            // CORRECT: select 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 
-                1, 0,
-                1
-            ],
-
-            // CORRECT: select 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 
-                1, 0,
-                1
-            ],
-
-            // CORRECT: select 1 row
-            [
-                'users',
-                [ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=' ,'1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], 
-                1, 0,
-                1
-            ],
-
-            // CORRECT: select 2 rows
-            [
-                'users',
-                [ ['user_status', '<>', 'trash']], 
-                2, 0,
-                2
-            ],
-
-            // CORRECT: 0 rows
-            [
-                'users',
-                [ ['user_status', '=', 'approved']], 
-                1, 0,
-                0
-            ],
-
-            // INCORRECT: empty table
-            [
-                '',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                1, 0,
-                0
-            ],
-
-            // INCORRECT: incorrect table name
-            [
-                '_users',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                1, 0,
-                0
-            ],
-
-            // INCORRECT: incorrect field name
-            [
-                'users',
-                [ ['user_name', '=', 'John Doe'], ], 
-                1, 0,
-                0
-            ],
-
-            // INCORRECT: empty args
-            [
-                'users',
-                [], 
-                1, 0,
-                0
-            ],
+            // INCORRECT (no results)
+            [ '*', '', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            [ '*', '_users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            [ '*', 'users', [ ['user_name', '=', 'John Doe'], ], 1, 0, 0 ],
+            [ '_id', 'users', [ ['id', '=', 1], ], 1, 0, 0 ],
 
         ];
     }
@@ -486,11 +416,11 @@ class EchidnaTest extends TestCase
                 False
             ],
 
-            // INCORRECT: empty args
+            // 
             [
                 'users',
                 [], 
-                False
+                True
             ],
 
         ];
