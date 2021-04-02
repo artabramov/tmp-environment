@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__.'/../src/Models/Echidna.php';
+require_once __DIR__.'/../src/Echidna.php';
 
 class EchidnaTest extends TestCase
 {
@@ -43,12 +43,234 @@ class EchidnaTest extends TestCase
         ];
 
         $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
-        $this->echidna = new \artabramov\Echidna\Models\Echidna( $this->pdo );
+        $this->echidna = new \artabramov\Echidna\Echidna( $this->pdo );
     }
 
     protected function tearDown() : void {
         $this->pdo = null;
         $this->echidna = null;
+    }
+
+    /**
+     * @dataProvider addIsEmpty
+     */
+    public function testIsEmpty( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_empty', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsEmpty() {
+        return [
+
+            // TRUE: various empty values
+            [ '', true ],
+            [ ' ', true ],
+            [ '0', true ],
+            [ ' 0', true ],
+            [ '0 ', true ],
+            [ ' 0 ', true ],
+            [ 0, true ],
+
+            // FALSE: various not empty values
+            [ 1, false ],
+            [ -1, false ],
+            [ '1', false ],
+            [ ' 1', false ],
+            [ '1 ', false ],
+            [ ' 1 ', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsId
+     */
+    public function testIsId( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_id', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsId() {
+        return [
+
+            // TRUE: various correct values (int|string)
+            [ 0, true ],
+            [ 1, true ],
+            [ 9223372036854775807, true ],
+ 
+            // FALSE: various not correct values (int|string)
+            [ -1, false ],
+            [ '', false ],
+            [ '0', false ],
+            [ '1', false ],
+            [ '-1', false ],
+            
+        ];
+    }
+
+    /**
+     * @dataProvider addIsKey
+     */
+    public function testIsKey( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_key', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsKey() {
+        return [
+
+            // TRUE: variuous correct values (int|string)
+            [ 'a', true ],
+            [ 'abcdefghijklmnopqrst', true ],
+            [ 'abcde_fghij_klmno_pq', true ],
+            [ 'abcde-fghij-klmno-pq', true ],
+            [ 'abcde-1-fghij-2-klmn', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+            [ 'abcde fghij klmno pq', false ],
+            [ 'abcde,fghij.klmno+pq', false ],
+            [ 'abcdefghijklmnopqrstu', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsValue
+     */
+    public function testIsValue( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_value', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsValue() {
+        return [
+
+            // TRUE: variuous correct values (int|string)
+            [ '', true ],
+            [ ' ', true ],
+            [ '0', true ],
+            [ '1', true ],
+            [ '-1', true ],
+            [ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor i', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+            [ 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsDatetime
+     */
+    public function testIsDatetime( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_datetime', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsDatetime() {
+        return [
+
+            // TRUE: variuous correct values (int|string)
+            [ '0001-01-01 01:01:01', true ],
+            [ '2099-12-12 23:59:59', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+            [ '0000-00-00 00:00:00', false ],
+            [ '1970-00-00 00:00:00', false ],
+            [ '2021-13-01 00:00:00', false ],
+            [ '2021-01-32 00:00:00', false ],
+            [ '2021-01-01 25:00:00', false ],
+            [ '2021-01-01 00:60:00', false ],
+            [ '2021-01-01 00:00:60', false ],
+            [ '2021-02-29 00:00:00', false ],
+            [ '2021-02-30 00:00:00', false ],
+            [ '2021-02-31 00:00:00', false ],
+            [ '2021-04-31 00:00:00', false ],
+            [ 'yyyy-mm-dd hh:mm:ss', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsToken
+     */
+    public function testIsToken( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_token', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsToken() {
+        return [
+
+            // TRUE: correct value (int|string)
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd80719', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],            
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd807190', false ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
+            [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8071', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsHash
+     */
+    public function testIsHash( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_hash', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsHash() {
+        return [
+
+            // TRUE: variuous correct values (int|string)
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd80709', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],            
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd8070', false ],
+            [ 'da39a3ee5e6b4b0d3255bfef95601890afd807091', false ],
+            [ 'ga39a3ee5e6b4b0d3255bfef95601890afd80709', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsEmail
+     */
+    public function testIsEmail( $value, $expected ) {
+        $result = $this->call( $this->echidna, 'is_email', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsEmail() {
+        return [
+
+            // TRUE: variuous correct values (int|string)
+            [ 'noreply@noreply.no', true ],
+            [ 'noreply.1@noreply.1.no', true ],
+            [ 'noreply.noreply@noreply.noreply.no', true ],
+            [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
+            [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
+
+            // FALSE: various incorrect values (int|string)
+            [ 0, false ],
+            [ 1, false ],
+            [ -1, false ],
+            [ '@noreply.no', false ],
+            [ 'noreply@noreply', false ],
+            [ 'noreply@noreply.nono', false ],
+
+        ];
     }
 
     /**
@@ -302,16 +524,73 @@ class EchidnaTest extends TestCase
     }
 
     /**
+     * @dataProvider addIsExists
+     */
+    public function testIsExists( $table, $data, $expected ) {
+
+        // PREPARE: truncate table before testing and insert test dataset
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        // TEST
+        $result = $this->call( $this->echidna, 'is_exists', [ $table, $data ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsExists() {
+        return [
+
+            // TRUE: entry exists (also empty dataset)
+            [ 'users', [], true ],
+            [ 'users', [['id', '=', 1]], true ],
+            [ 'users', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], true ],
+            [ 'users', [['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=', '1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], true ],
+            [ 'users', [['id', '=', 1], ['date', '>', '1990-01-01 00:00:00']], true ],
+
+            // FALSE: entry not found
+            [ 'users', [['id', '=', 2]], false ],
+
+            // FALSE: empty table name
+            [ '', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], false ],
+
+            // FALSE: incorrect table name
+            [ '_users', [['id', '=', 1], ['date', '=', '2000-01-01 00:00:00']], false ],
+
+            // FALSE: incorrect field in dataset
+            [ '_users', [['id', '=', 1], ['user_name', '=', 'John Doe']], false ],
+
+        ];
+    }
+
+    /**
+     * get_time
+     */
+    public function testGetTime() {
+
+        // is a string
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertIsString( $result );
+
+        // is not empty date
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertNotEquals( '0000-00-00 00:00:00', $result );
+
+        // is dateteime-format
+        $result = $this->call( $this->echidna, 'get_time' );
+        $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
+    }
+
+    /**
      * @dataProvider addSelect
      */
-    public function testSelect( $fields, $table, $args, $limit, $offset, $expected ) {
+    public function testSelect( $table, $args, $limit, $offset, $expected ) {
 
         // PREPARE: truncate table before testing and insert test dataset
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
-        $tmp = $this->call( $this->echidna, 'select', [ $fields, $table, $args, $limit, $offset ] );
+        $tmp = $this->call( $this->echidna, 'select', [ $table, $args, $limit, $offset ] );
         $result = is_array( $tmp ) ? count( $tmp ) : 0;
         $this->assertEquals( $expected, $result );
     }
@@ -320,23 +599,93 @@ class EchidnaTest extends TestCase
 
         return [ 
 
-            // CORRECT
-            [ '*', 'users', [ ['id', '=', 1], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'] ], 1, 0, 1 ],
-            [ '*', 'users', [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'], ['user_status', '<>', 'trash']], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_status', '<>', 'trash']], 2, 0, 2 ],
-            [ '*', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', 'users', [], 1, 0, 1 ],
-            [ 'id', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ 'date', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            // CORRECT: select 1 row
+            [
+                'users',
+                [ ['id', '=', 1], ], 
+                1, 0,
+                1
+            ],
 
-            // INCORRECT (no results)
-            [ '*', '', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', '_users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', 'users', [ ['user_name', '=', 'John Doe'], ], 1, 0, 0 ],
-            [ '_id', 'users', [ ['id', '=', 1], ], 1, 0, 0 ],
+            // CORRECT: select 1 row
+            [
+                'users',
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                1, 0,
+                1
+            ],
+
+            // CORRECT: select 1 row
+            [
+                'users',
+                [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 
+                1, 0,
+                1
+            ],
+
+            // CORRECT: select 1 row
+            [
+                'users',
+                [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 
+                1, 0,
+                1
+            ],
+
+            // CORRECT: select 1 row
+            [
+                'users',
+                [ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=' ,'1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], 
+                1, 0,
+                1
+            ],
+
+            // CORRECT: select 2 rows
+            [
+                'users',
+                [ ['user_status', '<>', 'trash']], 
+                2, 0,
+                2
+            ],
+
+            // CORRECT: 0 rows
+            [
+                'users',
+                [ ['user_status', '=', 'approved']], 
+                1, 0,
+                0
+            ],
+
+            // INCORRECT: empty table
+            [
+                '',
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                1, 0,
+                0
+            ],
+
+            // INCORRECT: incorrect table name
+            [
+                '_users',
+                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
+                1, 0,
+                0
+            ],
+
+            // INCORRECT: incorrect field name
+            [
+                'users',
+                [ ['user_name', '=', 'John Doe'], ], 
+                1, 0,
+                0
+            ],
+
+            // INCORRECT: empty args
+            [
+                'users',
+                [], 
+                1, 0,
+                0
+            ],
 
         ];
     }
@@ -416,42 +765,15 @@ class EchidnaTest extends TestCase
                 False
             ],
 
-            // 
+            // INCORRECT: empty args
             [
                 'users',
                 [], 
-                True
+                False
             ],
 
         ];
 
-    }
-
-    /**
-     * @dataProvider addCount
-     */
-    public function testCount( $table, $data, $expected ) {
-
-        // PREPARE: truncate table before testing and insert test dataset
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
-
-        // TEST
-        $result = $this->call( $this->echidna, 'count', [ $table, $data ] );
-        $this->assertEquals( $expected, $result );
-    }
-
-    public function addCount() {
-        return [
-
-            [ 'users', [['id', '=', 1]], 1 ],
-            [ 'users', [['id', '=', 2]], 1 ],
-            [ 'users', [['id', '<>', 3]], 2 ],
-            [ 'users', [['id', '=', 3]], 0 ],
-            [ 'users', [['_id', '=', 1]], 0 ],
-
-        ];
     }
 
 }
