@@ -239,4 +239,5 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         return empty( $this->error );
     }
 
+    
 }
