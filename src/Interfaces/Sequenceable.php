@@ -3,5 +3,5 @@ namespace artabramov\Echidna\Interfaces;
 
 interface Sequenceable
 {
-    public function get( int $id );
+    public function getone( int $id );
 }

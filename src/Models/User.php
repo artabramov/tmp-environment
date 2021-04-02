@@ -1,9 +1,8 @@
 <?php
 namespace artabramov\Echidna\Models;
-use \artabramov\Echidna\Services\Filter;
+use \artabramov\Echidna\Utilities\Filter;
 
 /**
- * User class.
  * @implements Sequenceable
  */
 class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echidna\Interfaces\Sequenceable
@@ -104,7 +103,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         } else {
             $this->clear();
             $this->set_token();
-            $this->$user_email = $user_email;
+            $this->user_email = $user_email;
 
             $data = [
                 'user_status' => 'pending',
@@ -115,7 +114,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
             $this->id = $this->insert( 'users', $data );
 
-            if( !empty( $this->id )) {
+            if( empty( $this->id )) {
                 $this->error = 'user insert error';
             }            
         }
@@ -201,7 +200,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
-        } elseif( !Filter::is_id( $user_id )) {
+        } elseif( !Filter::is_int( $user_id )) {
             $this->error = 'user_id is incorrect';
 
         } elseif( $this->count( 'users', [[ 'id', '=', $user_id ], ['user_status', '=', 'approved']] ) == 0 ) {
@@ -254,16 +253,16 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * This is a part of the Sequence interface.
+     * This is a part of the Sequence interface. Get the element by id.
      * @param mixed $user_id
      * @return bool
      */
-    public function get( mixed $user_id ) : bool {
+    public function getone( mixed $user_id ) : bool {
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
-        } elseif( !Filter::is_id( $user_id )) {
+        } elseif( !Filter::is_int( $user_id )) {
             $this->error = 'user_id is incorrect';
 
         } elseif( $this->count( 'users', [[ 'id', '=', $user_id ]] ) == 0 ) {
@@ -275,8 +274,13 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
             $rows = $this->select( '*', 'users', [[ 'id', '=', $this->id ]], 1, 0 );
 
-            foreach( $rows[0] as $key=>$value ) {
-                $this->$key = $value;
+            if( empty( $rows[0] )) {
+                $this->error = 'user select error';
+
+            } else {
+                foreach( $rows[0] as $key=>$value ) {
+                    $this->$key = $value;
+                }
             }
         }
 

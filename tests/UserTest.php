@@ -6,7 +6,7 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__.'/../src/Interfaces/Sequenceable.php';
 require_once __DIR__.'/../src/Models/Echidna.php';
 require_once __DIR__.'/../src/Models/User.php';
-require_once __DIR__.'/../src/Services/Filter.php';
+require_once __DIR__.'/../src/Utilities/Filter.php';
 
 class UserTest extends TestCase
 {

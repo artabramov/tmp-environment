@@ -1,5 +1,5 @@
 <?php
-namespace artabramov\Echidna\Services;
+namespace artabramov\Echidna\Utilities;
 
 class Sequence extends \artabramov\Echidna\Models\Echidna
 {
@@ -10,7 +10,7 @@ class Sequence extends \artabramov\Echidna\Models\Echidna
 
         foreach( $rows as $row ) {
             $instance = new $model( $this->pdo );
-            $instance->get( intval( $row['id'] ));
+            $instance->getone( intval( $row['id'] ));
             array_push( $this->data, $instance );
         }
     }

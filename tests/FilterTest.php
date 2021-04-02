@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__.'/../src/Services/Filter.php';
+require_once __DIR__.'/../src/Utilities/Filter.php';
 
 class FilterTest extends TestCase
 {
@@ -25,7 +25,7 @@ class FilterTest extends TestCase
     }
 
     protected function setUp() : void {
-        $this->validator = new \artabramov\Echidna\Services\Filter();
+        $this->validator = new \artabramov\Echidna\Utilities\Filter();
     }
 
     protected function tearDown() : void {
