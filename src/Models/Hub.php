@@ -209,7 +209,7 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
 
             $args = [ ['id', '=', $this->id] ];
 
-            if( !$this->delete( 'hubs', $args, $data )) {
+            if( !$this->delete( 'hubs', $args )) {
                 $this->error = 'hub delete error';
             }
         }

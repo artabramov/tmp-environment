@@ -38,7 +38,6 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         $this->user_role = null;
     }
 
-
     /**
      * @param int $user_id
      * @param int $hub_id
@@ -90,50 +89,83 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         return empty( $this->error );
     }
 
-
-    // TODO
-
-
-
-
-
-
-
-
-
-
     /**
+     * @param int $user_id
      * @param int $hub_id
-     * @param mixed $hub_name
+     * @param string $user_role
      * @return bool
      */
-    public function put( int $hub_id, mixed $hub_name, int $min_length, int $max_length ) : bool {
+    public function put( int $user_id, int $hub_id, string $user_role ) : bool {
 
-        if( Filter::is_empty( $hub_id )) {
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_int( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
         } elseif( !Filter::is_int( $hub_id )) {
             $this->error = 'hub_id is incorrect';
 
-        } elseif( Filter::is_empty( $hub_name )) {
-            $this->error = 'hub_name is empty';
+        } elseif( Filter::is_empty( $user_role )) {
+            $this->error = 'user_role is empty';
 
-        } elseif( !Filter::is_string( $hub_name, $min_length, $max_length )) {
-            $this->error = 'hub_name is incorrect';
+        } elseif( !Filter::is_key( $user_role, 20 )) {
+            $this->error = 'user_role is incorrect';
 
-        } elseif( $this->count( 'hubs', [['id', '=', $hub_id], ['hub_status', '<>', 'trash']] ) == 0 ) {
-            $this->error = 'hub not found';
+        } elseif( $this->count( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] ) == 0 ) {
+            $this->error = 'role not found';
 
         } else {
             $this->clear();
-            $this->id = $hub_id;
-            $this->hub_name = $hub_name;
+            $this->user_id = $user_id;
+            $this->hub_id = $hub_id;
+            $this->user_role = $user_role;
 
-            $args = [[ 'id', '=', $this->id ]];
-            $data = [ 'hub_name' => $this->hub_name ];
+            $args = [[ 'user_id', '=', $this->user_id ], [ 'hub_id', '=', $this->hub_id ]];
+            $data = [ 'user_role' => $this->user_role ];
 
-            if( !$this->update( 'hubs', $args, $data )) {
-                $this->error = 'hub update error';
+            if( !$this->update( 'user_roles', $args, $data )) {
+                $this->error = 'role update error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+    
+    /**
+     * @param int $user_id
+     * @param int $hub_id
+     * @return bool
+     */
+    public function remove( int $user_id, int $hub_id ) : bool {
+
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_int( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( Filter::is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !Filter::is_int( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( $this->count( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] ) == 0 ) {
+            $this->error = 'role not found';
+
+        } else {
+            $this->clear();
+            $this->user_id = $user_id;
+            $this->hub_id = $hub_id;
+
+            $args = [[ 'user_id', '=', $this->user_id ], [ 'hub_id', '=', $this->hub_id ]];
+
+            if( !$this->delete( 'user_roles', $args )) {
+                $this->error = 'role delete error';
             }
         }
 
@@ -141,91 +173,36 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
-     * Update status from public to trash.
+     * @param int $user_id
      * @param int $hub_id
      * @return bool
      */
-    public function trash( int $hub_id ) : bool {
+    public function get( int $user_id, int $hub_id ) : bool {
 
-        if( Filter::is_empty( $hub_id )) {
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_int( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
         } elseif( !Filter::is_int( $hub_id )) {
             $this->error = 'hub_id is incorrect';
 
-        } elseif( $this->count( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'public']] ) == 0 ) {
-            $this->error = 'hub not found';
+        } elseif( $this->count( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] ) == 0 ) {
+            $this->error = 'role not found';
 
         } else {
             $this->clear();
-            $this->id = $hub_id;
+            $this->user_id = $user_id;
+            $this->hub_id = $hub_id;
 
-            $args = [ ['id', '=', $this->id] ];
-            $data = [ 'hub_status' => 'trash' ];
+            $args = [[ 'user_id', '=', $this->user_id ], [ 'hub_id', '=', $this->hub_id ]];
 
-            if( !$this->update( 'hubs', $args, $data )) {
-                $this->error = 'hub update error';
-            }
-        }
-
-        return empty( $this->error );
-    }
-
-    /**
-     * Update status from trash to public.
-     * @param int $hub_id
-     * @return bool
-     */
-    public function recover( int $hub_id ) : bool {
-
-        if( Filter::is_empty( $hub_id )) {
-            $this->error = 'hub_id is empty';
-
-        } elseif( !Filter::is_int( $hub_id )) {
-            $this->error = 'hub_id is incorrect';
-
-        } elseif( $this->count( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'trash']] ) == 0 ) {
-            $this->error = 'hub not found';
-
-        } else {
-            $this->clear();
-            $this->id = $hub_id;
-
-            $args = [ ['id', '=', $this->id] ];
-            $data = [ 'hub_status' => 'public' ];
-
-            if( !$this->update( 'hubs', $args, $data )) {
-                $this->error = 'hub update error';
-            }
-        }
-
-        return empty( $this->error );
-    }
-
-    /**
-     * Permanent remove.
-     * @param int $hub_id
-     * @return bool
-     */
-    public function remove( int $hub_id ) : bool {
-
-        if( Filter::is_empty( $hub_id )) {
-            $this->error = 'hub_id is empty';
-
-        } elseif( !Filter::is_int( $hub_id )) {
-            $this->error = 'hub_id is incorrect';
-
-        } elseif( $this->count( 'hubs', [['id', '=', $hub_id], ['hub_status', '=', 'trash']] ) == 0 ) {
-            $this->error = 'hub not found';
-
-        } else {
-            $this->clear();
-            $this->id = $hub_id;
-
-            $args = [ ['id', '=', $this->id] ];
-
-            if( !$this->delete( 'hubs', $args, $data )) {
-                $this->error = 'hub delete error';
+            if( !$this->select( 'user_roles', $args )) {
+                $this->error = 'role select error';
             }
         }
 
@@ -234,28 +211,28 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
     /**
      * This is a part of the Sequence interface. Get the element by id.
-     * @param mixed $attribute_id
+     * @param mixed $role_id
      * @return bool
      */
-    public function getone( int $hub_id ) : bool {
+    public function getone( int $role_id ) : bool {
 
-        if( Filter::is_empty( $hub_id )) {
-            $this->error = 'hub_id is empty';
+        if( Filter::is_empty( $role_id )) {
+            $this->error = 'role_id is empty';
 
-        } elseif( !Filter::is_int( $hub_id )) {
-            $this->error = 'hub_id is incorrect';
+        } elseif( !Filter::is_int( $role_id )) {
+            $this->error = 'role_id is incorrect';
 
-        } elseif( $this->count( 'hubs', [['id', '=', $hub_id]] ) == 0 ) {
-            $this->error = 'hub not found';
+        } elseif( $this->count( 'user_roles', [['id', '=', $role_id]] ) == 0 ) {
+            $this->error = 'role not found';
 
         } else {
             $this->clear();
-            $this->id = $hub_id;
+            $this->id = $role_id;
 
-            $args = [ ['id', '=', $this->id] ];
+            $args = [[ 'id', '=', $this->id ]];
 
-            if( !$this->select( 'hubs', $args )) {
-                $this->error = 'hub select error';
+            if( !$this->select( 'user_roles', $args )) {
+                $this->error = 'role select error';
             }
         }
 
