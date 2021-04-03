@@ -85,7 +85,7 @@ class Echidna
             $this->e = $e;
         }
 
-        return empty( $this->e ) ? $rows : false;
+        return empty( $this->e ) ? true : false;
     }
 
     /**

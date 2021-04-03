@@ -229,14 +229,14 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
         } elseif( !Filter::is_int( $attribute_id )) {
             $this->error = 'attribute_id is incorrect';
 
-        } elseif( $this->count( 'user_attributes', [['attribute_id', '=', $attribute_id]] ) == 0 ) {
+        } elseif( $this->count( 'user_attributes', [['id', '=', $attribute_id]] ) == 0 ) {
             $this->error = 'attribute not found';
 
         } else {
             $this->clear();
             $this->attribute_id = $attribute_id;
 
-            $rows = $this->select( '*', 'user_attributes', [['attribute_id', '=', $attribute_id]], 1, 0 );
+            $rows = $this->select( '*', 'user_attributes', [['id', '=', $attribute_id]], 1, 0 );
 
             if( empty( $rows[0] )) {
                 $this->error = 'attribute select error';
