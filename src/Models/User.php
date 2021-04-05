@@ -250,8 +250,17 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $args = [['user_token', '=', $this->user_token]];
             $rows = $this->select( '*', 'users', $args, 1, 0 );
 
-            foreach( $rows[0] as $key=>$value ) {
-                $this->$key = $value;
+            if( empty( $rows[0] )) {
+                $this->clear();
+
+            } else {
+                $this->id          = $rows[0]->id;
+                $this->date        = $rows[0]->date;
+                $this->user_status = $rows[0]->user_status;
+                $this->user_token  = $rows[0]->user_token;
+                $this->user_email  = $rows[0]->user_email;
+                $this->user_pass   = $rows[0]->user_pass;
+                $this->user_hash   = $rows[0]->user_hash;
             }
         }
 

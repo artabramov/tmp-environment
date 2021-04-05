@@ -239,12 +239,17 @@ class UserTest extends TestCase
         $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
         $result = $this->callMethod( $this->user, 'signin', [ $email, $pass ] );
+
+        $id = $this->getProperty( $this->user, 'id' );
+        $date = $this->getProperty( $this->user, 'date' );
         $user_email = $this->getProperty( $this->user, 'user_email' );
         $user_pass = $this->getProperty( $this->user, 'user_pass' );
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
         if( $result ) {
+            $this->assertEquals( $id, 1 );
+            $this->assertEquals( $date, '2000-01-01 00:00:00' );
             $this->assertEquals( $user_email, $email );
             $this->assertEquals( $user_pass, '123456' );
             $this->assertEquals( $user_hash, '' );
@@ -252,6 +257,8 @@ class UserTest extends TestCase
             $this->assertTrue( $result );
 
         } else {
+            $this->assertEquals( $id, null );
+            $this->assertEquals( $date, null );
             $this->assertEquals( $user_email, null );
             $this->assertEquals( $user_pass, null );
             $this->assertEquals( $user_hash, null );
@@ -271,6 +278,146 @@ class UserTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addSignout
+     */
+    public function testSignout( $user_id, $expected ) {
 
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        $result = $this->callMethod( $this->user, 'signout', [ $user_id ] );
+        $error = $this->getProperty( $this->user, 'error' );
+
+        if( $result ) {
+            $this->assertEmpty( $error );
+            $this->assertTrue( $result );
+
+        } else {
+            $this->assertNotEmpty( $error );
+            $this->assertFalse( $result );
+        }
+    }
+
+    public function addSignout() {
+        return [
+
+            // correct case
+            [ 1, true ],
+
+            // incorrect cases
+            [ 0, false ],
+            [ -1, false ],
+            [ 2, false ],
+            [ 'a', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addAuth
+     */
+    public function testAuth( $token, $expected ) {
+
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        $result = $this->callMethod( $this->user, 'auth', [ $token ] );
+
+        $id = $this->getProperty( $this->user, 'id' );
+        $date = $this->getProperty( $this->user, 'date' );
+        $user_status = $this->getProperty( $this->user, 'user_status' );
+        $user_token = $this->getProperty( $this->user, 'user_token' );
+        $user_email = $this->getProperty( $this->user, 'user_email' );
+        $user_hash = $this->getProperty( $this->user, 'user_hash' );
+        $error = $this->getProperty( $this->user, 'error' );
+
+        if( $result ) {
+            $this->assertEquals( $id, 1 );
+            $this->assertEquals( $date, '2000-01-01 00:00:00' );
+            $this->assertEquals( $user_status, 'pending' );
+            $this->assertEquals( $user_token, 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' );
+            $this->assertEquals( $user_email, 'noreply@noreply.no' );
+            $this->assertEquals( $user_hash, '1542850d66d8007d620e4050b5715dc83f4a921d' );
+            $this->assertEmpty( $error );
+            $this->assertTrue( $result );
+
+        } else {
+            $this->assertEquals( $id, null );
+            $this->assertEquals( $date, null );
+            $this->assertEquals( $user_status, null );
+            $this->assertEquals( $user_token, null );
+            $this->assertEquals( $user_email, null );
+            $this->assertEquals( $user_hash, null );
+            $this->assertNotEmpty( $error );
+            $this->assertFalse( $result );
+        }
+    }
+
+    public function addAuth() {
+        return [
+
+            // correct case
+            [ 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', true ],
+
+            // incorrect case
+            [ 1, false ],
+            [ '', false ],
+            [ 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addGetone
+     */
+    public function testGetone( $user_id, $expected ) {
+
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        $result = $this->callMethod( $this->user, 'getone', [ $user_id ] );
+
+        $id = $this->getProperty( $this->user, 'id' );
+        $date = $this->getProperty( $this->user, 'date' );
+        $user_status = $this->getProperty( $this->user, 'user_status' );
+        $user_token = $this->getProperty( $this->user, 'user_token' );
+        $user_email = $this->getProperty( $this->user, 'user_email' );
+        $user_hash = $this->getProperty( $this->user, 'user_hash' );
+        $error = $this->getProperty( $this->user, 'error' );
+
+        if( $result ) {
+            $this->assertEquals( $id, 1 );
+            $this->assertEquals( $date, '2000-01-01 00:00:00' );
+            $this->assertEquals( $user_status, 'pending' );
+            $this->assertEquals( $user_token, 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' );
+            $this->assertEquals( $user_email, 'noreply@noreply.no' );
+            $this->assertEquals( $user_hash, '1542850d66d8007d620e4050b5715dc83f4a921d' );
+            $this->assertEmpty( $error );
+            $this->assertTrue( $result );
+
+        } else {
+            $this->assertEquals( $id, null );
+            $this->assertEquals( $date, null );
+            $this->assertEquals( $user_status, null );
+            $this->assertEquals( $user_token, null );
+            $this->assertEquals( $user_email, null );
+            $this->assertEquals( $user_hash, null );
+            $this->assertNotEmpty( $error );
+            $this->assertFalse( $result );
+        }
+    }
+
+    public function addGetone() {
+        return [
+
+            // correct case
+            [ 1, true ],
+
+            // incorrect case
+            [ 0, false ],
+            [ 2, false ],
+            [ '', false ],
+            [ 'a', false ],
+        ];
+    }
 
 }
