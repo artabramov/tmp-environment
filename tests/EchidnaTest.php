@@ -11,14 +11,13 @@ class EchidnaTest extends TestCase
     private $echidna;
 
     /**
-     * Call private method from testing object.
      * @param $object
      * @param string $method
      * @param array $parameters
      * @return mixed
      * @throws \Exception
      */
-    private function call( $object, string $method , array $parameters = [] ) {
+    private function callMethod( $object, string $method , array $parameters = [] ) {
 
         try {
             $className = get_class($object);
@@ -31,6 +30,18 @@ class EchidnaTest extends TestCase
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * @param $object
+     * @param string $property
+     * @return mixed
+     */
+    public function getProperty( $object, $property ) {
+        $reflectedClass = new \ReflectionClass($object);
+        $reflection = $reflectedClass->getProperty($property);
+        $reflection->setAccessible(true);
+        return $reflection->getValue($object);
     }
 
     protected function setUp() : void {
@@ -56,11 +67,8 @@ class EchidnaTest extends TestCase
      */
     public function testInsert( $table, $data, $expected ) {
 
-        // truncate table before testing
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-
-        // test
-        $result = $this->call( $this->echidna, 'insert', [ $table, $data ] );
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $result = $this->callMethod( $this->echidna, 'insert', [ $table, $data ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -68,121 +76,31 @@ class EchidnaTest extends TestCase
 
         return [ 
 
-            // 1: correct data, full dataset
-            [ 
-                'users', [
-                'id'          => 1,
-                'date'        => date('Y-m-d H:i:s'),
-                'user_status' => 'user_status',
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], 1
-            ],
+            // correct cases
+            [ 'hubs', [ 'id' => 1, 'date' => date('Y-m-d H:i:s'), 'user_id' => 1, 'hub_status' => 'public', 'hub_name' => 'hub name' ], 1 ],
+            [ 'hubs', [ 'user_id' => 0, 'hub_status' => '', 'hub_name' => '' ], 1 ],
 
-            // 1: correct data, not full dataset
-            [ 
-                'users', [
-                'date'        => date('Y-m-d H:i:s'),
-                'user_status' => 'user_status',
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], 1
-            ],
-
-            // 1: correct data, not full dataset
-            [ 
-                'users', [
-                'user_status' => 'user_status',
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], 1
-            ],
-
-            // 1: correct data, not full dataset
-            [ 
-                'users', [
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], 1
-            ],
-
-            // 1: correct data, not full dataset (only UNIQUE KEY fields)
-            [ 
-                'users', [
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                ], 1
-            ],
-
-            // FALSE: without required field (UNIQUE KEY user_token)
-            [ 
-                'users', [
-                'user_status' => 'user_status',
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], false 
-            ],
-
-            // FALSE: without table
-            [ 
-                '', [
-                'user_status' => 'user_status',
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], false 
-            ],
-
-            // FALSE: with incorrect table name (_users)
-            [ 
-                '_users', [
-                'user_status' => 'user_status',
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], false 
-            ],
-
-            // FALSE: without dataset
-            [ 'users', [], false ],
-
-            // FALSE: with incorrect field name (user_name)
-            [ 
-                'users', [
-                'user_name'  => 'John Doe',
-                'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email' => 'noreply@noreply.no',
-                'user_hash'  =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], false 
-            ],
-
-            // FALSE: with field length bigger than maximum (user_status)
-            [ 
-                'users', [
-                'user_status' => 'user_status_user_stat',
-                'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 
-                'user_email'  => 'noreply@noreply.no',
-                'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921d', 
-                ], false
-            ],
+            // incorrect cases
+            [ '_hubs', [ 'user_id' => 1, 'hub_status' => 'public', 'hub_name' => 'noname' ], false ],
+            [ '', [ 'user_id' => 1, 'hub_status' => 'public', 'hub_name' => 'noname' ], false ],
+            [ 'hubs', [ '_user_id' => 1, 'hub_status' => 'public', 'hub_name' => 'noname' ], false ],
+            [ 'hubs', [ 'user_id' => 1, 'hub_status' => 'public_public_public_', 'hub_name' => 'noname' ], false ],
+            [ 'hubs', [], false ],
 
         ];
-
     }
 
     public function testInsertTwice() {
 
-        // truncate table before testing
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
 
-        // insert one UNIQUE KEY attribute twice
-        $result = $this->call( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        // correct case
+        $result = $this->callMethod( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
         $this->assertEquals( 1, $result );
 
-        $result = $this->call( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
-        $this->assertFalse( $result );
+        // again correct case (false)
+        $result = $this->callMethod( $this->echidna, 'insert', [ 'users', [ 'user_token' => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'user_email' => 'noreply@noreply.no' ]] );
+        $this->assertEquals( false, $result );
     }
 
     /**
@@ -190,11 +108,10 @@ class EchidnaTest extends TestCase
      */
     public function testUpdate( $table, $args, $data, $expected ) {
 
-        // PREPARE: truncate table before testing and insert test dataset
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'noname');" );
 
-        $result = $this->call( $this->echidna, 'update', [ $table, $args, $data ] );
+        $result = $this->callMethod( $this->echidna, 'update', [ $table, $args, $data ] );
         $this->assertEquals( $expected, $result );
     }
 
@@ -202,102 +119,26 @@ class EchidnaTest extends TestCase
 
         return [ 
 
-            // 1: update all dataset by id
-            [
-                'users', [
-                    ['id', '=', 1], 
-                ], [
-                    'date'        => date('Y-m-d H:i:s'),
-                    'user_status' => 'user_status',
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
-                    'user_email'  => 'no@no.no',
-                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
-                ], 1
-            ],
+            // correct cases
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'date' => date('Y-m-d H:i:s') ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'user_id' => 1 ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'user_id' => 2 ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'hub_status' => 'private' ], true ],
+            [ 'hubs', [[ 'id', '=', 2 ]], [ 'hub_status' => 'private' ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'hub_name' => 'hub name' ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'hub_status' => 'private', 'hub_name' => 'hub name' ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ], [ 'hub_status', '=', 'public' ]], [ 'user_id' => 2 ], true ],
+            [ 'hubs', [[ 'id', '=', 1 ], [ 'hub_status', '<>', 'trash' ]], [ 'user_id' => 2 ], true ],
 
-            // 1: update part of dataset by some fields
-            [
-                'users', [
-                    ['id', '=', 1], 
-                    ['user_status', '=', 'pending'], 
-                ], [
-                    'date'        => date('Y-m-d H:i:s'),
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
-                    'user_email'  => 'no@no.no',
-                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
-                ], 1
-            ],
-
-            // 1: update part of dataset by some fields
-            [
-                'users', [
-                    ['id', '=', 1], 
-                    ['user_status', '<>', 'trash'], 
-                ], [
-                    'date'        => date('Y-m-d H:i:s'),
-                    'user_token'  => 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 
-                    'user_email'  => 'no@no.no',
-                    'user_hash'   =>  '1542850d66d8007d620e4050b5715dc83f4a921f', 
-                ], 1
-            ],
-            
-            // 0: update field to his old value
-            [
-                'users', 
-                [ ['id', '=', 1] ], 
-                [ 'user_status' => 'pending' ], 
-                0
-            ],
-            
-            // 0: update not existing row
-            [
-                'users', 
-                [ ['id', '=', 2] ], 
-                [ 'user_status' => 'trash' ], 
-                0
-            ],
-            
-            // 0: empty table name
-            [
-                '', 
-                [ ['id', '=', 1] ], 
-                [ 'user_status' => 'trash' ], 
-                0
-            ],
-
-            // 0: incorrect table name
-            [
-                '_users', 
-                [ ['id', '=', 1] ], 
-                [ 'user_status' => 'trash' ], 
-                0
-            ],
-
-            // 0: empty dataset
-            [
-                'users', 
-                [ ['id', '=', 1] ], 
-                [], 
-                0
-            ],
-
-            // 0: incorrect field in dataset
-            [
-                'users',
-                [ ['id', '=', 1], ], 
-                [ 'user_name' => 'Jogn Doe'], 
-                0
-            ],
-
-            // 0: field longer than maximum length
-            [
-                'users', 
-                [ ['id', '=', 1] ], 
-                [ 'user_status' => 'user_ststus_user_stst' ], 
-                0
-            ],
+            // incorrect cases
+            [ '', [[ 'id', '=', 1 ]], [ 'hub_status' => 'private' ], false ],
+            [ '_hubs', [[ 'id', '=', 1 ]], [ 'hub_status' => 'private' ], false ],
+            [ 'hubs', [[ '_id', '=', 1 ]], [ 'hub_status' => 'private' ], false ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ '_hub_status' => 'private' ], false ],
+            [ 'hubs', [[ 'id', '=', 1 ]], [ 'hub_status' => 'private_private_priva' ], false ],
 
         ];
+        
 
     }
 
@@ -306,13 +147,12 @@ class EchidnaTest extends TestCase
      */
     public function testSelect( $fields, $table, $args, $limit, $offset, $expected ) {
 
-        // PREPARE: truncate table before testing and insert test dataset
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'noname 1');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (2, '2000-01-01 00:00:00', 1, 'private', 'noname 2');" );
 
-        $tmp = $this->call( $this->echidna, 'select', [ $fields, $table, $args, $limit, $offset ] );
-        $result = is_array( $tmp ) ? count( $tmp ) : 0;
+        $tmp = $this->callMethod( $this->echidna, 'select', [ $fields, $table, $args, $limit, $offset ] );
+        $result = is_array( $tmp ) ? count( $tmp ) : $tmp;
         $this->assertEquals( $expected, $result );
     }
 
@@ -320,23 +160,20 @@ class EchidnaTest extends TestCase
 
         return [ 
 
-            // CORRECT
-            [ '*', 'users', [ ['id', '=', 1], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'] ], 1, 0, 1 ],
-            [ '*', 'users', [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_email', '=', 'noreply@noreply.no'], ['user_status', '<>', 'trash']], 1, 0, 1 ],
-            [ '*', 'users', [ ['user_status', '<>', 'trash']], 2, 0, 2 ],
-            [ '*', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', 'users', [], 1, 0, 1 ],
-            [ 'id', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ 'date', 'users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
+            // correct cases
+            [ '*', 'hubs', [ ['id', '=', 1], ], 10, 0, 1 ],
+            [ '*', 'hubs', [ ['user_id', '=', 1], ], 10, 0, 2 ],
+            [ '*', 'hubs', [ ['user_id', '=', 1], ['hub_status', '=', 'public']], 10, 0, 1 ],
+            [ '*', 'hubs', [ ['user_id', '=', 1], ['hub_status', '<>', 'trash']], 10, 0, 2 ],
+            [ '*', 'hubs', [ ['user_id', '=', 2], ], 10, 0, 0 ],
+            [ '*', 'hubs', [ ['_user_id', '=', 2], ], 10, 0, 0 ],
+            [ '*', 'hubs', [ ['hub_status', '=', 'public_public_public_']], 10, 0, 0 ],
+            [ '*', 'hubs', [], 10, 0, 2 ],
 
-            // INCORRECT (no results)
-            [ '*', '', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', '_users', [ ['user_status', '=', 'approved']], 1, 0, 0 ],
-            [ '*', 'users', [ ['user_name', '=', 'John Doe'], ], 1, 0, 0 ],
-            [ '_id', 'users', [ ['id', '=', 1], ], 1, 0, 0 ],
+            // incorrect cases
+            [ '*', '', [ ['id', '=', 1], ], 10, 0, false ],
+            [ '*', '_hubs', [ ['id', '=', 1], ], 10, 0, false ],
+            [ '*', 'hubs', [ ['_id', '=', 1], ], 10, 0, false ],
 
         ];
     }
@@ -346,11 +183,10 @@ class EchidnaTest extends TestCase
      */
     public function testDelete( $table, $args, $expected ) {
 
-        // PREPARE: truncate table before testing and insert test dataset
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'noname');" );
 
-        $result = $this->call( $this->echidna, 'delete', [ $table, $args ] );
+        $result = $this->callMethod( $this->echidna, 'delete', [ $table, $args ] );
         $this->assertEquals( $expected, $result );
 
     }
@@ -359,69 +195,19 @@ class EchidnaTest extends TestCase
 
         return [ 
 
+            // correct cases
+            [ 'hubs', [], true ], // all rows deleted
+            [ 'hubs', [[ 'id', '=', 1 ]], true ], // one row deleted
+            [ 'hubs', [[ 'id', '=', 2 ]], true ], // no rows deleted
+            [ 'hubs', [[ 'user_id', '=', 1 ]], true ],
+            [ 'hubs', [[ 'user_id', '=', 1 ], [ 'hub_status', '=', 'public' ]], true ],
+            [ 'hubs', [[ 'user_id', '=', 1 ], [ 'hub_status', '<>', 'trash' ]], true ],
+            [ 'hubs', [[ 'hub_status', '=', 'public_public_public_' ]], true ], // no rows
 
-            // CORRECT: delete 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ], 
-                True
-            ],
-
-            // CORRECT: delete 1 row
-            [
-                'users',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                True
-            ],
-
-            // CORRECT: delete 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ['user_status', '=', 'pending'], ], 
-                True
-            ],
-
-            // CORRECT: delete 1 row
-            [
-                'users',
-                [ ['id', '=', 1], ['user_status', '<>', 'trash'], ], 
-                True
-            ],
-
-            // CORRECT: delete 1 row
-            [
-                'users',
-                [ ['user_email', '=', 'noreply@noreply.no'], ['user_hash', '=' ,'1542850d66d8007d620e4050b5715dc83f4a921d'], ['user_status', '<>', 'trash']], 
-                True
-            ],
-
-            // INCORRECT: empty table
-            [
-                '',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                False
-            ],
-
-            // INCORRECT: incorrect table name
-            [
-                '_users',
-                [ ['user_token', '=', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200'], ], 
-                False
-            ],
-
-            // INCORRECT: incorrect field name
-            [
-                'users',
-                [ ['user_name', '=', 'John Doe'], ], 
-                False
-            ],
-
-            // 
-            [
-                'users',
-                [], 
-                True
-            ],
+            // incorrect cases
+            [ '', [[ 'id', '=', 1 ]], false ],
+            [ '_hubs', [[ 'id', '=', 1 ]], false ],
+            [ 'hubs', [[ '_id', '=', 1 ]], false ],
 
         ];
 
@@ -432,26 +218,33 @@ class EchidnaTest extends TestCase
      */
     public function testCount( $table, $data, $expected ) {
 
-        // PREPARE: truncate table before testing and insert test dataset
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'noreply1@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'noname 1');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (2, '2000-01-01 00:00:00', 1, 'private', 'noname 2');" );
 
-        // TEST
-        $result = $this->call( $this->echidna, 'count', [ $table, $data ] );
+        $result = $this->callMethod( $this->echidna, 'count', [ $table, $data ] );
         $this->assertEquals( $expected, $result );
     }
 
     public function addCount() {
         return [
 
-            [ 'users', [['id', '=', 1]], 1 ],
-            [ 'users', [['id', '=', 2]], 1 ],
-            [ 'users', [['id', '<>', 3]], 2 ],
-            [ 'users', [['id', '=', 3]], 0 ],
-            [ 'users', [['_id', '=', 1]], 0 ],
+            [ 'hubs', [['id', '=', 1]], 1 ],
+            [ 'hubs', [['id', '=', 2]], 1 ],
+            [ 'hubs', [['id', '<>', 3]], 2 ],
+            [ 'hubs', [['id', '=', 3]], 0 ],
+            [ 'hubs', [['_id', '=', 1]], 0 ],
+            [ '_hubs', [['id', '=', 1]], 0 ],
+            [ '', [['id', '=', 1]], 0 ],
+            [ 'hubs', [], 2 ],
 
         ];
+    }
+
+    // datetime
+    public function testDatetime() {
+        $result = $this->callMethod( $this->echidna, 'datetime', [] );
+        $this->assertMatchesRegularExpression( "/^\d{4}-((0[0-9])|(1[0-2]))-(([0-2][0-9])|(3[0-1])) (([0-1][0-9])|(2[0-3])):[0-5][0-9]:[0-5][0-9]$/", $result );
     }
 
 }

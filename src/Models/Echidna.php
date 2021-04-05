@@ -45,7 +45,7 @@ class Echidna
      * @param string $table
      * @param array $args
      * @param array $data
-     * @return mixed
+     * @return bool
      * @throws \PDOException
      */
     protected function update( string $table, array $args, array $data ) : mixed {
@@ -134,7 +134,7 @@ class Echidna
      * @param array $args
      * @param int $limit
      * @param int $offset
-     * @return mixed
+     * @return bool
      * @throws \PDOException
      */
     protected function delete( string $table, array $args ) : mixed {
