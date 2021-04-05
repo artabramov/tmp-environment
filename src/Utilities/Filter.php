@@ -18,7 +18,7 @@ class Filter
      * @return bool
      */
     public static function is_int( mixed $value, int $min_value = 0, int $max_value = 9223372036854775807 ) : bool {
-        return is_numeric( $value ) and intval( $value ) >= $min_value and intval( $value ) <= $max_value;
+        return ( is_int( $value ) and $value >= $min_value and $value <= $max_value ) or ( is_string( $value ) and ctype_digit( $value ) and intval( $value ) >= $min_value and intval( $value ) <= $max_value );
     }
 
     /**
@@ -27,7 +27,7 @@ class Filter
      * @param int $length
      * @return bool
      */
-    public static function is_key( mixed $value, int $max_length ) : bool {
+    public static function is_key( mixed $value, int $max_length = 20 ) : bool {
         return is_string( $value ) and preg_match("/^[a-z0-9_-]{1," . $max_length . "}$/", $value );
     }
 
@@ -38,7 +38,7 @@ class Filter
      * @param int $max_length
      * @return bool
      */
-    public static function is_string( mixed $value, int $min_length, int $max_length ) : bool {
+    public static function is_string( mixed $value, int $min_length = 1, int $max_length = 255 ) : bool {
         $length = mb_strlen( $value, 'UTF-8' );
         return is_string( $value ) and $length >= $min_length and $length <= $max_length;
     }
