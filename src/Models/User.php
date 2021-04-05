@@ -102,19 +102,22 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
         } else {
             $this->clear();
+            $this->user_status = 'pending';
             $this->set_token();
             $this->user_email = $user_email;
+            $this->user_hash = '';
 
             $data = [
-                'user_status' => 'pending',
+                'user_status' => $this->user_status,
                 'user_token'  => $this->user_token,
                 'user_email'  => $this->user_email,
-                'user_hash'   => ''
+                'user_hash'   => $this->user_hash,
             ];
 
             $this->id = $this->insert( 'users', $data );
 
             if( empty( $this->id )) {
+                $this->clear();
                 $this->error = 'user insert error';
             }            
         }
@@ -149,6 +152,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $data = [ 'user_hash' => $this->user_hash ];
 
             if( !$this->update( 'users', $args, $data )) {
+                $this->clear();
                 $this->error = 'user update error';
             }
         }
@@ -184,6 +188,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $data = ['user_status' => 'approved', 'user_hash' => '' ];
 
             if( !$this->update( 'users', $args, $data )) {
+                $this->clear();
                 $this->error = 'user update error';
             }
         }
@@ -215,6 +220,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $data = [ 'user_token' => $this->user_token ];
 
             if( !$this->update( 'users', $args, $data )) {
+                $this->clear();
                 $this->error = 'user update error';
             }
         }
