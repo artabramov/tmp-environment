@@ -44,7 +44,9 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      * @param string $user_role
      * @return bool
      */
-    public function set( int $user_id, int $hub_id, string $user_role ) : bool {
+    public function create( int $hub_id, int $user_id, string $user_role ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -68,7 +70,6 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'role is occupied';
 
         } else {
-            $this->clear();
             $this->hub_id = $hub_id;
             $this->user_id = $user_id;
             $this->user_role = $user_role;
@@ -82,6 +83,7 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->id = $this->insert( 'user_roles', $data );
 
             if( empty( $this->id )) {
+                $this->clear();
                 $this->error = 'role insert error';
             }   
         }
@@ -95,7 +97,9 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      * @param string $user_role
      * @return bool
      */
-    public function put( int $user_id, int $hub_id, string $user_role ) : bool {
+    public function rerole( int $hub_id, int $user_id, string $user_role ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -119,7 +123,6 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'role not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->hub_id = $hub_id;
             $this->user_role = $user_role;
@@ -128,6 +131,7 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $data = [ 'user_role' => $this->user_role ];
 
             if( !$this->update( 'user_roles', $args, $data )) {
+                $this->clear();
                 $this->error = 'role update error';
             }
         }
@@ -140,7 +144,9 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      * @param int $hub_id
      * @return bool
      */
-    public function remove( int $user_id, int $hub_id ) : bool {
+    public function remove( int $hub_id, int $user_id ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -158,13 +164,13 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'role not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->hub_id = $hub_id;
 
             $args = [[ 'user_id', '=', $this->user_id ], [ 'hub_id', '=', $this->hub_id ]];
 
             if( !$this->delete( 'user_roles', $args )) {
+                $this->clear();
                 $this->error = 'role delete error';
             }
         }
@@ -177,7 +183,9 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      * @param int $hub_id
      * @return bool
      */
-    public function get( int $user_id, int $hub_id ) : bool {
+    public function fetch( int $hub_id, int $user_id ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -195,14 +203,22 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'role not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->hub_id = $hub_id;
 
             $args = [[ 'user_id', '=', $this->user_id ], [ 'hub_id', '=', $this->hub_id ]];
+            $rows = $this->select( '*', 'user_roles', $args, 1, 0 );
 
-            if( !$this->select( 'user_roles', $args )) {
+            if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'role select error';
+
+            } else {
+                $this->id        = $rows[0]['id'];
+                $this->date      = $rows[0]['date'];
+                $this->hub_id    = $rows[0]['hub_id'];
+                $this->user_id   = $rows[0]['user_id'];
+                $this->user_role = $rows[0]['user_role'];
             }
         }
 
@@ -216,6 +232,8 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function getone( int $role_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $role_id )) {
             $this->error = 'role_id is empty';
 
@@ -226,13 +244,21 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'role not found';
 
         } else {
-            $this->clear();
             $this->id = $role_id;
 
             $args = [[ 'id', '=', $this->id ]];
+            $rows = $this->select( '*', 'user_roles', $args, 1, 0 );
 
-            if( !$this->select( 'user_roles', $args )) {
+            if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'role select error';
+
+            } else {
+                $this->id        = $rows[0]['id'];
+                $this->date      = $rows[0]['date'];
+                $this->hub_id    = $rows[0]['hub_id'];
+                $this->user_id   = $rows[0]['user_id'];
+                $this->user_role = $rows[0]['user_role'];
             }
         }
 
