@@ -91,6 +91,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function register( mixed $user_email ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -101,7 +103,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user_email is occupied';
 
         } else {
-            $this->clear();
             $this->user_status = 'pending';
             $this->set_token();
             $this->user_email = $user_email;
@@ -133,6 +134,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function restore( mixed $user_email, int $pass_length = 6, string $pass_symbols = '0123456789' ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -143,7 +146,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user not found';
 
         } else {
-            $this->clear();
             $this->user_email = $user_email;
             $this->set_pass( $pass_symbols, $pass_length );
             $this->set_hash();
@@ -166,6 +168,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function signin( mixed $user_email, mixed $user_pass ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_email )) {
             $this->error = 'user_email is empty';
 
@@ -179,7 +183,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user not found';
 
         } else {
-            $this->clear();
             $this->user_email = $user_email;
             $this->user_pass = $user_pass;
             $this->set_hash();
@@ -202,6 +205,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function signout( mixed $user_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
@@ -212,7 +217,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user not found';
         
         } else {
-            $this->clear();
             $this->id = $user_id;
             $this->set_token();
 
@@ -234,6 +238,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function auth( mixed $user_token ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_token )) {
             $this->error = 'user_token is empty';
 
@@ -244,7 +250,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user not found';
 
         } else {
-            $this->clear();
             $this->user_token = $user_token;
 
             $args = [['user_token', '=', $this->user_token]];
@@ -254,13 +259,12 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
                 $this->clear();
 
             } else {
-                $this->id          = $rows[0]->id;
-                $this->date        = $rows[0]->date;
-                $this->user_status = $rows[0]->user_status;
-                $this->user_token  = $rows[0]->user_token;
-                $this->user_email  = $rows[0]->user_email;
-                $this->user_pass   = $rows[0]->user_pass;
-                $this->user_hash   = $rows[0]->user_hash;
+                $this->id          = $rows[0]['id'];
+                $this->date        = $rows[0]['date'];
+                $this->user_status = $rows[0]['user_status'];
+                $this->user_token  = $rows[0]['user_token'];
+                $this->user_email  = $rows[0]['user_email'];
+                $this->user_hash   = $rows[0]['user_hash'];
             }
         }
 
@@ -274,6 +278,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
      */
     public function getone( mixed $user_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
 
@@ -284,18 +290,22 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user not found';
 
         } else {
-            $this->clear();
             $this->id = $user_id;
 
-            $rows = $this->select( '*', 'users', [[ 'id', '=', $this->id ]], 1, 0 );
+            $args = [[ 'id', '=', $this->id ]];
+            $rows = $this->select( '*', 'users', $args, 1, 0 );
 
             if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'user select error';
 
             } else {
-                foreach( $rows[0] as $key=>$value ) {
-                    $this->$key = $value;
-                }
+                $this->id          = $rows[0]['id'];
+                $this->date        = $rows[0]['date'];
+                $this->user_status = $rows[0]['user_status'];
+                $this->user_token  = $rows[0]['user_token'];
+                $this->user_email  = $rows[0]['user_email'];
+                $this->user_hash   = $rows[0]['user_hash'];
             }
         }
 

@@ -45,7 +45,9 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      * @param string $hub_name
      * @return bool
      */
-    public function set( int $user_id, string $hub_status, string $hub_name, int $min_length, int $max_length ) : bool {
+    public function create( int $user_id, string $hub_status, string $hub_name, int $min_length, int $max_length ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -66,7 +68,6 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub_name is incorrect';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->hub_status = $hub_status;
             $this->hub_name = $hub_name;
@@ -80,6 +81,7 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->id = $this->insert( 'hubs', $data );
 
             if( empty( $this->id )) {
+                $this->clear();
                 $this->error = 'hub insert error';
             }   
         }
@@ -92,7 +94,9 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      * @param mixed $hub_name
      * @return bool
      */
-    public function put( int $hub_id, mixed $hub_name, int $min_length, int $max_length ) : bool {
+    public function rename( int $hub_id, mixed $hub_name, int $min_length, int $max_length ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
@@ -110,7 +114,6 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub not found';
 
         } else {
-            $this->clear();
             $this->id = $hub_id;
             $this->hub_name = $hub_name;
 
@@ -118,6 +121,7 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $data = [ 'hub_name' => $this->hub_name ];
 
             if( !$this->update( 'hubs', $args, $data )) {
+                $this->clear();
                 $this->error = 'hub update error';
             }
         }
@@ -132,6 +136,8 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      */
     public function trash( int $hub_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
@@ -142,13 +148,14 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub not found';
 
         } else {
-            $this->clear();
             $this->id = $hub_id;
+            $this->hub_status = 'trash';
 
             $args = [ ['id', '=', $this->id] ];
-            $data = [ 'hub_status' => 'trash' ];
+            $data = [ 'hub_status' => $this->hub_status ];
 
             if( !$this->update( 'hubs', $args, $data )) {
+                $this->clear();
                 $this->error = 'hub update error';
             }
         }
@@ -163,6 +170,8 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      */
     public function recover( int $hub_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
@@ -173,13 +182,14 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub not found';
 
         } else {
-            $this->clear();
             $this->id = $hub_id;
+            $this->hub_status = 'public';
 
             $args = [ ['id', '=', $this->id] ];
-            $data = [ 'hub_status' => 'public' ];
+            $data = [ 'hub_status' => $this->hub_status ];
 
             if( !$this->update( 'hubs', $args, $data )) {
+                $this->clear();
                 $this->error = 'hub update error';
             }
         }
@@ -194,6 +204,8 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      */
     public function remove( int $hub_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
@@ -204,12 +216,12 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub not found';
 
         } else {
-            $this->clear();
             $this->id = $hub_id;
 
             $args = [ ['id', '=', $this->id] ];
 
             if( !$this->delete( 'hubs', $args )) {
+                $this->clear();
                 $this->error = 'hub delete error';
             }
         }
@@ -224,6 +236,8 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
      */
     public function getone( int $hub_id ) : bool {
 
+        $this->clear();
+
         if( Filter::is_empty( $hub_id )) {
             $this->error = 'hub_id is empty';
 
@@ -234,13 +248,21 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub not found';
 
         } else {
-            $this->clear();
             $this->id = $hub_id;
 
-            $args = [ ['id', '=', $this->id] ];
+            $args = [[ 'id', '=', $this->id ]];
+            $rows = $this->select( '*', 'hubs', $args, 1, 0 );
 
-            if( !$this->select( 'hubs', $args )) {
+            if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'hub select error';
+
+            } else {
+                $this->id         = $rows[0]['id'];
+                $this->date       = $rows[0]['date'];
+                $this->user_id    = $rows[0]['user_id'];
+                $this->hub_status = $rows[0]['hub_status'];
+                $this->hub_name   = $rows[0]['hub_name'];
             }
         }
 
