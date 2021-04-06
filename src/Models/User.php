@@ -43,9 +43,9 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
     
     /**
-     * Set unique user_token.
+     * @return string
      */
-    private function set_token() {
+    private function get_token() : string {
 
         do {
             $user_token = bin2hex( random_bytes( 40 ));
@@ -58,15 +58,16 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             }
         } while( $repeat );
 
-        $this->user_token = $user_token;
+        return $user_token;
     }
 
     /**
-     * Set non-unique one-time password.
+     * Get non-unique one-time password.
      * @param int $pass_len
      * @param string $pass_symbs
+     * @return string
      */
-    private function set_pass( string $symbols, int $length ) {
+    private function get_pass( string $symbols, int $length ) : string {
 
         $user_pass = '';
         $symbols_length = mb_strlen( $symbols, 'utf-8' ) - 1;
@@ -75,14 +76,16 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $user_pass .= $symbols[ random_int( 0, $symbols_length ) ];
         }
 
-        $this->user_pass = $user_pass;
+        return $user_pass;
     }
 
     /**
-     * Set hash (sha1) of the password.
+     * Get hash (sha1) of the password.
+     * @param string $user_pass
+     * @return string
      */
-    private function set_hash() {
-        $this->user_hash = sha1( $this->user_pass );
+    private function get_hash( $user_pass ) : string {
+        return sha1( $user_pass );
     }
 
     /**
@@ -104,7 +107,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
         } else {
             $this->user_status = 'pending';
-            $this->set_token();
+            $this->user_token = $this->get_token();
             $this->user_email = $user_email;
             $this->user_hash = '';
 
@@ -147,8 +150,8 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
         } else {
             $this->user_email = $user_email;
-            $this->set_pass( $pass_symbols, $pass_length );
-            $this->set_hash();
+            $this->user_pass = $this->get_pass( $pass_symbols, $pass_length );
+            $this->user_hash = $this->get_hash( $this->user_pass );
 
             $args = [[ 'user_email', '=', $this->user_email ]];
             $data = [ 'user_hash' => $this->user_hash ];
@@ -179,16 +182,18 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         } elseif( Filter::is_empty( $user_pass )) {
             $this->error = 'user_pass is empty';
 
-        } elseif( $this->count( 'users', [[ 'user_email', '=', $this->user_email ], [ 'user_hash', '=', $this->user_hash ], [ 'user_status', '<>', 'trash' ]] ) == 0 ) {
+        } elseif( $this->count( 'users', [[ 'user_email', '=', $user_email ], [ 'user_hash', '=', $this->get_hash( $user_pass ) ], [ 'user_status', '<>', 'trash' ]] ) == 0 ) {
+            //$a = $this->get_hash( $user_pass );
             $this->error = 'user not found';
 
         } else {
+            $this->user_status = 'approved';
             $this->user_email = $user_email;
             $this->user_pass = $user_pass;
-            $this->set_hash();
+            $this->user_hash = '';
 
             $args = [[ 'user_email', '=', $this->user_email ]];
-            $data = ['user_status' => 'approved', 'user_hash' => '' ];
+            $data = ['user_status' => $this->user_status, 'user_hash' => $this->user_hash ];
 
             if( !$this->update( 'users', $args, $data )) {
                 $this->clear();
@@ -218,7 +223,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         
         } else {
             $this->id = $user_id;
-            $this->set_token();
+            $this->user_token = $this->get_token();
 
             $args = [[ 'id', '=', $this->user_id ]];
             $data = [ 'user_token' => $this->user_token ];

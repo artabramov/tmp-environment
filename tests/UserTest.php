@@ -68,38 +68,27 @@ class UserTest extends TestCase
     }
 
     /**
-     * set_token
+     * get_token
      */
-    public function testSetToken() {
-        
-        $this->callMethod( $this->user, 'set_token' );
-        $result = $this->getProperty($this->user, 'user_token');
-
-        // is correct
+    public function testGetToken() {
+        $result = $this->callMethod( $this->user, 'get_token' );
         $this->assertMatchesRegularExpression( '/[a-f0-9]{80}/', $result );
     }
 
     /**
-     * set_pass
+     * get_pass
      */
-    public function testSetPass() {
+    public function testGetPass() {
         
-        $this->callMethod( $this->user, 'set_pass', ['abcddefghijklmnopqrstuvwxyz0123456789', 6] );
-        $result = $this->getProperty($this->user, 'user_pass');
-
-        // is correct
+        $result = $this->callMethod( $this->user, 'get_pass', ['abcddefghijklmnopqrstuvwxyz0123456789', 6] );
         $this->assertMatchesRegularExpression( '/[a-z0-9]{6}/', $result );
     }
 
     /**
-     * set_hash
+     * get_hash
      */
-    public function testSetHash() {
-        
-        $this->callMethod( $this->user, 'set_hash' );
-        $result = $this->getProperty($this->user, 'user_hash');
-
-        // is correct
+    public function testGetHash() {
+        $result = $this->callMethod( $this->user, 'get_hash', [ '123456' ] );
         $this->assertMatchesRegularExpression( '/[a-f0-9]{40}/', $result );
     }
 
@@ -118,6 +107,7 @@ class UserTest extends TestCase
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result == true ) {
             $this->assertEquals( $user_id, 1 );
             $this->assertEquals( $user_status, 'pending' );
@@ -125,7 +115,6 @@ class UserTest extends TestCase
             $this->assertEquals( $user_email, $email );
             $this->assertEquals( $user_hash, '' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $user_id, null );
@@ -134,7 +123,6 @@ class UserTest extends TestCase
             $this->assertEquals( $user_email, null );
             $this->assertEquals( $user_hash, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -188,17 +176,16 @@ class UserTest extends TestCase
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertMatchesRegularExpression( '/[0-9]{6}/', $user_pass );
             $this->assertMatchesRegularExpression( '/[a-f0-9]{40}/', $user_hash );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $user_pass, null );
             $this->assertEquals( $user_hash, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -209,10 +196,10 @@ class UserTest extends TestCase
             [ 'noreply@noreply.no', true ],
 
             // incorrect cases (email correct, but not exists)
-            [ 'noreply.1@noreply.1.no', true ],
-            [ 'noreply.noreply@noreply.noreply.no', true ],
-            [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', true ],
-            [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', true ],
+            [ 'noreply.1@noreply.1.no', false ],
+            [ 'noreply.noreply@noreply.noreply.no', false ],
+            [ 'noreply-noreply.noreply@noreply-noreply.noreply.no', false ],
+            [ 'noreply_noreply.noreply@noreply_noreply.noreply.no', false ],
 
             // incorrect cases
             [ '', false ],
@@ -236,34 +223,27 @@ class UserTest extends TestCase
     public function testSignin( $email, $pass, $expected ) {
 
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '7c4a8d09ca3762af61e59520943dc26494f8941b');" );
 
         $result = $this->callMethod( $this->user, 'signin', [ $email, $pass ] );
 
-        $id = $this->getProperty( $this->user, 'id' );
-        $date = $this->getProperty( $this->user, 'date' );
+        $user_status = $this->getProperty( $this->user, 'user_status' );
         $user_email = $this->getProperty( $this->user, 'user_email' );
-        $user_pass = $this->getProperty( $this->user, 'user_pass' );
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
-            $this->assertEquals( $id, 1 );
-            $this->assertEquals( $date, '2000-01-01 00:00:00' );
+            $this->assertEquals( $user_status, 'approved' );
             $this->assertEquals( $user_email, $email );
-            $this->assertEquals( $user_pass, '123456' );
             $this->assertEquals( $user_hash, '' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
-            $this->assertEquals( $id, null );
-            $this->assertEquals( $date, null );
+            $this->assertEquals( $user_status, null );
             $this->assertEquals( $user_email, null );
-            $this->assertEquals( $user_pass, null );
             $this->assertEquals( $user_hash, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -273,8 +253,9 @@ class UserTest extends TestCase
             // correct case
             [ 'noreply@noreply.no', '123456', true ],
 
-            // incorrect case
+            // incorrect cases
             [ '_noreply@noreply.no', '123456', false ],
+            [ 'noreply@noreply.no', '1', false ],
         ];
     }
 
@@ -284,18 +265,17 @@ class UserTest extends TestCase
     public function testSignout( $user_id, $expected ) {
 
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
         $result = $this->callMethod( $this->user, 'signout', [ $user_id ] );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -319,7 +299,7 @@ class UserTest extends TestCase
     public function testAuth( $token, $expected ) {
 
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
 
         $result = $this->callMethod( $this->user, 'auth', [ $token ] );
 
@@ -331,15 +311,15 @@ class UserTest extends TestCase
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $id, 1 );
             $this->assertEquals( $date, '2000-01-01 00:00:00' );
-            $this->assertEquals( $user_status, 'pending' );
+            $this->assertEquals( $user_status, 'approved' );
             $this->assertEquals( $user_token, 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200' );
             $this->assertEquals( $user_email, 'noreply@noreply.no' );
             $this->assertEquals( $user_hash, '1542850d66d8007d620e4050b5715dc83f4a921d' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $id, null );
@@ -349,7 +329,6 @@ class UserTest extends TestCase
             $this->assertEquals( $user_email, null );
             $this->assertEquals( $user_hash, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -384,6 +363,7 @@ class UserTest extends TestCase
         $user_hash = $this->getProperty( $this->user, 'user_hash' );
         $error = $this->getProperty( $this->user, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $id, 1 );
             $this->assertEquals( $date, '2000-01-01 00:00:00' );
@@ -392,7 +372,6 @@ class UserTest extends TestCase
             $this->assertEquals( $user_email, 'noreply@noreply.no' );
             $this->assertEquals( $user_hash, '1542850d66d8007d620e4050b5715dc83f4a921d' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $id, null );
@@ -402,7 +381,6 @@ class UserTest extends TestCase
             $this->assertEquals( $user_email, null );
             $this->assertEquals( $user_hash, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 

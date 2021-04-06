@@ -57,13 +57,11 @@ class HubTest extends TestCase
         ];
 
         $this->pdo = new PDO( $dsn, PDO_USER, PDO_PASS, $args );
-        //$this->echidna = new \artabramov\Echidna\Models\Echidna( $this->pdo );
         $this->hub = new \artabramov\Echidna\Models\Hub( $this->pdo );
     }
 
     protected function tearDown() : void {
         $this->pdo = null;
-        //$this->echidna = null;
         $this->hub = null;
     }
 
@@ -80,19 +78,18 @@ class HubTest extends TestCase
         $_hub_name = $this->getProperty( $this->hub, 'hub_name' );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_user_id, $user_id );
             $this->assertEquals( $_hub_status, $hub_status );
             $this->assertEquals( $_hub_name, $hub_name );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_user_id, null );
             $this->assertEquals( $_hub_status, null );
             $this->assertEquals( $_hub_name, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -132,15 +129,14 @@ class HubTest extends TestCase
         $_hub_name = $this->getProperty( $this->hub, 'hub_name' );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_hub_name, $hub_name );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_hub_name, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -174,17 +170,16 @@ class HubTest extends TestCase
         $_hub_status = $this->getProperty( $this->hub, 'hub_status' );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_hub_id, $hub_id );
             $this->assertEquals( $_hub_status, 'trash' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_hub_id, null );
             $this->assertEquals( $_hub_status, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -215,17 +210,16 @@ class HubTest extends TestCase
         $_hub_status = $this->getProperty( $this->hub, 'hub_status' );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_hub_id, $hub_id );
             $this->assertEquals( $_hub_status, 'public' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_hub_id, null );
             $this->assertEquals( $_hub_status, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -254,13 +248,12 @@ class HubTest extends TestCase
         $result = $this->callMethod( $this->hub, 'remove', [ $hub_id ] );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -295,6 +288,7 @@ class HubTest extends TestCase
         $hub_name = $this->getProperty( $this->hub, 'hub_name' );
         $error = $this->getProperty( $this->hub, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $id, 1 );
             $this->assertEquals( $date, '2000-01-01 00:00:00' );
@@ -302,7 +296,6 @@ class HubTest extends TestCase
             $this->assertEquals( $hub_status, 'public' );
             $this->assertEquals( $hub_name, 'hub name' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $id, null );
@@ -311,7 +304,6 @@ class HubTest extends TestCase
             $this->assertEquals( $hub_status, null );
             $this->assertEquals( $hub_name, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 

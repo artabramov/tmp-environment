@@ -79,13 +79,13 @@ class RoleTest extends TestCase
         $_user_role = $this->getProperty( $this->role, 'user_role' );
         $error = $this->getProperty( $this->role, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_id, 1 );
             $this->assertEquals( $_hub_id, $hub_id );
             $this->assertEquals( $_user_id, $user_id );
             $this->assertEquals( $_user_role, $user_role );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_id, null );
@@ -93,7 +93,6 @@ class RoleTest extends TestCase
             $this->assertEquals( $_user_id, null );
             $this->assertEquals( $_user_role, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -135,19 +134,18 @@ class RoleTest extends TestCase
         $_user_role = $this->getProperty( $this->role, 'user_role' );
         $error = $this->getProperty( $this->role, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $_hub_id, $hub_id );
             $this->assertEquals( $_user_id, $user_id );
             $this->assertEquals( $_user_role, $user_role );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $_hub_id, null );
             $this->assertEquals( $_user_id, null );
             $this->assertEquals( $_user_role, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -190,6 +188,7 @@ class RoleTest extends TestCase
         $user_role = $this->getProperty( $this->role, 'user_role' );
         $error = $this->getProperty( $this->role, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $id, 1 );
             $this->assertEquals( $date, '2000-01-01 00:00:00' );
@@ -197,7 +196,6 @@ class RoleTest extends TestCase
             $this->assertEquals( $user_id, 1 );
             $this->assertEquals( $user_role, 'admin' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $id, null );
@@ -206,7 +204,6 @@ class RoleTest extends TestCase
             $this->assertEquals( $user_id, null );
             $this->assertEquals( $user_role, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 
@@ -227,7 +224,7 @@ class RoleTest extends TestCase
     }
 
     /**
-     * @dataProvider addFetch
+     * @dataProvider addGetone
      */
     public function testGetone( $role_id, $expected ) {
 
@@ -243,6 +240,7 @@ class RoleTest extends TestCase
         $user_role = $this->getProperty( $this->role, 'user_role' );
         $error = $this->getProperty( $this->role, 'error' );
 
+        $this->assertEquals( $result, $expected );
         if( $result ) {
             $this->assertEquals( $id, 1 );
             $this->assertEquals( $date, '2000-01-01 00:00:00' );
@@ -250,7 +248,6 @@ class RoleTest extends TestCase
             $this->assertEquals( $user_id, 1 );
             $this->assertEquals( $user_role, 'admin' );
             $this->assertEmpty( $error );
-            $this->assertTrue( $result );
 
         } else {
             $this->assertEquals( $id, null );
@@ -259,7 +256,6 @@ class RoleTest extends TestCase
             $this->assertEquals( $user_id, null );
             $this->assertEquals( $user_role, null );
             $this->assertNotEmpty( $error );
-            $this->assertFalse( $result );
         }
     }
 

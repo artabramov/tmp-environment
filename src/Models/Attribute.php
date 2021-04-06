@@ -46,7 +46,9 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
      * @param int $max_length
      * @return bool
      */
-    public function set( int $user_id, string $attribute_key, mixed $attribute_value, int $min_length, int $max_length ) : bool {
+    public function create( int $user_id, string $attribute_key, mixed $attribute_value, int $min_length, int $max_length ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -70,7 +72,6 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->error = 'attribute is occupied';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->attribute_key = $attribute_key;
             $this->attribute_value = $attribute_value;
@@ -84,6 +85,7 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->id = $this->insert( 'user_attributes', $data );
 
             if( empty( $this->id )) {
+                $this->clear();
                 $this->error = 'attribute insert error';
             }   
         }
@@ -97,7 +99,9 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
      * @param mixed $attribute_value
      * @return bool
      */
-    public function put( int $user_id, string $attribute_key, mixed $attribute_value, int $min_length, int $max_length ) : bool {
+    public function revalue( int $user_id, string $attribute_key, mixed $attribute_value, int $min_length, int $max_length ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -121,7 +125,6 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->error = 'attribute not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->attribute_key = $attribute_key;
             $this->attribute_value = $attribute_value;
@@ -130,6 +133,7 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $data = [ 'attribute_value' => $this->attribute_value ];
 
             if( !$this->update( 'user_attributes', $args, $data )) {
+                $this->clear();
                 $this->error = 'attribute update error';
             }
         }
@@ -142,7 +146,9 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
      * @param string $attribute_key
      * @return bool
      */
-    public function unset( int $user_id, string $attribute_key ) : bool {
+    public function remove( int $user_id, string $attribute_key ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -160,13 +166,13 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->error = 'attribute not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->attribute_key = $attribute_key;
 
             $args = [ ['user_id', '=', $this->user_id], ['attribute_key', '=', $this->attribute_key] ];
 
             if( !$this->delete( 'user_attributes', $args )) {
+                $this->clear();
                 $this->error = 'attribute delete error';
             }
         }
@@ -179,7 +185,9 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
      * @param string $attribute_key
      * @return bool
      */
-    public function get( int $user_id, string $attribute_key ) : bool {
+    public function fetch( int $user_id, string $attribute_key ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $user_id )) {
             $this->error = 'user_id is empty';
@@ -197,19 +205,22 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->error = 'attribute not found';
 
         } else {
-            $this->clear();
             $this->user_id = $user_id;
             $this->attribute_key = $attribute_key;
 
-            $rows = $this->select( '*', 'user_attributes', [['user_id', '=', $user_id], ['attribute_key', '=', $attribute_key]], 1, 0 );
+            $args = [['user_id', '=', $this->user_id], ['attribute_key', '=', $this->attribute_key]];
+            $rows = $this->select( '*', 'user_attributes', $args, 1, 0 );
 
             if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'attribute select error';
 
             } else {
-                foreach( $rows[0] as $key=>$value ) {
-                    $this->$key = $value;
-                }
+                $this->id              = $rows[0]['id'];
+                $this->date            = $rows[0]['date'];
+                $this->user_id         = $rows[0]['user_id'];
+                $this->attribute_key   = $rows[0]['attribute_key'];
+                $this->attribute_value = $rows[0]['attribute_value'];
             }
         }
 
@@ -222,6 +233,8 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
      * @return bool
      */
     public function getone( mixed $attribute_id ) : bool {
+
+        $this->clear();
 
         if( Filter::is_empty( $attribute_id )) {
             $this->error = 'attribute_id is empty';
@@ -236,15 +249,19 @@ class Attribute extends \artabramov\Echidna\Models\Echidna implements \artabramo
             $this->clear();
             $this->attribute_id = $attribute_id;
 
-            $rows = $this->select( '*', 'user_attributes', [['id', '=', $attribute_id]], 1, 0 );
+            $args = [['id', '=', $attribute_id]];
+            $rows = $this->select( '*', 'user_attributes', $args, 1, 0 );
 
             if( empty( $rows[0] )) {
+                $this->clear();
                 $this->error = 'attribute select error';
 
             } else {
-                foreach( $rows[0] as $key=>$value ) {
-                    $this->$key = $value;
-                }
+                $this->id              = $rows[0]['id'];
+                $this->date            = $rows[0]['date'];
+                $this->user_id         = $rows[0]['user_id'];
+                $this->attribute_key   = $rows[0]['attribute_key'];
+                $this->attribute_value = $rows[0]['attribute_value'];
             }
         }
 
