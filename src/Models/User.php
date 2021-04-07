@@ -297,6 +297,49 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
     /**
+     * @param int $user_id
+     * @param string $user_email
+     * @return bool
+     */
+    public function remail( $user_id, $user_email ) : bool {
+
+        $this->clear();
+
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_int( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'id', '=', $user_id ], ['user_status', '=', 'approved']] ) == 0 ) {
+            $this->error = 'user not found';
+
+        } elseif( Filter::is_empty( $user_email )) {
+            $this->error = 'user_email is empty';
+
+        } elseif( !Filter::is_email( $user_email )) {
+            $this->error = 'user_email is incorrect';
+
+        } elseif( $this->count( 'users', [[ 'user_email', '=', $user_email ]] ) > 0 ) {
+            $this->error = 'user_email is occupied';
+        
+        } else {
+            $this->id = $user_id;
+            $this->user_email = $user_email;
+
+            $args = [[ 'id', '=', $this->id ]];
+            $data = [ 'user_email' => $this->user_email ];
+
+            if( !$this->update( 'users', $args, $data )) {
+                $this->clear();
+                $this->error = 'user update error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
+    /**
      * This is a part of the Sequence interface. Get the element by id.
      * @param mixed $user_id
      * @return bool

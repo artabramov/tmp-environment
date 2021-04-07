@@ -398,4 +398,45 @@ class UserTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider addRemail
+     */
+    public function testRemail( $user_id, $user_email, $expected ) {
+
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".users;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (1, '2000-01-01 00:00:00', 'approved', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f200', 'noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".users (id, date, user_status, user_token, user_email, user_hash) VALUES (2, '2000-01-01 00:00:00', 'pending', 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f201', 'no.noreply@noreply.no', '1542850d66d8007d620e4050b5715dc83f4a921d');" );
+
+        $result = $this->callMethod( $this->user, 'remail', [ $user_id, $user_email ] );
+        $error = $this->getProperty( $this->user, 'error' );
+
+        $this->assertEquals( $result, $expected );
+        if( $result ) {
+            $this->getProperty( $this->user, 'error' ) == $user_email;
+            $this->assertEmpty( $error );
+
+        } else {
+            $this->getProperty( $this->user, 'error' ) == null;
+            $this->assertNotEmpty( $error );
+        }
+    }
+
+    public function addRemail() {
+        return [
+
+            // correct case
+            [ 1, 'noreply-2@noreply.no', true ],
+
+            // incorrect cases
+            [ 0, 'noreply-2@noreply.no', false ],
+            [ -1, 'noreply-2@noreply.no', false ],
+            [ 2, 'noreply-2@noreply.no', false ],
+            [ 1, '', false ],
+            [ 1, 'noreply@noreply.no', false ],
+            [ 1, 'no.noreply@noreply.no', false ],
+            [ 1, 'noreply-2', false ],
+
+        ];
+    }
+
 }

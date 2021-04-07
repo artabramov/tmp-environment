@@ -121,8 +121,9 @@ class Post extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     }
 
 
-
-
+    /**
+     * 
+     */
     public function getone( int $post_id ) {}
 
 }
