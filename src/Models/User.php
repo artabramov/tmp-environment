@@ -183,7 +183,6 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->error = 'user_pass is empty';
 
         } elseif( $this->count( 'users', [[ 'user_email', '=', $user_email ], [ 'user_hash', '=', $this->get_hash( $user_pass ) ], [ 'user_status', '<>', 'trash' ]] ) == 0 ) {
-            //$a = $this->get_hash( $user_pass );
             $this->error = 'user not found';
 
         } else {
@@ -192,6 +191,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->user_pass = $user_pass;
             $this->user_hash = '';
 
+            // update user
             $args = [[ 'user_email', '=', $this->user_email ]];
             $data = ['user_status' => $this->user_status, 'user_hash' => $this->user_hash ];
 
@@ -199,6 +199,26 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
                 $this->clear();
                 $this->error = 'user update error';
             }
+
+            // select user
+            if ( empty( $this->error )) {
+                $args = [[ 'user_email', '=', $this->user_email ]];
+                $rows = $this->select( '*', 'users', $args, 1, 0 );
+
+                if( empty( $rows[0] )) {
+                    $this->clear();
+                    $this->error = 'user select error';
+
+                } else {
+                    $this->id          = $rows[0]['id'];
+                    $this->date        = $rows[0]['date'];
+                    $this->user_status = $rows[0]['user_status'];
+                    $this->user_token  = $rows[0]['user_token'];
+                    $this->user_email  = $rows[0]['user_email'];
+                    $this->user_hash   = $rows[0]['user_hash'];
+                }
+            }
+
         }
 
         return empty( $this->error );
