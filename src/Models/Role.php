@@ -224,7 +224,7 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
         return empty( $this->error );
     }
-
+    
     /**
      * This is a part of the Sequence interface. Get the element by id.
      * @param mixed $role_id

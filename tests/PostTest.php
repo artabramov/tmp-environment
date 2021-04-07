@@ -74,7 +74,7 @@ class PostTest extends TestCase
 
         $result = $this->callMethod( $this->post, 'create', [ $parent_id, $user_id, $hub_id, $post_status, $post_type, $post_content, 2, 255 ] );
         $post = [];
-
+        
         $post['id']           = $this->getProperty( $this->post, 'id' );
         $post['parent_id']    = $this->getProperty( $this->post, 'parent_id' );
         $post['user_id']      = $this->getProperty( $this->post, 'user_id' );
