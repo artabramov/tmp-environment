@@ -245,7 +245,7 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
             $this->id = $user_id;
             $this->user_token = $this->get_token();
 
-            $args = [[ 'id', '=', $this->user_id ]];
+            $args = [[ 'id', '=', $this->id ]];
             $data = [ 'user_token' => $this->user_token ];
 
             if( !$this->update( 'users', $args, $data )) {
