@@ -271,4 +271,36 @@ class RoleTest extends TestCase
             [ -1, false ],
         ];
     }
+
+    /**
+     * @dataProvider addIsExists
+     */
+    /*
+    public function testIsExists( $hub_id, $user_id, $expected ) {
+
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".user_roles;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".user_roles (id, date, hub_id, user_id, user_role) VALUES (1, '2000-01-01 00:00:00', 1, 1, 'admin');" );
+
+        $result = $this->callMethod( $this->role, 'is_exists', [ $hub_id, $user_id ] );
+        //$error = $this->getProperty( $this->role, 'error' );
+        $this->assertEquals( $result, $expected );
+    }
+
+    public function addIsExists() {
+        return [
+
+            // correct case
+            [ 1, 1, true ],
+
+            // incorrect cases
+            [ 0, 1, false ],
+            [ 2, 1, false ],
+            [ 1, 0, false ],
+            [ 1, 2, false ],
+            [ -1, 1, null ],
+            [ 1, -1, null ],
+        ];
+    }
+    */
+
 }

@@ -224,6 +224,32 @@ class Role extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
 
         return empty( $this->error );
     }
+
+    /*
+    public function is_exists( int $hub_id, int $user_id ) : mixed {
+
+        $this->clear();
+
+        if( Filter::is_empty( $user_id )) {
+            $this->error = 'user_id is empty';
+
+        } elseif( !Filter::is_int( $user_id )) {
+            $this->error = 'user_id is incorrect';
+
+        } elseif( Filter::is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !Filter::is_int( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+        }
+
+        if( empty( $this->error )) {
+            return $this->count( 'user_roles', [['user_id', '=', $user_id], ['hub_id', '=', $hub_id]] ) > 0;
+        } 
+
+        return null;
+    }
+    */
     
     /**
      * This is a part of the Sequence interface. Get the element by id.

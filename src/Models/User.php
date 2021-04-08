@@ -325,11 +325,19 @@ class User extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         
         } else {
             $this->id = $user_id;
+            $this->user_status = 'pending';
+            $this->user_token = $this->get_token();
             $this->user_email = $user_email;
+            $this->user_hash = '';
 
             $args = [[ 'id', '=', $this->id ]];
-            $data = [ 'user_email' => $this->user_email ];
-
+            $data = [
+                'user_status' => $this->user_status,
+                'user_token'  => $this->user_token,
+                'user_email'  => $this->user_email,
+                'user_hash'   => $this->user_hash,
+            ];
+            
             if( !$this->update( 'users', $args, $data )) {
                 $this->clear();
                 $this->error = 'user update error';
