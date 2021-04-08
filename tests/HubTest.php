@@ -158,8 +158,47 @@ class HubTest extends TestCase
     }
 
     /**
+     * @dataProvider addRestatus
+     */
+    public function testRestatus( $hub_id, $hub_status, $expected ) {
+
+        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
+        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'hub name');" );
+
+        $result = $this->callMethod( $this->hub, 'restatus', [ $hub_id, $hub_status ] );
+        $_hub_id = $this->getProperty( $this->hub, 'id' );
+        $_hub_status = $this->getProperty( $this->hub, 'hub_status' );
+        $error = $this->getProperty( $this->hub, 'error' );
+
+        $this->assertEquals( $result, $expected );
+        if( $result ) {
+            $this->assertEquals( $_hub_id, $hub_id );
+            $this->assertEquals( $_hub_status, $hub_status );
+            $this->assertEmpty( $error );
+
+        } else {
+            $this->assertEquals( $_hub_id, null );
+            $this->assertEquals( $_hub_status, null );
+            $this->assertNotEmpty( $error );
+        }
+    }
+
+    public function addRestatus() {
+        return [
+
+            // correct case
+            [ 1, 'public', true ],
+
+            // incorrect cases
+            [ 1, '', false ],
+
+        ];
+    }
+
+    /**
      * @dataProvider addTrash
      */
+    /*
     public function testTrash( $hub_id, $expected ) {
 
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
@@ -196,10 +235,12 @@ class HubTest extends TestCase
 
         ];
     }
+    */
 
     /**
      * @dataProvider addRecover
      */
+    /*
     public function testRecover( $hub_id, $expected ) {
 
         $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
@@ -236,6 +277,7 @@ class HubTest extends TestCase
 
         ];
     }
+    */
 
     /**
      * @dataProvider addRemove

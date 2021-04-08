@@ -129,11 +129,47 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
         return empty( $this->error );
     }
 
+    public function restatus( int $hub_id, string $hub_status ) : bool {
+
+        $this->clear();
+
+        if( Filter::is_empty( $hub_id )) {
+            $this->error = 'hub_id is empty';
+
+        } elseif( !Filter::is_int( $hub_id )) {
+            $this->error = 'hub_id is incorrect';
+
+        } elseif( $this->count( 'hubs', [['id', '=', $hub_id]] ) == 0 ) {
+            $this->error = 'hub not found';
+
+        } elseif( Filter::is_empty( $hub_status )) {
+            $this->error = 'hub_status is empty';
+
+        } elseif( !Filter::is_key( $hub_status, 20 )) {
+            $this->error = 'hub_status is incorrect';
+
+        } else {
+            $this->id = $hub_id;
+            $this->hub_status = $hub_status;
+
+            $args = [ ['id', '=', $this->id] ];
+            $data = [ 'hub_status' => $this->hub_status ];
+
+            if( !$this->update( 'hubs', $args, $data )) {
+                $this->clear();
+                $this->error = 'hub update error';
+            }
+        }
+
+        return empty( $this->error );
+    }
+
     /**
      * Update status from public to trash.
      * @param int $hub_id
      * @return bool
      */
+    /*
     public function trash( int $hub_id ) : bool {
 
         $this->clear();
@@ -162,12 +198,14 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
 
         return empty( $this->error );
     }
+    */
 
     /**
      * Update status from trash to public.
      * @param int $hub_id
      * @return bool
      */
+    /*
     public function recover( int $hub_id ) : bool {
 
         $this->clear();
@@ -196,6 +234,7 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
 
         return empty( $this->error );
     }
+    */
 
     /**
      * Permanent remove.
