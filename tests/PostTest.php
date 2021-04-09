@@ -111,18 +111,18 @@ class PostTest extends TestCase
         return [
 
             // correct cases
-            [ 1, 1, 1, 'post_status', 'post_type', 'Lorem ipsum', true ],
-            [ 0, 1, 1, 'post_status', 'post_type', 'Lorem ipsum', true ],
-            [ 1, 1, 1, 'post_status', 'post_type', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor i', true ],
+            [ 1, 1, 1, 'todo', 'post_type', 'Lorem ipsum', true ],
+            [ 0, 1, 1, 'todo', 'post_type', 'Lorem ipsum', true ],
+            [ 1, 1, 1, 'todo', 'post_type', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor i', true ],
 
             // incorrect cases
-            [ 1, 0, 1, 'post_status', 'post_type', 'Lorem ipsum', false ],
-            [ 1, 1, 0, 'post_status', 'post_type', 'Lorem ipsum', false ],
+            [ 1, 0, 1, 'todo', 'post_type', 'Lorem ipsum', false ],
+            [ 1, 1, 0, 'todo', 'post_type', 'Lorem ipsum', false ],
             [ 1, 1, 1, '', 'post_type', 'Lorem ipsum', false ],
-            [ 1, 1, 1, 'post_status', '', 'Lorem ipsum', false ],
-            [ 1, 1, 1, 'post_status', 'post_type', '', false ],
-            [ 1, 1, 1, 'post_status', 'post_type', 'L', false ],
-            [ 1, 1, 1, 'post_status', 'post_type', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in', false ],
+            [ 1, 1, 1, 'todo', '', 'Lorem ipsum', false ],
+            [ 1, 1, 1, 'todo', 'post_type', '', false ],
+            [ 1, 1, 1, 'todo', 'post_type', 'L', false ],
+            [ 1, 1, 1, 'todo', 'post_type', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in', false ],
 
         ];
     }

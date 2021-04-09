@@ -4,7 +4,7 @@ SET sql_mode = '';
 CREATE TABLE IF NOT EXISTS project.users (
     id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_status VARCHAR(20)  NOT NULL DEFAULT '',
+    user_status VARCHAR(20)  NOT NULL DEFAULT '', # pending | approved | trash
     user_token  VARCHAR(80)  NOT NULL,
     user_email  VARCHAR(255) NOT NULL,
     user_hash   VARCHAR(40)  NOT NULL DEFAULT '',
@@ -101,23 +101,23 @@ CREATE TABLE IF NOT EXISTS project.post_meta (
 
 
 CREATE TABLE IF NOT EXISTS project.post_uploads (
-    id            BIGINT(20)   NOT NULL AUTO_INCREMENT,
-    date          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id       BIGINT(20)   NOT NULL,
-    post_id       BIGINT(20)   NOT NULL,
-    upload_status VARCHAR(20)  NOT NULL, # inherit | favorite | trash
-    upload_name   VARCHAR(255) NOT NULL, # Filename
-    upload_mime   VARCHAR(255) NOT NULL,
-    upload_size   BIGINT(20)   NOT NULL,
-    upload_file   VARCHAR(255) NOT NULL, # Full link to the file
+    id          BIGINT(20)   NOT NULL AUTO_INCREMENT,
+    date        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_id     BIGINT(20)   NOT NULL,
+    post_id     BIGINT(20)   NOT NULL,
+    upload_key  VARCHAR(20)  NOT NULL,
+    upload_name VARCHAR(255) NOT NULL, # filename
+    upload_mime VARCHAR(255) NOT NULL,
+    upload_size BIGINT(20)   NOT NULL,
+    upload_file VARCHAR(255) NOT NULL, # link to the file
 
-    PRIMARY KEY id            (id),
-            KEY date          (date),
-            KEY user_id       (user_id),
-            KEY post_id       (post_id),
-            KEY upload_status (upload_status),
-            KEY upload_name   (upload_name),
-            KEY upload_mime   (upload_mime),
-            KEY upload_size   (upload_size),
-     UNIQUE KEY upload_file   (upload_file)
+    PRIMARY KEY id          (id),
+            KEY date        (date),
+            KEY user_id     (user_id),
+            KEY post_id     (post_id),
+            KEY upload_key  (upload_key),
+            KEY upload_name (upload_name),
+            KEY upload_mime (upload_mime),
+            KEY upload_size (upload_size),
+     UNIQUE KEY upload_file (upload_file)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

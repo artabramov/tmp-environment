@@ -77,7 +77,7 @@ class Post extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
         } elseif( Filter::is_empty( $post_status )) {
             $this->error = 'post_status is empty';
 
-        } elseif( !Filter::is_key( $post_status, 20 )) {
+        } elseif( !Filter::is_status( $post_status, 'post' )) {
             $this->error = 'post_status is incorrect';
 
         } elseif( Filter::is_empty( $post_type )) {

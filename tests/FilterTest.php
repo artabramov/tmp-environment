@@ -138,6 +138,71 @@ class FilterTest extends TestCase
     }
 
     /**
+     * @dataProvider addIsStatus
+     */
+    public function testIsStatus( $value, $key, $expected ) {
+        $result = $this->callMethod( $this->filter, 'is_status', [ $value, $key ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsStatus() {
+        return [
+
+            // correct cases
+            [ 'pending', 'user', true ],
+            [ 'approved', 'user', true ],
+            [ 'trash', 'user', true ],
+            [ 'private', 'hub', true ],
+            [ 'public', 'hub', true ],
+            [ 'trash', 'hub', true ],
+            [ 'todo', 'post', true ],
+            [ 'doing', 'post', true ],
+            [ 'done', 'post', true ],
+            [ 'trash', 'post', true ],
+            [ 'inherit', 'post', true ],
+
+            // incorrect cases
+            [ '_pending', 'user', false ],
+            [ '_approved', 'user', false ],
+            [ '_trash', 'user', false ],
+            [ '_private', 'hub', false ],
+            [ '_public', 'hub', false ],
+            [ '_trash', 'hub', false ],
+            [ '_todo', 'post', false ],
+            [ '_doing', 'post', false ],
+            [ '_done', 'post', false ],
+            [ '_trash', 'post', false ],
+            [ '_inherit', 'post', false ],
+        ];
+    }
+
+    /**
+     * @dataProvider addIsType
+     */
+    public function testIsType( $value, $key, $expected ) {
+        $result = $this->callMethod( $this->filter, 'is_type', [ $value, $key ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsType() {
+        return [
+
+            // correct cases
+            [ 'document', 'post', true ],
+            [ 'comment', 'post', true ],
+
+            // incorrect cases
+            [ '_document', 'post', false ],
+            [ '_comment', 'post', false ],
+            [ 'document', '_post', false ],
+            [ 'comment', '_post', false ],
+            [ '', 'post', false ],
+            [ 'comment', '', false ],
+
+        ];
+    }
+
+    /**
      * @dataProvider addIsString
      */
     public function testIsString( $value, $min_length, $max_length, $expected ) {

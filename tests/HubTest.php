@@ -97,22 +97,22 @@ class HubTest extends TestCase
         return [
 
             // correct cases
-            [ 1, 'status', 'hub name', true ],
-            [ 9223372036854775807, 'status', 'hub name', true ],
-            [ 1, 'status_status_status', 'hub name', true ],
-            [ 1, 'status', 'hu', true ],
-            [ 1, 'status', 'hub name hub name hub name hub name hubn', true ],
+            [ 1, 'public', 'hub name', true ],
+            [ 9223372036854775807, 'public', 'hub name', true ],
+            [ 1, 'public', 'hub name', true ],
+            [ 1, 'public', 'hu', true ],
+            [ 1, 'public', 'hub name hub name hub name hub name hubn', true ],
 
             // incorrect cases
-            [ 0, 'status', 'hub name', false ],
-            [ -1, 'status', 'hub name', false ],
+            [ 0, 'public', 'hub name', false ],
+            [ -1, 'public', 'hub name', false ],
             [ 1, '', 'hub name', false ],
             [ 1, '0', 'hub name', false ],
-            [ 1, 'status_status_status_', 'hub name', false ],
-            [ 1, 'status', '', false ],
-            [ 1, 'status', '0', false ],
-            [ 1, 'status', 'h', false ],
-            [ 1, 'status', 'hub name hub name hub name hub name hub n', false ],
+            [ 1, '_public', 'hub name', false ],
+            [ 1, 'public', '', false ],
+            [ 1, 'public', '0', false ],
+            [ 1, 'public', 'h', false ],
+            [ 1, 'public', 'hub name hub name hub name hub name hub n', false ],
 
         ];
     }
@@ -194,90 +194,6 @@ class HubTest extends TestCase
 
         ];
     }
-
-    /**
-     * @dataProvider addTrash
-     */
-    /*
-    public function testTrash( $hub_id, $expected ) {
-
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'public', 'hub name');" );
-
-        $result = $this->callMethod( $this->hub, 'trash', [ $hub_id ] );
-        $_hub_id = $this->getProperty( $this->hub, 'id' );
-        $_hub_status = $this->getProperty( $this->hub, 'hub_status' );
-        $error = $this->getProperty( $this->hub, 'error' );
-
-        $this->assertEquals( $result, $expected );
-        if( $result ) {
-            $this->assertEquals( $_hub_id, $hub_id );
-            $this->assertEquals( $_hub_status, 'trash' );
-            $this->assertEmpty( $error );
-
-        } else {
-            $this->assertEquals( $_hub_id, null );
-            $this->assertEquals( $_hub_status, null );
-            $this->assertNotEmpty( $error );
-        }
-    }
-
-    public function addTrash() {
-        return [
-
-            // correct case
-            [ 1, true ],
-
-            // incorrect cases
-            [ 0, false ],
-            [ 2, false ],
-            [ -1, false  ],
-
-        ];
-    }
-    */
-
-    /**
-     * @dataProvider addRecover
-     */
-    /*
-    public function testRecover( $hub_id, $expected ) {
-
-        $stmt = $this->pdo->query( "TRUNCATE TABLE " . PDO_DBASE . ".hubs;" );
-        $stmt = $this->pdo->query( "INSERT INTO " . PDO_DBASE . ".hubs (id, date, user_id, hub_status, hub_name) VALUES (1, '2000-01-01 00:00:00', 1, 'trash', 'hub name');" );
-
-        $result = $this->callMethod( $this->hub, 'recover', [ $hub_id ] );
-        $_hub_id = $this->getProperty( $this->hub, 'id' );
-        $_hub_status = $this->getProperty( $this->hub, 'hub_status' );
-        $error = $this->getProperty( $this->hub, 'error' );
-
-        $this->assertEquals( $result, $expected );
-        if( $result ) {
-            $this->assertEquals( $_hub_id, $hub_id );
-            $this->assertEquals( $_hub_status, 'public' );
-            $this->assertEmpty( $error );
-
-        } else {
-            $this->assertEquals( $_hub_id, null );
-            $this->assertEquals( $_hub_status, null );
-            $this->assertNotEmpty( $error );
-        }
-    }
-
-    public function addRecover() {
-        return [
-
-            // correct case
-            [ 1, true ],
-
-            // incorrect cases
-            [ 0, false ],
-            [ 2, false ],
-            [ -1, false  ],
-
-        ];
-    }
-    */
 
     /**
      * @dataProvider addRemove

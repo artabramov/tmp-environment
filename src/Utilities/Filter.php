@@ -32,6 +32,42 @@ class Filter
     }
 
     /**
+     * Check is value a correct status.
+     * @param mixed $value
+     * @param string $key
+     * @return bool
+     */
+    public static function is_status( mixed $value, string $key ) : bool {
+
+        if( $key == 'user' ) {
+            return in_array( $value, [ 'pending', 'approved', 'trash' ] );
+
+        } elseif( $key == 'hub' ) {
+            return in_array( $value, [ 'private', 'public', 'trash' ] );
+
+        } elseif( $key == 'post' ) {
+            return in_array( $value, [ 'inherit', 'todo', 'doing', 'done', 'trash' ] );
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check is value a correct type.
+     * @param mixed $value
+     * @param string $key
+     * @return bool
+     */
+    public static function is_type( mixed $value, string $key ) : bool {
+
+        if( $key == 'post' ) {
+            return in_array( $value, [ 'document', 'comment' ] );
+        }
+        
+        return false;
+    }
+
+    /**
      * Check is value a string.
      * @param mixed $value
      * @param int $min_length
