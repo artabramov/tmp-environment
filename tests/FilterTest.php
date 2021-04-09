@@ -152,8 +152,7 @@ class FilterTest extends TestCase
             [ 'pending', 'user', true ],
             [ 'approved', 'user', true ],
             [ 'trash', 'user', true ],
-            [ 'private', 'hub', true ],
-            [ 'public', 'hub', true ],
+            [ 'custom', 'hub', true ],
             [ 'trash', 'hub', true ],
             [ 'todo', 'post', true ],
             [ 'doing', 'post', true ],
@@ -198,6 +197,32 @@ class FilterTest extends TestCase
             [ 'comment', '_post', false ],
             [ '', 'post', false ],
             [ 'comment', '', false ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider addIsRole
+     */
+    public function testIsRole( $value, $expected ) {
+        $result = $this->callMethod( $this->filter, 'is_role', [ $value ] );
+        $this->assertEquals( $expected, $result );
+    }
+
+    public function addIsRole() {
+        return [
+
+            // correct cases
+            [ 'admin', true ],
+            [ 'editor', true ],
+            [ 'reader', true ],
+            [ 'invited', true ],
+
+            // incorrect cases
+            [ '_admin', false ],
+            [ '_editor', false ],
+            [ '_reader', false ],
+            [ '_invited', false ],
 
         ];
     }

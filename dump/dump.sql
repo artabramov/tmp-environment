@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS project.hubs (
     id         BIGINT(20)   NOT NULL AUTO_INCREMENT,
     date       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     user_id    BIGINT(20)   NOT NULL,
-    hub_status VARCHAR(20)  NOT NULL, # private | public | trash
+    hub_status VARCHAR(20)  NOT NULL, # custom | trash
     hub_name   VARCHAR(255) NOT NULL,
 
     PRIMARY KEY id         (id),

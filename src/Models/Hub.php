@@ -68,9 +68,9 @@ class Hub extends \artabramov\Echidna\Models\Echidna implements \artabramov\Echi
             $this->error = 'hub_name is incorrect';
 
         } else {
-            $this->user_id = $user_id;
+            $this->user_id    = $user_id;
             $this->hub_status = $hub_status;
-            $this->hub_name = $hub_name;
+            $this->hub_name   = $hub_name;
 
             $data = [
                 'user_id'    => $this->user_id,

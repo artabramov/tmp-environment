@@ -101,10 +101,9 @@ class RoleTest extends TestCase
 
             // correct cases
             [ 1, 1, 'admin', true ],
+            [ 1, 1, 'reader', true ],
             [ 9223372036854775807, 1, 'admin', true ],
             [ 1, 9223372036854775807, 'admin', true ],
-            [ 1, 1, 'a', true ],
-            [ 1, 1, 'admin_admin_admin_ad', true ],
 
             // incorrect cases
             [ 0, 1, 'admin', false ],
@@ -153,9 +152,8 @@ class RoleTest extends TestCase
         return [
 
             // correct cases
+            [ 1, 1, 'invited', true ],
             [ 1, 1, 'editor', true ],
-            [ 1, 1, 'e', true ],
-            [ 1, 1, 'editor_editor_editor', true ],
 
             // incorrect values
             [ 0, 1, 'editor', false ],

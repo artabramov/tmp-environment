@@ -97,22 +97,22 @@ class HubTest extends TestCase
         return [
 
             // correct cases
-            [ 1, 'public', 'hub name', true ],
-            [ 9223372036854775807, 'public', 'hub name', true ],
-            [ 1, 'public', 'hub name', true ],
-            [ 1, 'public', 'hu', true ],
-            [ 1, 'public', 'hub name hub name hub name hub name hubn', true ],
+            [ 1, 'custom', 'hub name', true ],
+            [ 9223372036854775807, 'custom', 'hub name', true ],
+            [ 1, 'custom', 'hub name', true ],
+            [ 1, 'custom', 'hu', true ],
+            [ 1, 'custom', 'hub name hub name hub name hub name hubn', true ],
 
             // incorrect cases
-            [ 0, 'public', 'hub name', false ],
-            [ -1, 'public', 'hub name', false ],
+            [ 0, 'custom', 'hub name', false ],
+            [ -1, 'custom', 'hub name', false ],
             [ 1, '', 'hub name', false ],
             [ 1, '0', 'hub name', false ],
-            [ 1, '_public', 'hub name', false ],
-            [ 1, 'public', '', false ],
-            [ 1, 'public', '0', false ],
-            [ 1, 'public', 'h', false ],
-            [ 1, 'public', 'hub name hub name hub name hub name hub n', false ],
+            [ 1, '_custom', 'hub name', false ],
+            [ 1, 'custom', '', false ],
+            [ 1, 'custom', '0', false ],
+            [ 1, 'custom', 'h', false ],
+            [ 1, 'custom', 'hub name hub name hub name hub name hub n', false ],
 
         ];
     }
@@ -187,9 +187,11 @@ class HubTest extends TestCase
         return [
 
             // correct case
-            [ 1, 'public', true ],
+            [ 1, 'custom', true ],
+            [ 1, 'trash', true ],
 
             // incorrect cases
+            [ 1, 'public', false ],
             [ 1, '', false ],
 
         ];

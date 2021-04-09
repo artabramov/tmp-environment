@@ -43,7 +43,7 @@ class Filter
             return in_array( $value, [ 'pending', 'approved', 'trash' ] );
 
         } elseif( $key == 'hub' ) {
-            return in_array( $value, [ 'private', 'public', 'trash' ] );
+            return in_array( $value, [ 'custom', 'trash' ] );
 
         } elseif( $key == 'post' ) {
             return in_array( $value, [ 'inherit', 'todo', 'doing', 'done', 'trash' ] );
@@ -65,6 +65,16 @@ class Filter
         }
         
         return false;
+    }
+
+
+    /**
+     * Check is value a correct role.
+     * @param mixed $value
+     * @return bool
+     */
+    public static function is_role( mixed $value ) : bool {
+        return in_array( $value, [ 'admin', 'editor', 'reader', 'invited' ] );
     }
 
     /**
