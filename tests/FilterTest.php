@@ -154,11 +154,12 @@ class FilterTest extends TestCase
             [ 'trash', 'user', true ],
             [ 'custom', 'hub', true ],
             [ 'trash', 'hub', true ],
+            [ 'inherit', 'post', true ],
+            [ 'draft', 'post', true ],
             [ 'todo', 'post', true ],
             [ 'doing', 'post', true ],
             [ 'done', 'post', true ],
             [ 'trash', 'post', true ],
-            [ 'inherit', 'post', true ],
 
             // incorrect cases
             [ '_pending', 'user', false ],

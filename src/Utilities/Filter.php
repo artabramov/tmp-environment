@@ -46,7 +46,7 @@ class Filter
             return in_array( $value, [ 'custom', 'trash' ] );
 
         } elseif( $key == 'post' ) {
-            return in_array( $value, [ 'inherit', 'todo', 'doing', 'done', 'trash' ] );
+            return in_array( $value, [ 'inherit', 'draft', 'todo', 'doing', 'done', 'trash' ] );
         }
         
         return false;
