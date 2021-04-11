@@ -124,6 +124,42 @@ class Post extends \artabramov\Echidna\Models\Echidna implements \artabramov\Ech
     /**
      * 
      */
-    public function getone( int $post_id ) {}
+    public function getone( int $post_id ) {
+
+        $this->clear();
+
+        if( Filter::is_empty( $post_id )) {
+            $this->error = 'post_id is empty';
+
+        } elseif( !Filter::is_int( $post_id )) {
+            $this->error = 'post_id is incorrect';
+
+        } elseif( $this->count( 'posts', [['id', '=', $post_id]] ) == 0 ) {
+            $this->error = 'post not found';
+
+        } else {
+            $this->id = $post_id;
+
+            $args = [[ 'id', '=', $this->id ]];
+            $rows = $this->select( '*', 'posts', $args, 1, 0 );
+
+            if( empty( $rows[0] )) {
+                $this->clear();
+                $this->error = 'post select error';
+
+            } else {
+                $this->id           = $rows[0]['id'];
+                $this->date         = $rows[0]['date'];
+                $this->parent_id    = $rows[0]['parent_id'];
+                $this->user_id      = $rows[0]['user_id'];
+                $this->hub_id       = $rows[0]['hub_id'];
+                $this->post_status  = $rows[0]['post_status'];
+                $this->post_type    = $rows[0]['post_type'];
+                $this->post_content = $rows[0]['post_content'];
+            }
+        }
+
+        return empty( $this->error );
+    }
 
 }
