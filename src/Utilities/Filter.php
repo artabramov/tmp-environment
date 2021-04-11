@@ -61,9 +61,9 @@ class Filter
     public static function is_type( mixed $value, string $key ) : bool {
 
         if( $key == 'post' ) {
-            return in_array( $value, [ 'document', 'comment' ] );
+            return in_array( $value, [ 'post', 'comment' ] );
         }
-        
+
         return false;
     }
 

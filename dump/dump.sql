@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS project.posts (
     parent_id    BIGINT(20)  NOT NULL,
     user_id      BIGINT(20)  NOT NULL,
     hub_id       BIGINT(20)  NOT NULL,
-    post_type    VARCHAR(20) NOT NULL, # document | comment
+    post_type    VARCHAR(20) NOT NULL, # post | comment
     post_status  VARCHAR(20) NOT NULL, # inherit | draft | todo | doing | done | trash
     post_content TEXT        NOT NULL,
 
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS project.posts (
             KEY user_id     (user_id),
             KEY hub_id      (hub_id),
             KEY post_type   (post_type),
-            KEY post_status (post_status),
+            KEY post_status (post_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
