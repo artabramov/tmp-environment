@@ -25,10 +25,16 @@ class Repository
         return false;
     }
 
+    /**
+     * @return string
+     */
     protected function get_where( array $args ) : string {
         return implode( ' AND ', array_map( fn( $value ) => !is_array( $value[2] ) ? $value[0] . ' ' . $value[1] . ' ?' : $value[0] . ' ' . $value[1] . ' (' . implode( ', ', array_map( fn() => '?', $value[2] ) ) . ')', $args ));
     }
 
+    /**
+     * @return array
+     */
     protected function get_params( array $args ) : array {
 
         $params = [];

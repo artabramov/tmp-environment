@@ -28,7 +28,7 @@ class Mapper
      * Entity doc format: @entity(table=users alias=user)
      * @return string
      */
-    private function get_entity_params( $entity_class ) {
+    private function get_entity_params( \ReflectionClass $entity_class ) : string {
         $doc = $entity_class->getDocComment();
         return $this->parse_params( $doc, 'entity' );
     }
@@ -37,7 +37,7 @@ class Mapper
      * Param doc format: @column(nullable=true unique=true regex=/^[a-z]{1,20}$/)
      * @return string
      */
-    private function get_property_params( $entity, $column ) {
+    private function get_property_params( $entity, string $column ) : string {
         $class = new \ReflectionClass( $entity );
         $property = $class->getProperty( $column );
         $doc = $property->getDocComment();
@@ -47,7 +47,7 @@ class Mapper
     /**
      * @return array
      */
-    private function parse_params( $doc, $key ) {
+    private function parse_params( string $doc, string $key ) : array {
 
         preg_match_all( '#@' . $key . '\((.*?)\)\n#s', $doc, $tmp );
         preg_match_all( '/\s*([^=]+)=(\S+)\s*/', !empty($tmp[1][0]) ? $tmp[1][0] : '', $tmp );
