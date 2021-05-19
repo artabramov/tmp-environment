@@ -1,6 +1,6 @@
 {
     "name": "artabramov/echidna",
-    "description": "Simple backend core for REST apps.",
+    "description": "Data mapper.",
     "homepage": "http://echidna.io",
     "license": "MIT",
     "authors": [
