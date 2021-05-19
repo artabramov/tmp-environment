@@ -57,7 +57,7 @@ class Mapper
     /**
      * @return bool
      */
-    public function insert( $entity, $data ) {
+    public function insert( $entity, array $data ) : bool {
 
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
@@ -107,7 +107,7 @@ class Mapper
     /**
      * @return bool
      */
-    public function update( $entity, $data ) {
+    public function update( $entity, array $data ) : bool {
 
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
@@ -156,7 +156,7 @@ class Mapper
     /**
      * @return bool
      */
-    public function delete( $entity ) {
+    public function delete( $entity ) : bool {
         $this->error = '';
 
         $class = new \ReflectionClass( $entity );
@@ -180,7 +180,7 @@ class Mapper
     /**
      * @return bool
      */
-    public function select( $entity, $args ) {
+    public function select( $entity, array $args ) : bool {
         $this->error = '';
 
         $class = new \ReflectionClass( $entity );
@@ -205,7 +205,7 @@ class Mapper
     /**
      * @return bool
      */
-    public function exists( $entity, $args ) {
+    public function exists( $entity, array $args ) : bool {
         $this->error = '';
 
         $class = new \ReflectionClass( $entity );
