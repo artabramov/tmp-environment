@@ -24,11 +24,19 @@ class Mapper
         }
     }
 
+    /**
+     * Entity doc format: @entity(table=users alias=user)
+     * @return string
+     */
     private function get_entity_params( $entity_class ) {
         $doc = $entity_class->getDocComment();
         return $this->parse_params( $doc, 'entity' );
     }
 
+    /**
+     * Param doc format: @column(nullable=true unique=true regex=/^[a-z]{1,20}$/)
+     * @return string
+     */
     private function get_property_params( $entity, $column ) {
         $class = new \ReflectionClass( $entity );
         $property = $class->getProperty( $column );
@@ -36,7 +44,9 @@ class Mapper
         return $this->parse_params( $doc, 'column' );
     }
 
-    // doc format: @key(param1=value1 param2=value2)
+    /**
+     * @return array
+     */
     private function parse_params( $doc, $key ) {
 
         preg_match_all( '#@' . $key . '\((.*?)\)\n#s', $doc, $tmp );
@@ -44,6 +54,9 @@ class Mapper
         return array_combine ( $tmp[1], $tmp[2] );
     }
 
+    /**
+     * @return bool
+     */
     public function insert( $entity, $data ) {
 
         $this->error = '';
@@ -91,6 +104,9 @@ class Mapper
         return empty( $this->error );
     }
 
+    /**
+     * @return bool
+     */
     public function update( $entity, $data ) {
 
         $this->error = '';
@@ -137,6 +153,9 @@ class Mapper
         return empty( $this->error );
     }
 
+    /**
+     * @return bool
+     */
     public function delete( $entity ) {
         $this->error = '';
 
@@ -158,6 +177,9 @@ class Mapper
         return empty( $this->error );
     }
 
+    /**
+     * @return bool
+     */
     public function select( $entity, $args ) {
         $this->error = '';
 
@@ -180,6 +202,9 @@ class Mapper
         return empty( $this->error );
     }
 
+    /**
+     * @return bool
+     */
     public function exists( $entity, $args ) {
         $this->error = '';
 
