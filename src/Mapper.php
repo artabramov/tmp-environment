@@ -206,7 +206,6 @@ class Mapper
      * @return bool
      */
     public function exists( $entity, array $args ) : bool {
-        $this->error = '';
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
