@@ -1,5 +1,5 @@
 <?php
-namespace App\Core;
+namespace artabramov\Echidna;
 
 class Repository
 {
