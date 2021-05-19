@@ -24,13 +24,11 @@ class Mapper
         }
     }
 
-    // +
     private function get_entity_params( $entity_class ) {
         $doc = $entity_class->getDocComment();
         return $this->parse_params( $doc, 'entity' );
     }
 
-    // +
     private function get_property_params( $entity, $column ) {
         $class = new \ReflectionClass( $entity );
         $property = $class->getProperty( $column );
@@ -38,7 +36,7 @@ class Mapper
         return $this->parse_params( $doc, 'column' );
     }
 
-    // + doc format: @key(param1=value1 param2=value2)
+    // doc format: @key(param1=value1 param2=value2)
     private function parse_params( $doc, $key ) {
 
         preg_match_all( '#@' . $key . '\((.*?)\)\n#s', $doc, $tmp );
@@ -149,7 +147,6 @@ class Mapper
             $properties = $class->getProperties();
 
             foreach( $properties as $property ) {
-                //$property = $class->getProperty( $key );
                 $property->setAccessible( true );
                 $property->setValue( $entity, null );
             }
@@ -191,7 +188,5 @@ class Mapper
         $rows = $this->repository->select( ['id'], $params['table'], $args, 1, 0 );
         return !empty( $rows[0]->id );
     }
-
-
 
 }
