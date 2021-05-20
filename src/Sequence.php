@@ -20,10 +20,11 @@ class Sequence
 
         $class = new \ReflectionClass( $entity );
         $doc = $class->getDocComment();
+
         preg_match_all( '#@entity\((.*?)\)\n#s', $doc, $tmp );
         preg_match_all( '/\s*([^=]+)=(\S+)\s*/', !empty( $tmp[1][0]) ? $tmp[1][0] : '', $tmp );
-        $params = array_combine ( $tmp[1], $tmp[2] );
 
+        $params = array_combine ( $tmp[1], $tmp[2] );
         $rows = $this->repository->select( ['id'], $params['table'], $args, $extras );
 
         foreach( $rows as $row ) {
