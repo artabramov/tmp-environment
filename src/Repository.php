@@ -98,14 +98,20 @@ class Repository
      * @return array
      * @throws \Exception
      */
-    public function select( array $columns, string $table, array $args, int $limit, int $offset ) : array {
+    public function select( array $columns, string $table, array $args, array $extras = [] ) : array {
 
         $select = implode( ', ', $columns );
         $where = $this->get_where( $args );
         $params = $this->get_params( $args );
 
         try {
-            $stmt = $this->pdo->prepare( 'SELECT ' . $select . ' FROM ' . $table . ' WHERE ' . $where . ' LIMIT ' . $offset . ',' . $limit );
+            $sql = 'SELECT ' . $select . ' FROM ' . $table . ' WHERE ' . $where;
+
+            foreach( $extras as $key => $value ) {
+                $sql .= ' ' . $key . ' ' . $value;
+            }
+
+            $stmt = $this->pdo->prepare( $sql );
             $stmt->execute( $params );
             $rows = $stmt->fetchAll( $this->pdo::FETCH_OBJ );
 

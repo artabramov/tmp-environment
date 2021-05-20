@@ -185,7 +185,7 @@ class Mapper
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
-        $rows = $this->repository->select( ['*'], $params['table'], $args, 1, 0 );
+        $rows = $this->repository->select( ['*'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
 
         if( !empty( $rows )) {
             foreach( $rows[0] as $key=>$value ) {
@@ -209,7 +209,7 @@ class Mapper
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
-        $rows = $this->repository->select( ['id'], $params['table'], $args, 1, 0 );
+        $rows = $this->repository->select( ['id'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
         return !empty( $rows[0]->id );
     }
 
