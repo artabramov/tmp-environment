@@ -161,4 +161,18 @@ class Repository
         return empty( $this->e ) ? $rows[ 'datetime' ] : '0000-00-00 00:00:00';
     }
 
+    public function query( string $sql, array $params ) {
+
+        try {
+            $stmt = $this->pdo->prepare( $sql );
+            $stmt->execute( $params );
+            $rows = $stmt->fetchAll( $this->pdo::FETCH_OBJ );
+
+        } catch( \Exception $e ) {
+            $this->e = $e;
+        }
+
+        return empty( $this->e ) ? $rows : [];
+    }
+
 }
