@@ -6,18 +6,9 @@ class Repository
     protected $e;
     protected $pdo;
 
-    //protected $query = '';
-    //protected $params = [];
-
-    protected $query;
-    protected $rows;
-
     public function __construct( $pdo ) {
         $this->e = null;
         $this->pdo = $pdo;
-
-        $this->query = new \stdClass;
-        $this->rows = [];
     }
 
     public function __get( $key ) {
@@ -34,91 +25,17 @@ class Repository
         return false;
     }
 
-    private function where( array $kwargs ) : string {
-
-        return implode( ' AND ', array_map( 
-            fn( $value ) => 
-                is_array($value[2]) ? $value[0] . ' ' . $value[1] . ' (' . implode( ', ', array_map( fn() => '?', $value[2] ) ) . ')' :
-                (
-                    is_object($value[2]) ? $value[0] . ' ' . $value[1] . ' (' . $value[2]->query . ') ' :
-                    $value[0] . ' ' . $value[1] . ' ?'
-                ), 
-            $kwargs ));
-    }
-
-    private function params( array $kwargs ) : array {
-
-        $params = [];
-        foreach( $kwargs as $kwarg ) {
-
-            if( is_array( $kwarg[2] )) {
-                foreach( $kwarg[2] as $param ) {
-                    $params[] = $param;
-                }
-
-            } elseif( is_object( $kwarg[2] )) {
-                $params = array_merge( $params, $kwarg[2]->params );
-
-            } else {
-                $params[] = $kwarg[2];
-            }
-        }
-        return $params;
-    }
-
-    // return query object
-    public function select( array $columns, string $table, array $kwargs, array $args = [] ) {
-
-        $select = implode( ', ', $columns );
-        $where = $this->where( $kwargs );
-        $limits = !empty( $args ) ? ' ' . implode( ' ', $args ) : '';
-
-        $this->query = new \stdClass;
-        $this->query->query = 'SELECT ' . $select . ' FROM ' . $table . ' WHERE ' . $where . $limits;
-        $this->query->params = $this->params( $kwargs );
-        return $this->query;
-    }
-
-    // create custom query object
-    public function custom( string $query, array $params ) {
-
-        $this->query = new \stdClass;
-        $this->query->query = $query;
-        $this->query->params = $params;
-        return $this->query;
-    }
-
-    public function execute( $query ) {
-        $this->e = null;
-        $this->rows = [];
-
-        try {
-            $stmt = $this->pdo->prepare( $query->query );
-            $stmt->execute( $query->params );
-            $this->rows = $stmt->fetchAll( $this->pdo::FETCH_OBJ );
-
-        } catch( \Exception $e ) {
-            $this->e = $e;
-        }
-
-        return empty( $this->e ) ? true : false;
-    }
-
-
-
-
-
     /**
      * @return string
      */
-    protected function _get_where( array $args ) : string {
+    protected function get_where( array $args ) : string {
         return implode( ' AND ', array_map( fn( $value ) => !is_array( $value[2] ) ? $value[0] . ' ' . $value[1] . ' ?' : $value[0] . ' ' . $value[1] . ' (' . implode( ', ', array_map( fn() => '?', $value[2] ) ) . ')', $args ));
     }
 
     /**
      * @return array
      */
-    protected function _get_params( array $args ) : array {
+    protected function get_params( array $args ) : array {
 
         $params = [];
         foreach( $args as $arg ) {
@@ -138,7 +55,7 @@ class Repository
      * @return integer
      * @throws \Exception
      */
-    public function _insert( string $table, array $data ) : int {
+    public function insert( string $table, array $data ) : int {
 
         $columns = implode( ', ', array_keys( $data ));
         $values = implode( ', ', array_fill( 0, count( $data ), '?' ));
@@ -159,7 +76,7 @@ class Repository
      * @return bool
      * @throws \Exception
      */
-    public function _update( string $table, array $args, array $data ) : bool {
+    public function update( string $table, array $args, array $data ) : bool {
 
         $set = implode( ', ', array_map( fn( $value ) => $value . ' = ?', array_keys( $data )));
         $where = $this->get_where( $args );
@@ -181,7 +98,7 @@ class Repository
      * @return array
      * @throws \Exception
      */
-    public function _select( array $columns, string $table, array $args, array $extras = [] ) : array {
+    public function select( array $columns, string $table, array $args, array $extras = [] ) : array {
 
         $select = implode( ', ', $columns );
         $where = $this->get_where( $args );
@@ -209,7 +126,7 @@ class Repository
      * @return bool
      * @throws \Exception
      */
-    public function _delete( string $table, array $args ) : bool {
+    public function delete( string $table, array $args ) : bool {
 
         $where = $this->get_where( $args );
         $params = $this->get_params( $args );
@@ -230,7 +147,7 @@ class Repository
      * @return string
      * @throws \Exception
      */
-    public function _time() {
+    public function time() {
 
         try {
             $stmt = $this->pdo->prepare( 'SELECT NOW() AS datetime;' );
@@ -244,7 +161,7 @@ class Repository
         return empty( $this->e ) ? $rows[ 'datetime' ] : '0000-00-00 00:00:00';
     }
 
-    public function _query( string $sql, array $params ) {
+    public function query( string $sql, array $params ) {
 
         try {
             $stmt = $this->pdo->prepare( $sql );

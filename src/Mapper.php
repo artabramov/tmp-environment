@@ -177,16 +177,33 @@ class Mapper
         return empty( $this->error );
     }
 
-    /**
-     * @return bool
-     */
-    public function select( $entity, array $args ) : bool {
+
+    public function sequence( $entity, array $kwargs ) : bool {
         $this->error = '';
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
-        $rows = $this->repository->select( ['*'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
 
+        return $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT' => 1, 'OFFSET' => 0] );
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function select( $entity, array $kwargs ) : bool {
+        $this->error = '';
+
+        $class = new \ReflectionClass( $entity );
+        $params = $this->get_entity_params( $class );
+
+        return $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT' => 1, 'OFFSET' => 0] );
+
+        //$this->repository->execute();
+        //$rows = $this->repository->rows;
+
+        /*
+        $rows = $this->repository->select( ['*'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
         if( !empty( $rows )) {
             foreach( $rows[0] as $key=>$value ) {
 
@@ -198,9 +215,16 @@ class Mapper
         } else {
             $this->error = $params['alias'] . ' not found';
         }
-
         return empty( $this->error );
+        */
     }
+
+    // return the query
+    /*
+    public function query() {
+        return $this->repository->
+    }
+    */
 
     /**
      * @return bool
