@@ -5,14 +5,10 @@ class Mapper
 {
     protected $error;
     protected $repository;
-    //protected $query;
-    //protected $rows;
 
     public function __construct( $repository ) {
         $this->error = '';
         $this->repository = $repository;
-        //$this->query = new \stdClass;
-        //$this->rows = [];
     }
 
     public function __isset( $key ) {
@@ -29,7 +25,7 @@ class Mapper
     }
 
     /**
-     * Entity doc format: @entity(table=users alias=user)
+     * Entity doc format: @entity(table=users entity=user)
      * @return string
      */
     private function get_entity_params( \ReflectionClass $entity_class ) : array {
@@ -58,11 +54,66 @@ class Mapper
         return array_combine ( $tmp[1], $tmp[2] );
     }
 
+    // looking for error
+    private function parse_data( $entity, array $data ) {
+
+        $entity_class = new \ReflectionClass( $entity );
+
+        foreach( $data as $key => $value ) {
+            $property = $entity_class->getProperty( $key );
+            $property->setAccessible( true );
+            $property_params = $this->get_property_params( $entity, $key );
+
+            if( $property_params[ 'nullable' ] != 'true' and empty( $value )) {
+                $this->error = $key . ' is empty';
+                break;
+
+            } elseif( !empty( $value ) and !preg_match( $property_params[ 'regex' ], $value ) ) {
+                $this->error = $key . ' is incorrect';
+                break;
+
+            } elseif( !empty( $value ) and  $property_params[ 'unique' ] == 'true' and $this->exists( $entity, [[ $key, '=', $value ]] ) ) {
+                $this->error = $key . ' is occupied';
+                break;
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    public function select( $entity, array $data ) : bool {
+        $this->error = '';
+        $class = new \ReflectionClass( $entity );
+        $params = $this->get_entity_params( $class );
+
+        $query = $this->repository->select( ['*'], $params['table'], $data, ['LIMIT 1', 'OFFSET 0'] );
+        $this->repository->execute( $query );
+        $rows = $this->repository->rows();
+
+        if( !empty( $rows )) {
+            foreach( $rows[0] as $key=>$value ) {
+
+                $property = $class->getProperty( $key );
+                $property->setAccessible( true );
+                $property->setValue( $entity, $rows[0]->$key );
+            }
+
+        } else {
+            $this->error = $params['entity'] . ' not found';
+        }
+
+        return empty( $this->error );
+    }
+
+
+
     /**
      * @return bool
      */
     public function insert( $entity, array $data ) : bool {
 
+        /*
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
         $entity_params = $this->get_entity_params( $entity_class );
@@ -85,34 +136,36 @@ class Mapper
                 break;
             }
         }
+        */
+
+        $this->error = '';
+        $entity_class = new \ReflectionClass( $entity );
+        $entity_params = $this->get_entity_params( $entity_class );
+        $this->parse_data( $entity, $data );
         
         if( empty( $this->error )) {
             $query = $this->repository->insert( $entity_params['table'], $data );
-            $result = $this->repository->execute( $query );
 
-            $a = 1;
-        }
+            if( $this->repository->execute( $query )) {
+                $id = $this->repository->id();
 
-        /*
-        if( empty( $this->error )) {
-            //$data['id'] = $this->repository->insert( $entity_params['table'], $data );
+                if( !empty( $id )) {
+                    $data['id'] = $id;
 
-            $query = $this->repository->insert( $entity_params['table'], $data );
+                    foreach( $data as $key => $value ) {
+                        $property = $entity_class->getProperty( $key );
+                        $property->setAccessible( true );
+                        $property->setValue( $entity, $value );
+                    }
 
-            if( $this->repository->execute( $query ) ) {
-            //if( !empty( $data['id'] )) {
-
-                foreach( $data as $key => $value ) {
-                    $property = $entity_class->getProperty( $key );
-                    $property->setAccessible( true );
-                    $property->setValue( $entity, $value );
+                } else {
+                    $this->error = $entity_params['entity'] . ' insert error';
                 }
 
-            } else {
-                $this->error = $entity_params['alias'] . ' insert error';
             }
+
+            
         }
-        */
 
         return empty( $this->error );
     }
@@ -122,6 +175,7 @@ class Mapper
      */
     public function update( $entity, array $data ) : bool {
 
+        /*
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
         $entity_params = $this->get_entity_params( $entity_class );
@@ -147,10 +201,17 @@ class Mapper
                 }
             }
         }
+        */
+
+        $this->error = '';
+        $entity_class = new \ReflectionClass( $entity );
+        $entity_params = $this->get_entity_params( $entity_class );
+        $this->parse_data( $entity, $data );
 
         if( empty( $this->error )) {
+            $query = $this->repository->update( $entity_params['table'], [['id', '=', $entity->id]], $data );
 
-            if( $this->repository->update( $entity_params['table'], [['id', '=', $entity->id]], $data )) {
+            if( $this->repository->execute( $query )) {
 
                 foreach( $data as $key => $value ) {
                     $property = $entity_class->getProperty( $key );
@@ -159,7 +220,7 @@ class Mapper
                 }
 
             } else {
-                $this->error = $entity_params['alias'] . ' update error';
+                $this->error = $entity_params['entity'] . ' update error';
             }
         }
 
@@ -184,7 +245,7 @@ class Mapper
             }
 
         } else {
-            $this->error = $params['alias'] . ' delete error';
+            $this->error = $params['entity'] . ' delete error';
         }
 
         return empty( $this->error );
@@ -194,48 +255,7 @@ class Mapper
 
 
 
-    /**
-     *
-     */
-    public function select( $entity, array $kwargs ) {
-        $this->error = '';
-        $class = new \ReflectionClass( $entity );
-        $params = $this->get_entity_params( $class );
-        $query = $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT 1', 'OFFSET 0'] );
-        $result = $this->repository->execute( $query );
 
-        if( !empty( $this->repository->rows )) {
-            foreach( $this->repository->rows[0] as $key=>$value ) {
-
-                $property = $class->getProperty( $key );
-                $property->setAccessible( true );
-                $property->setValue( $entity, $this->repository->rows[0]->$key );
-            }
-
-        } else {
-            $this->error = $params['alias'] . ' not found';
-        }
-        return empty( $this->error );
-
-        //$this->repository->execute();
-        //$rows = $this->repository->rows;
-
-        /*
-        $rows = $this->repository->select( ['*'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
-        if( !empty( $rows )) {
-            foreach( $rows[0] as $key=>$value ) {
-
-                $property = $class->getProperty( $key );
-                $property->setAccessible( true );
-                $property->setValue( $entity, $rows[0]->$key );
-            }
-
-        } else {
-            $this->error = $params['alias'] . ' not found';
-        }
-        return empty( $this->error );
-        */
-    }
 
 
     /**

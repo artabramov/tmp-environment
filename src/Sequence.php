@@ -5,11 +5,13 @@ class Sequence
 {
     protected $error;
     protected $repository;
+    protected $entity;
     protected $rows;
 
-    public function __construct( $repository ) {
+    public function __construct( $repository, $entity ) {
         $this->error = '';
         $this->repository = $repository;
+        $this->entity = $entity;
         $this->rows = [];
     }
 
@@ -26,21 +28,22 @@ class Sequence
         }
     }
 
-    public function select( array $columns, string $table, array $kwargs, array $args = [] ) {
-        $query = $this->repository->select( $columns, $table, $kwargs, $args );
-        return clone $query;
+    public function select( array $columns, string $table, array $kwargs, array $args = [] ) : \artabramov\Echidna\Query {
+        return $this->repository->select( $columns, $table, $kwargs, $args );
     }
 
     // return result rows
-    public function execute( $query, $entity ) {
+    public function execute( $query ) {
 
         $this->error = '';
         $this->rows = [];
+
         $this->repository->execute( $query );
+        $rows = $this->repository->rows();
 
-        foreach( $this->repository->rows as $row ) {
+        foreach( $rows as $row ) {
 
-            $instance = clone $entity;
+            $instance = clone $this->entity;
             $reflection = new \ReflectionClass( $instance );
             $properties = $reflection->getProperties();
 

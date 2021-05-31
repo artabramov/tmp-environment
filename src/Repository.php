@@ -6,13 +6,14 @@ class Repository
     protected $e;
     protected $pdo;
     //protected $query;
-    protected $rows;
+    //protected $rows;
+    protected $stmt;
 
     public function __construct( $pdo ) {
         $this->e = null;
         $this->pdo = $pdo;
         //$this->query = new \artabramov\Echidna\Query();
-        $this->rows = [];
+        //$this->rows = [];
     }
 
     public function __get( $key ) {
@@ -62,7 +63,7 @@ class Repository
     }
 
     // return query object
-    public function select( array $columns, string $table, array $kwargs, array $args = [] ) {
+    public function select( array $columns, string $table, array $kwargs, array $args = [] ) : \artabramov\Echidna\Query {
 
         $select = implode( ', ', $columns );
         $where = $this->where( $kwargs );
@@ -89,6 +90,21 @@ class Repository
         return $query;
     }
 
+    /**
+     *
+     */
+    public function update( string $table, array $args, array $data ) {
+
+        $set = implode( ', ', array_map( fn( $value ) => $value . ' = ?', array_keys( $data )));
+        $where = $this->where( $args );
+        $params = array_merge( array_values( $data ), $this->params( $args ));
+
+        $query = new \artabramov\Echidna\Query();
+        $query->text = 'UPDATE ' . $table . ' SET ' . $set . ' WHERE ' . $where . ' LIMIT 1';
+        $query->args = $params;
+        return $query;
+    }
+
     // return query object
     public function custom( string $query_text, array $query_args ) {
 
@@ -101,11 +117,10 @@ class Repository
     // only execute
     public function execute( $query ) {
         $this->e = null;
-        $this->rows = [];
 
         try {
-            $stmt = $this->pdo->prepare( $query->text );
-            $stmt->execute( $query->args );
+            $this->stmt = $this->pdo->prepare( $query->text );
+            $this->stmt->execute( $query->args );
 
         } catch( \Exception $e ) {
             $this->e = $e;
@@ -115,24 +130,22 @@ class Repository
     }
 
     // execute and select rows
-    public function fetch( $query ) {
+    public function rows() {
         $this->e = null;
-        $this->rows = [];
 
         try {
-            $stmt = $this->pdo->prepare( $query->text );
-            $stmt->execute( $query->args );
-            $this->rows = $stmt->fetchAll( $this->pdo::FETCH_OBJ );
+            $rows = $this->stmt->fetchAll( $this->pdo::FETCH_OBJ );
 
         } catch( \Exception $e ) {
             $this->e = $e;
         }
 
-        return empty( $this->e ) ? true : false;
+        return empty( $this->e ) ? $rows : [];
     }
 
     // get last insert id
-    public function last_id() {
+    public function id() {
+        $this->e = null;
 
         try {
             $id = $this->pdo->lastInsertId();
