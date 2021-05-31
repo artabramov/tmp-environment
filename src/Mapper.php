@@ -5,10 +5,14 @@ class Mapper
 {
     protected $error;
     protected $repository;
+    //protected $query;
+    //protected $rows;
 
     public function __construct( $repository ) {
         $this->error = '';
         $this->repository = $repository;
+        //$this->query = new \stdClass;
+        //$this->rows = [];
     }
 
     public function __isset( $key ) {
@@ -72,23 +76,31 @@ class Mapper
                 $this->error = $key . ' is empty';
                 break;
 
-            } elseif( !empty( $value )) {
+            } elseif( !empty( $value ) and !preg_match( $property_params[ 'regex' ], $value ) ) {
+                $this->error = $key . ' is incorrect';
+                break;
 
-                if( !preg_match( $property_params[ 'regex' ], $value ) ) {
-                    $this->error = $key . ' is incorrect';
-                    break;
-
-                } elseif( $property_params[ 'unique' ] == 'true' and $this->exists( $entity, [[ $key, '=', $value ]] ) ) {
-                    $this->error = $key . ' is occupied';
-                    break;
-                }
+            } elseif( !empty( $value ) and  $property_params[ 'unique' ] == 'true' and $this->exists( $entity, [[ $key, '=', $value ]] ) ) {
+                $this->error = $key . ' is occupied';
+                break;
             }
         }
         
         if( empty( $this->error )) {
-            $data['id'] = $this->repository->insert( $entity_params['table'], $data );
+            $query = $this->repository->insert( $entity_params['table'], $data );
+            $result = $this->repository->execute( $query );
 
-            if( !empty( $data['id'] )) {
+            $a = 1;
+        }
+
+        /*
+        if( empty( $this->error )) {
+            //$data['id'] = $this->repository->insert( $entity_params['table'], $data );
+
+            $query = $this->repository->insert( $entity_params['table'], $data );
+
+            if( $this->repository->execute( $query ) ) {
+            //if( !empty( $data['id'] )) {
 
                 foreach( $data as $key => $value ) {
                     $property = $entity_class->getProperty( $key );
@@ -100,6 +112,7 @@ class Mapper
                 $this->error = $entity_params['alias'] . ' insert error';
             }
         }
+        */
 
         return empty( $this->error );
     }
@@ -178,26 +191,31 @@ class Mapper
     }
 
 
-    public function sequence( $entity, array $kwargs ) : bool {
-        $this->error = '';
 
-        $class = new \ReflectionClass( $entity );
-        $params = $this->get_entity_params( $class );
-
-        return $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT' => 1, 'OFFSET' => 0] );
-    }
 
 
     /**
-     * @return bool
+     *
      */
-    public function select( $entity, array $kwargs ) : bool {
+    public function select( $entity, array $kwargs ) {
         $this->error = '';
-
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
+        $query = $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT 1', 'OFFSET 0'] );
+        $result = $this->repository->execute( $query );
 
-        return $this->repository->select( ['*'], $params['table'], $kwargs, ['LIMIT' => 1, 'OFFSET' => 0] );
+        if( !empty( $this->repository->rows )) {
+            foreach( $this->repository->rows[0] as $key=>$value ) {
+
+                $property = $class->getProperty( $key );
+                $property->setAccessible( true );
+                $property->setValue( $entity, $this->repository->rows[0]->$key );
+            }
+
+        } else {
+            $this->error = $params['alias'] . ' not found';
+        }
+        return empty( $this->error );
 
         //$this->repository->execute();
         //$rows = $this->repository->rows;
@@ -219,12 +237,6 @@ class Mapper
         */
     }
 
-    // return the query
-    /*
-    public function query() {
-        return $this->repository->
-    }
-    */
 
     /**
      * @return bool
@@ -233,8 +245,9 @@ class Mapper
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
-        $rows = $this->repository->select( ['id'], $params['table'], $args, ['LIMIT' => 1, 'OFFSET' => 0] );
-        return !empty( $rows[0]->id );
+        $query = $this->repository->select( ['id'], $params['table'], $args, ['LIMIT 1', 'OFFSET 0'] );
+        $this->repository->execute( $query );
+        return !empty( $this->repository->rows[0]->id );
     }
 
 }

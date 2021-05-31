@@ -5,18 +5,13 @@ class Repository
 {
     protected $e;
     protected $pdo;
-
-    //protected $query = '';
-    //protected $params = [];
-
-    protected $query;
+    //protected $query;
     protected $rows;
 
     public function __construct( $pdo ) {
         $this->e = null;
         $this->pdo = $pdo;
-
-        $this->query = new \stdClass;
+        //$this->query = new \artabramov\Echidna\Query();
         $this->rows = [];
     }
 
@@ -40,7 +35,7 @@ class Repository
             fn( $value ) => 
                 is_array($value[2]) ? $value[0] . ' ' . $value[1] . ' (' . implode( ', ', array_map( fn() => '?', $value[2] ) ) . ')' :
                 (
-                    is_object($value[2]) ? $value[0] . ' ' . $value[1] . ' (' . $value[2]->query . ') ' :
+                    is_object($value[2]) ? $value[0] . ' ' . $value[1] . ' (' . $value[2]->text . ') ' :
                     $value[0] . ' ' . $value[1] . ' ?'
                 ), 
             $kwargs ));
@@ -57,7 +52,7 @@ class Repository
                 }
 
             } elseif( is_object( $kwarg[2] )) {
-                $params = array_merge( $params, $kwarg[2]->params );
+                $params = array_merge( $params, $kwarg[2]->args );
 
             } else {
                 $params[] = $kwarg[2];
@@ -73,28 +68,60 @@ class Repository
         $where = $this->where( $kwargs );
         $limits = !empty( $args ) ? ' ' . implode( ' ', $args ) : '';
 
-        $this->query = new \stdClass;
-        $this->query->query = 'SELECT ' . $select . ' FROM ' . $table . ' WHERE ' . $where . $limits;
-        $this->query->params = $this->params( $kwargs );
-        return $this->query;
+        $query = new \artabramov\Echidna\Query();
+        $query->text = 'SELECT ' . $select . ' FROM ' . $table . ' WHERE ' . $where . $limits;
+        $query->args = $this->params( $kwargs );
+        return $query;
     }
 
-    // create custom query object
-    public function custom( string $query, array $params ) {
+    /**
+     *
+     */
+    public function insert( string $table, array $data ) {
 
-        $this->query = new \stdClass;
-        $this->query->query = $query;
-        $this->query->params = $params;
-        return $this->query;
+        $columns = implode( ', ', array_keys( $data ));
+        $keys = implode( ', ', array_fill( 0, count( $data ), '?' ));
+        $values = array_values( $data );
+
+        $query = new \artabramov\Echidna\Query();
+        $query->text = 'INSERT INTO ' . $table . ' ( ' . $columns . ' ) VALUES ( ' . $keys . ' )';
+        $query->args = $values;
+        return $query;
     }
 
+    // return query object
+    public function custom( string $query_text, array $query_args ) {
+
+        $query = new \artabramov\Echidna\Query();
+        $query->text = $query_text;
+        $query->args = $query_args;
+        return $query;
+    }
+
+    // only execute
     public function execute( $query ) {
         $this->e = null;
         $this->rows = [];
 
         try {
-            $stmt = $this->pdo->prepare( $query->query );
-            $stmt->execute( $query->params );
+            $stmt = $this->pdo->prepare( $query->text );
+            $stmt->execute( $query->args );
+
+        } catch( \Exception $e ) {
+            $this->e = $e;
+        }
+
+        return empty( $this->e ) ? true : false;
+    }
+
+    // execute and select rows
+    public function fetch( $query ) {
+        $this->e = null;
+        $this->rows = [];
+
+        try {
+            $stmt = $this->pdo->prepare( $query->text );
+            $stmt->execute( $query->args );
             $this->rows = $stmt->fetchAll( $this->pdo::FETCH_OBJ );
 
         } catch( \Exception $e ) {
@@ -102,6 +129,19 @@ class Repository
         }
 
         return empty( $this->e ) ? true : false;
+    }
+
+    // get last insert id
+    public function last_id() {
+
+        try {
+            $id = $this->pdo->lastInsertId();
+
+        } catch( \Exception $e ) {
+            $this->e = $e;
+        }
+
+        return empty( $this->e ) ? $id : 0;
     }
 
 
