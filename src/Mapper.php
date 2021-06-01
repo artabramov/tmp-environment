@@ -235,6 +235,27 @@ class Mapper
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
+        $query = $this->repository->delete( $params['table'], [['id', '=', $entity->id]] );
+
+        if( $this->repository->execute( $query )) {
+            $properties = $class->getProperties();
+
+            foreach( $properties as $property ) {
+                $property->setAccessible( true );
+                $property->setValue( $entity, null );
+            }
+
+        } else {
+            $this->error = $params['entity'] . ' delete error';
+        }
+
+        return empty( $this->error );
+
+        /*
+        $this->error = '';
+
+        $class = new \ReflectionClass( $entity );
+        $params = $this->get_entity_params( $class );
 
         if( $this->repository->delete( $params['table'], [['id', '=', $entity->id]] )) {
             $properties = $class->getProperties();
@@ -249,6 +270,7 @@ class Mapper
         }
 
         return empty( $this->error );
+        */
     }
 
 
