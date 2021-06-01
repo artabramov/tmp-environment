@@ -5,13 +5,11 @@ class Sequence
 {
     protected $error;
     protected $repository;
-    protected $entity;
     protected $rows;
 
-    public function __construct( $repository, $entity ) {
+    public function __construct( $repository ) {
         $this->error = '';
         $this->repository = $repository;
-        $this->entity = $entity;
         $this->rows = [];
     }
 
@@ -32,8 +30,8 @@ class Sequence
         return $this->repository->select( $columns, $table, $kwargs, $args );
     }
 
-    // return result rows
-    public function execute( $query ) {
+    // return result rows 
+    public function execute( $query, $entity ) {
 
         $this->error = '';
         $this->rows = [];
@@ -43,7 +41,7 @@ class Sequence
 
         foreach( $rows as $row ) {
 
-            $instance = clone $this->entity;
+            $instance = clone $entity;
             $reflection = new \ReflectionClass( $instance );
             $properties = $reflection->getProperties();
 
@@ -57,6 +55,14 @@ class Sequence
             }
             array_push( $this->rows, $instance );
         }
+    }
+
+    // count rows in table
+    public function count( string $table, array $kwargs ) {
+        $query = $this->repository->select( ['COUNT(id) AS count'], $table, $kwargs, [] );
+        $this->repository->execute( $query );
+        $rows = $this->repository->rows();
+        return (int) $rows[0]->count;
     }
 
 }

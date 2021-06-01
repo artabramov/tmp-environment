@@ -144,17 +144,6 @@ class Repository
     }
 
     /**
-     * Create custom query.
-     */
-    public function custom( string $query_text, array $query_args ) : \artabramov\Echidna\Query {
-
-        $query = new \artabramov\Echidna\Query();
-        $query->text = $query_text;
-        $query->args = $query_args;
-        return $query;
-    }
-
-    /**
      * Execute the query.
      */
     public function execute( $query ) {
@@ -201,6 +190,16 @@ class Repository
         }
 
         return empty( $this->e ) ? $id : 0;
+    }
+
+    public function time() {
+        $query = new \artabramov\Echidna\Query();
+        $query->text = "SELECT NOW() as time";
+        $query->args = [];
+
+        $this->execute( $query );
+        $rows = $this->rows();
+        return $rows[0]->time;
     }
 
 }

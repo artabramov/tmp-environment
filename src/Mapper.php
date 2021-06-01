@@ -221,16 +221,6 @@ class Mapper
     }
 
     /**
-     * Get current repository time.
-     */
-    public function time() {
-        $query = $this->repository->custom( "SELECT NOW() as time", [] );
-        $this->repository->execute( $query );
-        $rows = $this->repository->rows();
-        return $rows[0]->time;
-    }
-
-    /**
      * Begin transaction
      */
     public function start() {
