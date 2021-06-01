@@ -233,14 +233,14 @@ class Mapper
     /**
      * Begin transaction
      */
-    public function begin() {
+    public function start() {
         $this->repository->begin();
     }
 
     /**
      * Commit or rollback transaction.
      */
-    public function end() {
+    public function stop() {
         if( empty( $this->error )) {
             $this->repository->commit();
         } else {
