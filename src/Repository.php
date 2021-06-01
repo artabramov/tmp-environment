@@ -26,6 +26,27 @@ class Repository
     }
 
     /**
+     * Begin transaction
+     */
+    public function begin() {
+        $this->pdo->beginTransaction();
+    }
+
+    /**
+     * Commit transaction.
+     */
+    public function commit() {
+        $this->pdo->commit();
+    }
+
+    /**
+     * Rollback transaction.
+     */
+    public function rollback() {
+        $this->pdo->rollBack();
+    }
+
+    /**
      * Create query string from array.
      */
     private function where( array $kwargs ) : string {
@@ -181,26 +202,5 @@ class Repository
 
         return empty( $this->e ) ? $id : 0;
     }
-
-    /**
-     * Get current inner time of repository.
-     * @return string
-     * @throws \Exception
-     */
-    public function _time() {
-
-        try {
-            $stmt = $this->pdo->prepare( 'SELECT NOW() AS datetime;' );
-            $stmt->execute();
-            $rows = $stmt->fetch( $this->pdo::FETCH_ASSOC );
-
-        } catch( \Exception $e ) {
-            $this->e = $e;
-        }
-
-        return empty( $this->e ) ? $rows[ 'datetime' ] : '0000-00-00 00:00:00';
-    }
-
-
 
 }

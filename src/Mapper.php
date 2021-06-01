@@ -220,4 +220,22 @@ class Mapper
         return !empty( $rows[0]->id );
     }
 
+    /**
+     * Begin transaction
+     */
+    public function begin() {
+        $this->repository->begin();
+    }
+
+    /**
+     * Commit or rollback transaction.
+     */
+    public function end() {
+        if( empty( $this->error )) {
+            $this->repository->commit();
+        } else {
+            $this->repository->rollback();    
+        }
+    }
+
 }
