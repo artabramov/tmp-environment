@@ -1,7 +1,7 @@
 <?php
 namespace artabramov\Echidna;
 
-class Time
+class Custom
 {
     protected $error;
     protected $repository;
@@ -27,7 +27,8 @@ class Time
     public function time() {
         $query = $this->repository->custom( "SELECT NOW() as time", [] );
         $this->repository->execute( $query );
-        return $this->repository->rows[0]->time;
+        $rows = $this->repository->rows();
+        return $rows[0]->time;
     }
 
 }
