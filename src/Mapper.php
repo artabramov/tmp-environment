@@ -25,6 +25,7 @@ class Mapper
     }
 
     /**
+     * Make entity params array from doc string.
      * Entity doc format: @entity(table=users entity=user)
      * @return string
      */
@@ -34,6 +35,7 @@ class Mapper
     }
 
     /**
+     * Make property params array from doc string.
      * Param doc format: @column(nullable=true unique=true regex=/^[a-z]{1,20}$/)
      * @return string
      */
@@ -45,6 +47,7 @@ class Mapper
     }
 
     /**
+     * Make params array from string.
      * @return array
      */
     private function parse_params( string $doc, string $key ) : array {
@@ -54,7 +57,10 @@ class Mapper
         return array_combine ( $tmp[1], $tmp[2] );
     }
 
-    // looking for error
+    /**
+     * Check data for correctness.
+     * @return void
+     */
     private function parse_data( $entity, array $data ) {
 
         $entity_class = new \ReflectionClass( $entity );
@@ -80,7 +86,8 @@ class Mapper
     }
 
     /**
-     *
+     * Select entity from repository.
+     * @return bool
      */
     public function select( $entity, array $data ) : bool {
         $this->error = '';
@@ -106,37 +113,11 @@ class Mapper
         return empty( $this->error );
     }
 
-
-
     /**
+     * Insert entity in repository.
      * @return bool
      */
     public function insert( $entity, array $data ) : bool {
-
-        /*
-        $this->error = '';
-        $entity_class = new \ReflectionClass( $entity );
-        $entity_params = $this->get_entity_params( $entity_class );
-
-        foreach( $data as $key => $value ) {
-            $property = $entity_class->getProperty( $key );
-            $property->setAccessible( true );
-            $property_params = $this->get_property_params( $entity, $key );
-
-            if( $property_params[ 'nullable' ] != 'true' and empty( $value )) {
-                $this->error = $key . ' is empty';
-                break;
-
-            } elseif( !empty( $value ) and !preg_match( $property_params[ 'regex' ], $value ) ) {
-                $this->error = $key . ' is incorrect';
-                break;
-
-            } elseif( !empty( $value ) and  $property_params[ 'unique' ] == 'true' and $this->exists( $entity, [[ $key, '=', $value ]] ) ) {
-                $this->error = $key . ' is occupied';
-                break;
-            }
-        }
-        */
 
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
@@ -161,47 +142,17 @@ class Mapper
                 } else {
                     $this->error = $entity_params['entity'] . ' insert error';
                 }
-
             }
-
-            
         }
 
         return empty( $this->error );
     }
 
     /**
+     * Update entity in repository.
      * @return bool
      */
     public function update( $entity, array $data ) : bool {
-
-        /*
-        $this->error = '';
-        $entity_class = new \ReflectionClass( $entity );
-        $entity_params = $this->get_entity_params( $entity_class );
-
-        foreach( $data as $key => $value ) {
-            $property = $entity_class->getProperty( $key );
-            $property->setAccessible( true );
-            $property_params = $this->get_property_params( $entity, $key );
-
-            if( $property_params[ 'nullable' ] != 'true' and empty( $value )) {
-                $this->error = $key . ' is empty';
-                break;
-
-            } elseif( !empty( $value )) {
-
-                if( !preg_match( $property_params[ 'regex' ], $value ) ) {
-                    $this->error = $key . ' is incorrect';
-                    break;
-
-                } elseif( $property_params[ 'unique' ] == 'true' and $this->exists( $entity, [[ $key, '=', $value ]] ) ) {
-                    $this->error = $key . ' is occupied';
-                    break;
-                }
-            }
-        }
-        */
 
         $this->error = '';
         $entity_class = new \ReflectionClass( $entity );
@@ -228,6 +179,7 @@ class Mapper
     }
 
     /**
+     * Delete entiry from repository.
      * @return bool
      */
     public function delete( $entity ) : bool {
@@ -250,46 +202,22 @@ class Mapper
         }
 
         return empty( $this->error );
-
-        /*
-        $this->error = '';
-
-        $class = new \ReflectionClass( $entity );
-        $params = $this->get_entity_params( $class );
-
-        if( $this->repository->delete( $params['table'], [['id', '=', $entity->id]] )) {
-            $properties = $class->getProperties();
-
-            foreach( $properties as $property ) {
-                $property->setAccessible( true );
-                $property->setValue( $entity, null );
-            }
-
-        } else {
-            $this->error = $params['entity'] . ' delete error';
-        }
-
-        return empty( $this->error );
-        */
     }
 
-
-
-
-
-
-
-
     /**
+     * Check is entity exists in repository.
      * @return bool
      */
     public function exists( $entity, array $args ) : bool {
 
         $class = new \ReflectionClass( $entity );
         $params = $this->get_entity_params( $class );
+
         $query = $this->repository->select( ['id'], $params['table'], $args, ['LIMIT 1', 'OFFSET 0'] );
         $this->repository->execute( $query );
-        return !empty( $this->repository->rows[0]->id );
+        $rows = $this->repository->rows();
+
+        return !empty( $rows[0]->id );
     }
 
 }

@@ -187,7 +187,7 @@ class Repository
      * @return string
      * @throws \Exception
      */
-    public function time() {
+    public function _time() {
 
         try {
             $stmt = $this->pdo->prepare( 'SELECT NOW() AS datetime;' );
