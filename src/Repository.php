@@ -105,6 +105,17 @@ class Repository
         return $query;
     }
 
+    public function delete( string $table, array $args ) : bool {
+
+        $where = $this->where( $args );
+        $params = $this->params( $args );
+
+        $query = new \artabramov\Echidna\Query();
+        $query = 'DELETE FROM ' . $table . ' WHERE ' . $where;
+        $query->args = $params;
+        return $query;
+    }
+
     // return query object
     public function custom( string $query_text, array $query_args ) {
 
