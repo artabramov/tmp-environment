@@ -128,20 +128,16 @@ class Mapper
             $query = $this->repository->insert( $entity_params['table'], $data );
 
             if( $this->repository->execute( $query )) {
-                $id = $this->repository->id();
 
-                if( !empty( $id )) {
-                    $data['id'] = $id;
-
+                    $data['id'] = $this->repository->id();
                     foreach( $data as $key => $value ) {
                         $property = $entity_class->getProperty( $key );
                         $property->setAccessible( true );
                         $property->setValue( $entity, $value );
                     }
 
-                } else {
-                    $this->error = $entity_params['entity'] . ' insert error';
-                }
+            } else {
+                $this->error = $entity_params['entity'] . ' insert error';
             }
         }
 
