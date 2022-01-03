@@ -1,9 +1,6 @@
-from .. import make_celery
-from .. import db
+from .. import db, celery
 from ..models import msg
 import time
-
-celery = make_celery()
 
 @celery.task(name='post.post_msg')
 def post_msg(tmp):

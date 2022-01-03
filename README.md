@@ -29,3 +29,4 @@ rabbitmqctl start_app
 ** CELERY **  
 source /app/venv/bin/activate
 celery -A app.tasks.post_msg worker -n flask_worker.%n -Q post
+celery -A app.workers.worker_user worker -n flask_worker.%n -Q user
