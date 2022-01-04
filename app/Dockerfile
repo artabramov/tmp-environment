@@ -17,6 +17,7 @@ RUN ./venv/bin/pip3.7 install mod_wsgi
 RUN ln -s /app/venv/lib/python3.7/site-packages/mod_wsgi/server/mod_wsgi-*.so /app/venv/lib/python3.7/site-packages/mod_wsgi/server/mod_wsgi.so
 COPY ./src/requirements.txt ./
 RUN ./venv/bin/pip3.7 install --no-cache-dir -r ./requirements.txt
+RUN ./venv/bin/pip3.7 install -U "celery[redis]"
 
 # app
 COPY ./app/ ./
