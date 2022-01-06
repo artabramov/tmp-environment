@@ -42,21 +42,15 @@ celery = Celery(
 celery.conf.task_routes = app.config['CELERY_TASK_ROUTES']
 celery.conf.result_expires = app.config['CELERY_RESULT_EXPIRES']
 
-# core
-from app.core import error
-
 # models
-from app.models import msg
 from app.models import user
 from app.models import user_meta
 from app.models import user_token
 from app.models import user_authcode
 
 # routes
-from app.routes import route_user
 from app.routes import hello_world
+from app.routes import user_post
+from app.routes import user_get
 from app.routes import create_tables
-from app.routes import post_msg
-
-
 

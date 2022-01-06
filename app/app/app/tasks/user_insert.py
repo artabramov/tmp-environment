@@ -1,10 +1,9 @@
 from .. import db, celery
 from ..models.user import User
-import werkzeug
 
 
-@celery.task(name='user.insert', ignore_result=False)
-def insert_user(user_email, user_password, user_name):
+@celery.task(name='app.user_insert', ignore_result=False)
+def user_insert(user_email, user_password, user_name):
     
     try:
         user = User(
@@ -29,4 +28,3 @@ def insert_user(user_email, user_password, user_name):
         return 400, 'user insert error', {}
 
     return 200, '', {'user': {'id': user.id}}
-

@@ -1,6 +1,6 @@
 from flask import make_response, jsonify
 
-def send_response(status, error, data):
+def app_response(status, error, data):
     response = make_response(
         jsonify(
             {
