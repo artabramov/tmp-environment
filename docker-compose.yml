@@ -63,8 +63,8 @@ services:
     - apache_log:/var/log/apache2
     ports:
     - "8081:80"
-    volumes:
-    - app_log:/var/log/app
+    #volumes:
+    #- app_log:/var/log/app
    
 
   rabbit:
@@ -126,4 +126,4 @@ volumes:
   elasticsearch_data:
   nginx_log:
   apache_log:
-  app_log:
+  #app_log:

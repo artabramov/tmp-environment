@@ -6,7 +6,7 @@ filebeat.inputs:
     - /var/log/nginx/error.log
     - /var/log/apache/access.log
     - /var/log/apache/error.log
-    - /var/log/app/*.log
+    #- /var/log/app/*.log
 
 #output.console:
 #  enabled: true
