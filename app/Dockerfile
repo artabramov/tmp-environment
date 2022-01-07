@@ -3,6 +3,8 @@ RUN apt-get update
 RUN mkdir /app
 RUN mkdir /var/log/app
 RUN chown www-data /var/log/app
+RUN mkdir /var/log/celery
+RUN chown www-data /var/log/celery
 WORKDIR /app
 
 # apache

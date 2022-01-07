@@ -10,7 +10,9 @@ services:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - nginx_log:/var/log/nginx:ro
       - apache_log:/var/log/apache:ro
+      - celery_log:/var/log/celery:ro
       - app_log:/var/log/app:ro
+      - rabbit_log:/var/log/rabbitmq:ro
     depends_on:
       - nginx
       - app
@@ -62,6 +64,7 @@ services:
     restart: unless-stopped
     volumes:
     - apache_log:/var/log/apache2
+    - celery_log:/var/log/celery
     - app_log:/var/log/app
     ports:
     - "8081:80"
@@ -76,8 +79,11 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_LOG_BASE: /var/log/rabbitmq/
+      RABBITMQ_LOGS: rabbit.log
     volumes:
       - rabbit:/var/lib/rabbitmq
+      - rabbit_log:/var/log/rabbitmq
     ports:
       - "15672:15672"
       - "5672:5672"
@@ -126,4 +132,6 @@ volumes:
   elasticsearch_data:
   nginx_log:
   apache_log:
+  celery_log:
+  rabbit_log:
   app_log:

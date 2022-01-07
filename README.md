@@ -31,4 +31,4 @@ source /app/venv/bin/activate
 celery -A app.tasks.post_msg worker -n flask_worker.%n -Q post
 celery -A app.workers.worker_user worker -n flask_worker.%n -Q user --detach
 celery -A app.workers.worker_user control shutdown
-celery -A app.core.app_worker worker -n flask_worker.%n -Q app
+celery -A app.core.app_worker worker -n flask_worker.%n -Q app --loglevel=info -f /var/log/celery/celery.log

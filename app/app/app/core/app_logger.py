@@ -10,4 +10,8 @@ def app_logger(app):
 
     debug_file_handler = DebugFileHandler(app.config['LOGGING_PATH'] + datetime.now().strftime(app.config['LOGGING_FILE']))
     debug_file_handler.setFormatter(logging.Formatter(app.config['LOGGING_FORMATTER']))
+    
+    while app.logger.hasHandlers():
+        app.logger.removeHandler(app.logger.handlers[0])
+
     app.logger.addHandler(debug_file_handler)
