@@ -1,6 +1,8 @@
 FROM python:3.7
 RUN apt-get update
 RUN mkdir /app
+RUN mkdir /var/log/app
+RUN chown www-data /var/log/app
 WORKDIR /app
 
 # apache

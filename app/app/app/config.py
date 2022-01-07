@@ -1,5 +1,7 @@
 class Config:
     LOGGING_PATH = '/var/log/app/'
+    LOGGING_FILE = '%d-%m-%Y.log'
+    LOGGING_FORMATTER = '[APP] [%(asctime)s] %(levelname)s file %(filename)s, line %(lineno)d: %(message)s'
 
     CELERY_BROKER_URL = 'amqp://guest:guest@host.docker.internal:5672//'
     CELERY_RESULT_BACKEND = 'redis://host.docker.internal:6379/0'

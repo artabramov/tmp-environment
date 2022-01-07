@@ -6,7 +6,7 @@ filebeat.inputs:
     - /var/log/nginx/error.log
     - /var/log/apache/access.log
     - /var/log/apache/error.log
-    #- /var/log/app/*.log
+    - /var/log/app/*.log
 
 #output.console:
 #  enabled: true
@@ -23,7 +23,9 @@ output.elasticsearch:
   - index: "apache-%{+yyyy.MM.dd}"
     when.equals:
       event.module: "apache"
-  #index: "nginx-%{+yyyy.MM.dd}"
+  - index: "app-%{+yyyy.MM.dd}"
+    when.contains:
+      message: "[APP]"
 
 filebeat.modules:
 - module: nginx

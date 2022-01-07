@@ -10,6 +10,7 @@ services:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - nginx_log:/var/log/nginx:ro
       - apache_log:/var/log/apache:ro
+      - app_log:/var/log/app:ro
     depends_on:
       - nginx
       - app
@@ -61,10 +62,9 @@ services:
     restart: unless-stopped
     volumes:
     - apache_log:/var/log/apache2
+    - app_log:/var/log/app
     ports:
     - "8081:80"
-    #volumes:
-    #- app_log:/var/log/app
    
 
   rabbit:
@@ -126,4 +126,4 @@ volumes:
   elasticsearch_data:
   nginx_log:
   apache_log:
-  #app_log:
+  app_log:
