@@ -1,10 +1,16 @@
 FROM python:3.7
 RUN apt-get update
 RUN mkdir /app
+
 RUN mkdir /var/log/app
-RUN chown www-data /var/log/app
+RUN chown -R www-data /var/log/app
+#RUN touch /var/log/app/app.log
+#RUN chmod -R 777 /var/log/app
+
 RUN mkdir /var/log/celery
-RUN chown www-data /var/log/celery
+RUN chown -R www-data /var/log/celery
+#RUN chmod -R 777 /var/log/celery
+
 WORKDIR /app
 
 # apache

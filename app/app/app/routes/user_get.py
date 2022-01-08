@@ -9,8 +9,8 @@ def user_get(user_id):
     result = user_select.apply_async(args=[user_id])
     a = result.get()
 
-    app.logger.error('beware any error')
-    app.logger.critical('beware critical error')
+    #app.logger.error('beware any error')
+    app.logger.critical('some critical error')
 
     return app_response(*a)
 

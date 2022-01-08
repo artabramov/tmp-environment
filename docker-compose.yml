@@ -10,9 +10,9 @@ services:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - nginx_log:/var/log/nginx:ro
       - apache_log:/var/log/apache:ro
-      - celery_log:/var/log/celery:ro
-      - app_log:/var/log/app:ro
       - rabbit_log:/var/log/rabbitmq:ro
+      - celery_log:/var/log/celery:ro
+      #- app_log:/var/log/app:ro
     depends_on:
       - nginx
       - app
@@ -65,7 +65,7 @@ services:
     volumes:
     - apache_log:/var/log/apache2
     - celery_log:/var/log/celery
-    - app_log:/var/log/app
+    #- app_log:/var/log/app
     ports:
     - "8081:80"
    
@@ -134,4 +134,4 @@ volumes:
   apache_log:
   celery_log:
   rabbit_log:
-  app_log:
+  #app_log:

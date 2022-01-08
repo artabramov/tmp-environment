@@ -26,9 +26,14 @@ rabbitmqctl stop_app
 rabbitmqctl join_cluster rabbit@rabbit-1
 rabbitmqctl start_app
 
+\\wsl$\docker-desktop-data\version-pack-data\community\docker\
+
 ** CELERY **  
 source /app/venv/bin/activate
 celery -A app.tasks.post_msg worker -n flask_worker.%n -Q post
 celery -A app.workers.worker_user worker -n flask_worker.%n -Q user --detach
 celery -A app.workers.worker_user control shutdown
-celery -A app.core.app_worker worker -n flask_worker.%n -Q app --loglevel=info -f /var/log/celery/celery.log
+celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --uid=www-data --loglevel=info
+celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --loglevel=info
+
+
