@@ -6,11 +6,12 @@ from app.tasks.user_select import user_select
 @app.route('/api/v1/user/<user_id>', methods=['GET'])
 def user_get(user_id):
 
-    result = user_select.apply_async(args=[user_id])
-    a = result.get()
+    try:
+        result = user_select.apply_async(args=[user_id])
+        data = result.get()
+    except Exception as e:
+        app.logger.critical(str(e))
+        data = 500, 'internal server error', {}    
 
-    #app.logger.error('beware any error')
-    app.logger.critical('some critical error')
-
-    return app_response(*a)
+    return app_response(*data)
 

@@ -11,7 +11,7 @@ def user_post():
         request.args.get('user_password', None),
         request.args.get('user_name', None),
     ])
-    a = result.get()
+    data = result.get()
 
-    return app_response(*a)
+    return app_response(*data)
 

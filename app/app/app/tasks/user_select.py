@@ -7,9 +7,10 @@ def user_select(user_id):
     user = User.query.filter_by(id=user_id).first()
 
     if not user:
-        return 404, 'user rnot found', {}
+        return 404, 'user not found', {}
 
-    return 200, '', {'user': {
-        'id': user.id,
-        'user_email': user.user_email,
+    return 200, '', {
+        'user': {
+            'id': user.id,
+            'user_email': user.user_email,
     }}

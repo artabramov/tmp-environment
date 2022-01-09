@@ -1,4 +1,4 @@
-#version: '3.2'
+version: '3.2'
 services:
 
   filebeat:
@@ -12,10 +12,12 @@ services:
       - apache_log:/var/log/apache:ro
       - rabbit_log:/var/log/rabbitmq:ro
       - celery_log:/var/log/celery:ro
-      #- app_log:/var/log/app:ro
+      - postgres_log:/var/log/postgresql:ro
     depends_on:
       - nginx
       - app
+      - postgres
+      - rabbit
       - elasticsearch
     command: ["filebeat", "-e", "-strict.perms=false"]
     
@@ -61,14 +63,14 @@ services:
   app:
     image: app
     container_name: app
-    restart: unless-stopped
+    restart: always
     volumes:
     - apache_log:/var/log/apache2
     - celery_log:/var/log/celery
-    #- app_log:/var/log/app
     ports:
     - "8081:80"
-   
+    depends_on:
+      - postgres
 
   rabbit:
     image: rabbitmq:3-management
@@ -82,7 +84,7 @@ services:
       RABBITMQ_LOG_BASE: /var/log/rabbitmq/
       RABBITMQ_LOGS: rabbit.log
     volumes:
-      - rabbit:/var/lib/rabbitmq
+      - rabbit_data:/var/lib/rabbitmq
       - rabbit_log:/var/log/rabbitmq
     ports:
       - "15672:15672"
@@ -97,9 +99,11 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_log:/var/log/postgresql
     ports:
       - "5432:5432"
+    command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql/", "-c", "log_statement=all"]
 
   pgadmin:
     image: dpage/pgadmin4
@@ -111,7 +115,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
-      - pgadmin:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
     ports:
       - "5555:80"
 
@@ -126,12 +130,12 @@ services:
 
 
 volumes:
-  postgres:
-  rabbit:
-  pgadmin:
+  postgres_data:
+  rabbit_data:
+  pgadmin_data:
   elasticsearch_data:
   nginx_log:
   apache_log:
   celery_log:
   rabbit_log:
-  #app_log:
+  postgres_log:
