@@ -1,6 +1,6 @@
 from flask import request
 from app import app
-from app.core.app_response import app_response
+from app.core.response_format import response_format
 from app.tasks.user_insert import user_insert
 
 @app.route('/api/v1/user/', methods=['POST'])
@@ -13,5 +13,5 @@ def user_post():
     ])
     data = result.get()
 
-    return app_response(*data)
+    return response_format(*data)
 

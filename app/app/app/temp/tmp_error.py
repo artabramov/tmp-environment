@@ -1,4 +1,4 @@
-from app.core.app_response import app_response
+from app.core.response_format import response_format
 import werkzeug
 from app import app
 

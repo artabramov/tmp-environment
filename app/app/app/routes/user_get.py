@@ -1,5 +1,5 @@
 from app import app
-from app.core.app_response import app_response
+from app.core.response_format import response_format
 from app.tasks.user_select import user_select
 
 
@@ -13,5 +13,5 @@ def user_get(user_id):
         app.logger.critical(str(e))
         data = 500, 'internal server error', {}    
 
-    return app_response(*data)
+    return response_format(*data)
 

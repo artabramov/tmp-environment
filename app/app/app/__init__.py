@@ -2,13 +2,13 @@ from flask import Flask
 from celery import Celery
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
-from app.core.app_logger import app_logger
+from app.core.logger_format import logger_format
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-app_logger(app)
+logger_format(app)
 
 db = SQLAlchemy(app)
 

@@ -37,4 +37,4 @@ celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celer
 celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --loglevel=info
 
 
-source /app/venv/bin/activate && celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --loglevel=info --detach
+source /app/venv/bin/activate && celery -A app.workers.user_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --loglevel=info --detach
