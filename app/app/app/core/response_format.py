@@ -1,14 +1,14 @@
 from flask import make_response, jsonify
 
-def response_format(status, error, data):
+def response_format(message):
     response = make_response(
         jsonify(
             {
-                'error': error,
-                'data': data
+                'error': message['error'],
+                'data': message['data'],
             }
         ),
-        status,
+        message['code'],
     )
     response.headers['Content-Type'] = 'application/json'
     response.headers['Access-Control-Allow-Origin'] = '*'

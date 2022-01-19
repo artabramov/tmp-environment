@@ -9,6 +9,7 @@ filebeat.inputs:
     - /var/log/rabbitmq/*.log*
     - /var/log/celery/*.log
     - /var/log/postgresql/*.log
+    - /var/log/app/*.log*
 
 #output.console:
 #  enabled: true
@@ -28,12 +29,16 @@ output.elasticsearch:
   - index: "rabbit-%{+yyyy.MM.dd}"
     when.equals:
       event.module: "rabbitmq"
-  - index: "celery-%{+yyyy.MM.dd}"
-    when.contains:
-      log.file.path: "/var/log/celery/"
   - index: "postgres-%{+yyyy.MM.dd}"
     when.equals:
       event.module: "postgresql"
+  - index: "celery-%{+yyyy.MM.dd}"
+    when.contains:
+      log.file.path: "/var/log/celery/"
+  - index: "app-%{+yyyy.MM.dd}"
+    when.contains:
+      log.file.path: "/var/log/app/"
+
 
 filebeat.modules:
 - module: nginx

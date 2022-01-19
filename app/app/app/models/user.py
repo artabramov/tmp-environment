@@ -28,7 +28,6 @@ class User(db.Model):
     user_name = db.Column(db.String(40))
     password_hash = db.Column(db.String(64), nullable=False)
 
-    user_authcode = db.relationship('UserAuthcode', backref='users')
     user_token = db.relationship('UserToken', backref='users')
     user_meta = db.relationship('UserMeta', backref='users')
 
@@ -72,3 +71,10 @@ class User(db.Model):
         elif key == 'user_name'  and not self.NAME_REGEX.match(value):
             raise werkzeug.exceptions.BadRequest('user_name is incorrect')
         return value
+
+
+@db.event.listens_for(User, 'before_insert')
+def do_stuff(mapper, connect, user):
+    if User.query.filter_by(user_email=user.user_email).first():
+        raise werkzeug.exceptions.BadRequest('user_email already exists')
+

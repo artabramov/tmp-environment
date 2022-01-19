@@ -1,16 +1,34 @@
-from .. import celery
+import werkzeug
+from .. import app, celery
 from ..models.user import User
 
 @celery.task(name='app.user_select', ignore_result=False)
 def user_select(user_id):
 
-    user = User.query.filter_by(id=user_id).first()
+    try:
+        user = User.query.filter_by(id=user_id).first()
+    except Exception as e:
+        app.logger.critical(e)
+        return {
+            'code': 500, 
+            'error': 'Internal Server Error', 
+            'data': {},
+        }
 
     if not user:
-        return 404, 'user not found', {}
+        return {
+            'code': 404, 
+            'error': 'user not found', 
+            'data': {},
+        }
 
-    return 200, '', {
-        'user': {
-            'id': user.id,
-            'user_email': user.user_email,
-    }}
+    return {
+        'code': 200, 
+        'error': '',
+        'data': {
+            'user': {
+                'id': user.id,
+                'user_email': user.user_email,
+            }
+        }
+    }

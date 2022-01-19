@@ -7,7 +7,8 @@ WORKDIR /app
 RUN mkdir /var/log/celery
 RUN chown -R www-data /var/log/celery
 
-
+RUN mkdir /var/log/app
+RUN chown -R www-data /var/log/app
 
 # apache
 RUN apt-get install -y apache2 apache2-dev

@@ -2,13 +2,20 @@ from flask import Flask
 from celery import Celery
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
-from app.core.logger_format import logger_format
+from app.core.logger_wrapper import LoggerWrapper
+import os, pwd, grp
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-logger_format(app)
+if not os.path.isfile(app.config['LOG_FILE']):
+    open(app.config['LOG_FILE'], 'a').close()
+    uid = pwd.getpwnam('www-data').pw_uid
+    gid = grp.getgrnam('root').gr_gid
+    os.chown(app.config['LOG_FILE'], uid, gid)
+
+log = LoggerWrapper(app)
 
 db = SQLAlchemy(app)
 
@@ -46,14 +53,13 @@ celery.conf.task_routes = app.config['CELERY_TASK_ROUTES']
 celery.conf.result_expires = app.config['CELERY_RESULT_EXPIRES']
 
 # models
-from app.models import user
-from app.models import user_meta
-from app.models import user_token
-from app.models import user_authcode
+#from app.models import user
+#from app.models import user_meta
+#from app.models import user_token
 
 # routes
-from app.routes import hello_world
-from app.routes import user_post
-from app.routes import user_get
-from app.routes import create_tables
+from app.routes import hello
+#from app.routes import migrate
+#from app.routes import user_routes
+
 

@@ -1,16 +1,19 @@
 class Config:
-    LOGGING_FORMATTER = 'APP %(levelname)s in file %(filename)s, line %(lineno)d: %(message)s'
+    #DEBUG = True
+
+    LOG_FILE = '/var/log/app/app.log'
+    LOG_FORMAT = '[%(asctime)s] %(method)s: [%(url)s] %(levelname)s %(name)s in %(filename)s, line %(lineno)d: %(message)s'
+
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:postgres@host.docker.internal:5432/postgres' # dialect+driver://username:password@host:port/database
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CELERY_BROKER_URL = 'amqp://guest:guest@host.docker.internal:5672//'
     CELERY_RESULT_BACKEND = 'redis://host.docker.internal:6379/0'
     CELERY_TASK_LIST = ['app.tasks']
-    CELERY_RESULT_EXPIRES = 60
+    CELERY_RESULT_EXPIRES = 30
     CELERY_TASK_ROUTES = {
-        'app.*': {'queue': 'app'}
+        'app.*': {'queue': 'user'}
     }
-
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:postgres@host.docker.internal:5432/postgres' # dialect+driver://username:password@host:port/database
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     USER_PASSWORD_SALT = 'paSS-$alt!'
     USER_AUTHCODE_SALT = 'aUTH-$alt?'

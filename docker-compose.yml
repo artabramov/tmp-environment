@@ -13,6 +13,7 @@ services:
       - rabbit_log:/var/log/rabbitmq:ro
       - celery_log:/var/log/celery:ro
       - postgres_log:/var/log/postgresql:ro
+      - app_log:/var/log/app:ro
     depends_on:
       - nginx
       - app
@@ -67,6 +68,7 @@ services:
     volumes:
     - apache_log:/var/log/apache2
     - celery_log:/var/log/celery
+    - app_log:/var/log/app
     ports:
     - "8081:80"
     depends_on:
@@ -139,3 +141,4 @@ volumes:
   celery_log:
   rabbit_log:
   postgres_log:
+  app_log:
