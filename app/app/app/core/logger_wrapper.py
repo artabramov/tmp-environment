@@ -10,7 +10,8 @@ class LoggerWrapper():
         while app.logger.hasHandlers():
             app.logger.removeHandler(app.logger.handlers[0])
             
-        handler = logging.handlers.TimedRotatingFileHandler(app.config['LOG_FILENAME'], 
+        handler = logging.handlers.TimedRotatingFileHandler(
+            filename=app.config['LOG_FILENAME'], 
             when=app.config['LOG_ROTATE_WHEN'], 
             backupCount=app.config['LOG_BACKUP_COUNT'])
         handler.setFormatter(logging.Formatter(app.config['LOG_FORMAT']))
