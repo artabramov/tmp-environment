@@ -15,15 +15,12 @@ processors:
   - dissect:
       when.contains:
         log.file.path: "/var/log/app/"
-      tokenizer: '[%{app.asctime}] %{app.method}: [%{app.url}] %{app.levelname}: [%{app.name} in %{app.filename}, line %{app.lineno}: "%{app.message}"]'
+      tokenizer: '[%{asctime}] %{method}: [%{url}] %{levelname}: [%{name} in %{filename}, line %{lineno}: "%{message}"]'
+      target_prefix: "app"
       field: "message"
-      target_prefix: ""
       
 #output.console:
 #  enabled: true
-
-
-
 
 output.elasticsearch:
   enabled: true
