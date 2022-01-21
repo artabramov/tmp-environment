@@ -11,8 +11,19 @@ filebeat.inputs:
     - /var/log/postgresql/*.log
     - /var/log/app/*.log*
 
+processors:
+  - dissect:
+      when.contains:
+        log.file.path: "/var/log/app/"
+      tokenizer: '[%{app.asctime}] %{app.method}: [%{app.url}] %{app.levelname}: [%{app.name} in %{app.filename}, line %{app.lineno}: "%{app.message}"]'
+      field: "message"
+      target_prefix: ""
+      
 #output.console:
 #  enabled: true
+
+
+
 
 output.elasticsearch:
   enabled: true
@@ -38,7 +49,6 @@ output.elasticsearch:
   - index: "app-%{+yyyy.MM.dd}"
     when.contains:
       log.file.path: "/var/log/app/"
-
 
 filebeat.modules:
 - module: nginx

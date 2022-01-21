@@ -9,14 +9,13 @@ import os, pwd, grp
 app = Flask(__name__)
 app.config.from_object(Config)
 
-if not os.path.isfile(app.config['LOG_FILE']):
-    open(app.config['LOG_FILE'], 'a').close()
+if not os.path.isfile(app.config['LOG_FILENAME']):
+    open(app.config['LOG_FILENAME'], 'a').close()
     uid = pwd.getpwnam('www-data').pw_uid
     gid = grp.getgrnam('root').gr_gid
-    os.chown(app.config['LOG_FILE'], uid, gid)
+    os.chown(app.config['LOG_FILENAME'], uid, gid)
 
 log = LoggerWrapper(app)
-
 db = SQLAlchemy(app)
 
 """
