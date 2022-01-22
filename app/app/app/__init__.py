@@ -4,11 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 import os, pwd, grp
 import logging
+from app.core.log_wrapper import log_wrapper
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
-
+log = log_wrapper(app)
 db = SQLAlchemy(app)
 
 """
@@ -49,6 +50,7 @@ celery.conf.result_expires = app.config['CELERY_RESULT_EXPIRES']
 #from app.models import user_meta
 #from app.models import user_token
 
+"""
 if not os.path.isfile(app.config['LOG_FILENAME']):
     open(app.config['LOG_FILENAME'], 'a').close()
     uid = pwd.getpwnam('www-data').pw_uid
@@ -73,7 +75,7 @@ app.logger.addHandler(handler)
 context_provider = ContextualFilter()
 app.logger.addFilter(context_provider)
 log = app.logger
-
+"""
 
 # routes
 from app.routes import hello
