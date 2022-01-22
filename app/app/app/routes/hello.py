@@ -1,4 +1,5 @@
-from app import app, log
+from app import app
+from app import log
 from app.core.response_format import response_format
 
 @app.route('/api/v1/hello/')
