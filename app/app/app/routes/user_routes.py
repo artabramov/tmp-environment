@@ -5,7 +5,6 @@ from app.core.response_format import response_format
 from app.tasks.user_select import user_select
 from app.tasks.user_insert import user_insert
 
-"""
 @app.route('/api/v1/user/', methods=['POST'])
 def user_post():
     try:
@@ -44,14 +43,14 @@ def user_post():
 
 
     return response_format(result)
-"""
+
 
 @app.route('/api/v1/user/<int:user_id>', methods=['GET'])
 def user_get(user_id):
     try:
         result = user_select.apply_async(args=[user_id]).get(timeout=10)
     except Exception as e:
-        log.critical('fuck')
+        log.critical(e)
         result = {
             'code': 522, 
             'error': 'Connection Timed Out',

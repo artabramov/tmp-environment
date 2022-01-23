@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, has_request_context
 import logging
 import os, pwd, grp
 
@@ -11,8 +11,12 @@ def log_wrapper(app):
 
     class ContextualFilter(logging.Filter):
         def filter(self, message):
-            message.url = request.url
-            message.method = request.method
+            if has_request_context():
+                message.url = request.url
+                message.method = request.method
+            else:
+                message.url = '-'
+                message.method = '-'
             return True
 
     while app.logger.hasHandlers():

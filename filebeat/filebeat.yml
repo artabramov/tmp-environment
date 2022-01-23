@@ -15,7 +15,7 @@ processors:
   - dissect:
       when.contains:
         log.file.path: "/var/log/app/"
-      tokenizer: '[%{asctime}] %{request.method}: [%{request.url}] %{levelname}: [%{name} in %{filename}, line %{lineno}: "%{message}"]'
+      tokenizer: '[%{asctime}] %{request.method} [%{request.url}] %{levelname} [%{name} in %{filename}, line %{lineno}: "%{message}"]'
       target_prefix: "app"
       field: "message"
       
