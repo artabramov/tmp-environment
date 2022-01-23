@@ -51,13 +51,13 @@ class User(db.Model):
         self.password_hash = self._get_password_hash(value)
 
     def _is_user_email_correct(self, user_email):
-        return self.EMAIL_REGEX.match(user_email)
+        return True if self.EMAIL_REGEX.match(user_email) else False
 
     def _is_user_password_correct(self, user_password):
-        return re.search(self.PASS_REGEX, user_password)
+        return True if re.search(self.PASS_REGEX, user_password) else False
 
     def _is_user_name_correct(self, user_name):
-        return self.NAME_REGEX.match(user_name)
+        return True if self.NAME_REGEX.match(user_name) else False
 
     def _get_password_hash(self, user_password):
         user_password = user_password + app.config['USER_PASSWORD_SALT']

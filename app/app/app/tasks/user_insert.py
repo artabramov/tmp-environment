@@ -15,6 +15,10 @@ def user_insert(user_email, user_password, user_name, remote_addr, user_agent):
         db.session.add(user_token)
         db.session.flush()
 
+        user_meta = UserMeta(user.id, 'meta_key', 'meta_value')
+        db.session.add(user_meta)
+        db.session.flush()
+
         db.session.commit()
 
     except werkzeug.exceptions.BadRequest as e:
