@@ -14,6 +14,16 @@ def user_insert(user_email, user_password, user_name, remote_addr, user_agent):
         )
         db.session.add(user)
         db.session.flush()
+
+        user_token = UserToken(
+            user.id, 
+            remote_addr, 
+            user_agent)
+        db.session.add(user_token)
+        db.session.flush()
+
+        db.session.commit()
+
     except werkzeug.exceptions.BadRequest as e:
         db.session.rollback()
         return {
@@ -27,30 +37,6 @@ def user_insert(user_email, user_password, user_name, remote_addr, user_agent):
         return {
             'code': 400, 
             'error': 'user insert error wtf',
-            'data': {},
-        }
-
-    try:
-        user_token = UserToken(user.id, remote_addr, user_agent)
-        db.session.add(user_token)
-        db.session.flush()
-    except Exception as e:
-        db.session.rollback()
-        log.critical(e)
-        return {
-            'code': 400, 
-            'error': 'user_token insert error', 
-            'data': {},
-        }
-
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        log.critical(e)
-        return {
-            'code': 400, 
-            'error': 'user insert error 2!', 
             'data': {},
         }
 
