@@ -7,18 +7,11 @@ import werkzeug
 @celery.task(name='app.user_insert', time_limit=10, ignore_result=False)
 def user_insert(user_email, user_password, user_name, remote_addr, user_agent):
     try:
-        user = User(
-            user_email=user_email,
-            user_password=user_password,
-            user_name=user_name,
-        )
+        user = User(user_email, user_password, user_name)
         db.session.add(user)
         db.session.flush()
 
-        user_token = UserToken(
-            user.id, 
-            remote_addr, 
-            user_agent)
+        user_token = UserToken(user.id, remote_addr, user_agent)
         db.session.add(user_token)
         db.session.flush()
 
@@ -31,17 +24,19 @@ def user_insert(user_email, user_password, user_name, remote_addr, user_agent):
             'error': e.description, 
             'data': {},
         }
+
     except Exception as e:
         db.session.rollback()
         log.critical(e)
         return {
-            'code': 400, 
-            'error': 'user insert error wtf',
+            'code': 500, 
+            'error': 'Internal Server Error',
             'data': {},
         }
 
-    return {
-        'code': 200, 
-        'error': '', 
-        'data': {'user': {'id': user.id}},
-    }
+    else:
+        return {
+            'code': 200, 
+            'error': '', 
+            'data': {'user': {'id': user.id}},
+        }

@@ -15,7 +15,7 @@ class UserStatus(enum.Enum):
 class User(db.Model):
     EMAIL_REGEX = re.compile(r"^[a-z0-9._-]{2,122}@[a-z0-9._-]{2,122}\.[a-z]{2,10}$")
     PASS_REGEX = re.compile(r"(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,40}$")
-    NAME_REGEX = re.compile(r"^[^\s]{1}[a-zA-Z0-9 ]{4,38}[^\s]{1}$")
+    NAME_REGEX = re.compile(r"^[^\s]{1}[a-zA-Z0-9 ]{2,38}[^\s]{1}$")
 
     __tablename__ = 'users'
     __user_password = ''
@@ -45,14 +45,23 @@ class User(db.Model):
     def user_password(self, value):
         if not value:
             raise werkzeug.exceptions.BadRequest('user_password is empty')
-        elif not re.search(self.PASS_REGEX, value):
+        elif not self._is_user_password_correct(value):
             raise werkzeug.exceptions.BadRequest('user_password is incorrect')
         self.__user_password = value
-        self.password_hash = self._get_hash(value)
+        self.password_hash = self._get_password_hash(value)
 
-    def _get_hash(self, value):
-        value = value + app.config['USER_PASSWORD_SALT']
-        encoded_pass = value.encode()
+    def _is_user_email_correct(self, user_email):
+        return self.EMAIL_REGEX.match(user_email)
+
+    def _is_user_password_correct(self, user_password):
+        return re.search(self.PASS_REGEX, user_password)
+
+    def _is_user_name_correct(self, user_name):
+        return self.NAME_REGEX.match(user_name)
+
+    def _get_password_hash(self, user_password):
+        user_password = user_password + app.config['USER_PASSWORD_SALT']
+        encoded_pass = user_password.encode()
         hash_obj = hashlib.sha256(encoded_pass)
         return hash_obj.hexdigest()
 
@@ -60,7 +69,7 @@ class User(db.Model):
     def validate_user_email(self, key, value):
         if key == 'user_email' and not value:
             raise werkzeug.exceptions.BadRequest('user_email is empty')
-        elif key == 'user_email' and not self.EMAIL_REGEX.match(value):
+        elif key == 'user_email' and not self._is_user_email_correct(value):
             raise werkzeug.exceptions.BadRequest('user_email is incorrect')
         return value
         
@@ -68,13 +77,12 @@ class User(db.Model):
     def validate_user_name(self, key, value):
         if key == 'user_name' and not value:
             raise werkzeug.exceptions.BadRequest('user_name is empty')
-        elif key == 'user_name'  and not self.NAME_REGEX.match(value):
+        elif key == 'user_name' and not self._is_user_name_correct(value):
             raise werkzeug.exceptions.BadRequest('user_name is incorrect')
         return value
 
 
 @db.event.listens_for(User, 'before_insert')
-def do_stuff(mapper, connect, user):
+def before_insert_user(mapper, connect, user):
     if User.query.filter_by(user_email=user.user_email).first():
         raise werkzeug.exceptions.BadRequest('user_email already exists')
-

@@ -12,9 +12,10 @@ def user_post():
             request.args.get('user_email', None),
             request.args.get('user_password', None),
             request.args.get('user_name', None),
-            'remote_addr',
-            'user_agent',
+            request.remote_addr,
+            request.user_agent.string,
         ])
+
     except Exception as e:
         log.critical(e)
         return response_format({
