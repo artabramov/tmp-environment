@@ -6,7 +6,9 @@ class Config:
     LOG_ROTATE_WHEN = 'H'
     LOG_BACKUP_COUNT = 24
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:postgres@host.docker.internal:5432/postgres' # dialect+driver://username:password@host:port/database
+    # dialect+driver://username:password@host:port/database
+    #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:postgres@host.docker.internal:5432/postgres'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://admin:admin@host.docker.internal:3306/app'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CELERY_BROKER_URL = 'amqp://guest:guest@host.docker.internal:5672//'

@@ -12,12 +12,14 @@ services:
       - apache_log:/var/log/apache:ro
       - rabbit_log:/var/log/rabbitmq:ro
       - celery_log:/var/log/celery:ro
-      - postgres_log:/var/log/postgresql:ro
+      #- postgres_log:/var/log/postgresql:ro
+      - mysql_log:/var/log/mysql:ro
       - app_log:/var/log/app:ro
     depends_on:
       - nginx
       - app
-      - postgres
+      #- postgres
+      - mysql
       - rabbit
       - elasticsearch
     command: ["filebeat", "-e", "-strict.perms=false"]
@@ -72,7 +74,8 @@ services:
     ports:
     - "8081:80"
     depends_on:
-      - postgres
+      #- postgres
+      - mysql
 
   rabbit:
     image: rabbitmq:3-management
@@ -92,34 +95,34 @@ services:
       - "15672:15672"
       - "5672:5672"
 
-  postgres:
-    image: postgres:13.3
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: "postgres"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - postgres_log:/var/log/postgresql
-    ports:
-      - "5432:5432"
-    command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql/", "-c", "log_statement=all"]
+  #postgres:
+  #  image: postgres:13.3
+  #  container_name: postgres
+  #  restart: always
+  #  environment:
+  #    POSTGRES_DB: "postgres"
+  #    POSTGRES_USER: "postgres"
+  #    POSTGRES_PASSWORD: "postgres"
+  #  volumes:
+  #    - postgres_data:/var/lib/postgresql/data
+  #    - postgres_log:/var/log/postgresql
+  #  ports:
+  #    - "5432:5432"
+  #  command: ["postgres", "-c", "logging_collector=on", "-c", "log_directory=/var/log/postgresql/", "-c", "log_statement=all"]
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    depends_on:
-      - postgres
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-      PGADMIN_DEFAULT_PASSWORD: admin
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    ports:
-      - "5555:80"
+  #pgadmin:
+  #  image: dpage/pgadmin4
+  #  container_name: pgadmin
+  #  restart: always
+  #  depends_on:
+  #    - postgres
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+  #    PGADMIN_DEFAULT_PASSWORD: admin
+  #  volumes:
+  #    - pgadmin_data:/var/lib/pgadmin
+  #  ports:
+  #    - "5555:80"
 
   redis:
     image: bitnami/redis
@@ -130,15 +133,32 @@ services:
     ports:
       - "6379:6379"
 
+  mysql:
+    image: mysql
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: "app"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "admin"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - mysql_log:/var/log/mysql
+    ports:
+      - "3306:3306"
 
 volumes:
-  postgres_data:
+  #postgres_data:
+  mysql_data:
   rabbit_data:
-  pgadmin_data:
+  #pgadmin_data:
   elasticsearch_data:
   nginx_log:
   apache_log:
   celery_log:
   rabbit_log:
-  postgres_log:
+  #postgres_log:
+  mysql_log:
   app_log:

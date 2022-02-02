@@ -10,7 +10,7 @@ class UserToken(db.Model):
     deleted_date = db.Column(db.DateTime(timezone=False), server_default='1970-01-01 00:00:00', nullable=False)
     expired_date = db.Column(db.DateTime(timezone=False), nullable=False)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), index=True, nullable=False)
-    refresh_token = db.Column(db.String(80), index=True, unique=True, nullable=False)
+    refresh_token = db.Column(db.String(128), index=True, unique=True, nullable=False)
     remote_addr = db.Column(db.String(48), index=True, nullable=False)
     user_agent = db.Column(db.Text, nullable=False)
 

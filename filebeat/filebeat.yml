@@ -8,7 +8,7 @@ filebeat.inputs:
     - /var/log/apache/error.log
     - /var/log/rabbitmq/*.log*
     - /var/log/celery/*.log
-    - /var/log/postgresql/*.log
+    #- /var/log/postgresql/*.log
     - /var/log/app/*.log*
 
 processors:
@@ -37,9 +37,12 @@ output.elasticsearch:
   - index: "rabbit-%{+yyyy.MM.dd}"
     when.equals:
       event.module: "rabbitmq"
-  - index: "postgres-%{+yyyy.MM.dd}"
+  #- index: "postgres-%{+yyyy.MM.dd}"
+  #  when.equals:
+  #    event.module: "postgresql"
+  - index: "mysql-%{+yyyy.MM.dd}"
     when.equals:
-      event.module: "postgresql"
+      event.module: "mysql"
   - index: "celery-%{+yyyy.MM.dd}"
     when.contains:
       log.file.path: "/var/log/celery/"
@@ -69,7 +72,15 @@ filebeat.modules:
     enabled: true
     var.paths: ["/var/log/rabbitmq/*.log*"]
 
-- module: postgresql
-  log:
+#- module: postgresql
+#  log:
+#    enabled: true
+#    var.paths: ["/var/log/postgresql/postgresql-*.log"]
+
+- module: mysql
+  error:
     enabled: true
-    var.paths: ["/var/log/postgresql/postgresql-*.log"]
+    var.paths: ["/var/log/mysql/error.log*"]
+  slowlog:
+    enabled: true
+    var.paths: ["/var/log/mysql-slow.log*"]
