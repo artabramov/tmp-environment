@@ -144,10 +144,23 @@ services:
       MYSQL_USER: "admin"
       MYSQL_PASSWORD: "admin"
     volumes:
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - mysql_data:/var/lib/mysql
       - mysql_log:/var/log/mysql
     ports:
       - "3306:3306"
+
+    #docker exec -d mysql touch /var/log/mysql/mysql.log
+    #docker exec -d mysql chown mysql:mysql /var/log/mysql/mysql.log
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL general_log='ON';"
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL general_log_file='/var/log/mysql/mysql.log';"
+    #docker exec -d mysql touch /var/log/mysql/mysql-slow.log
+    #docker exec -d mysql chown mysql:mysql /var/log/mysql/mysql-slow.log
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL slow_query_log=1;"
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL slow_query_log_file='/var/log/mysql/mysql-slow.log';"
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL long_query_time=1;"
+    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL log_queries_not_using_indexes=0;"
+
 
 volumes:
   #postgres_data:

@@ -10,6 +10,8 @@ filebeat.inputs:
     - /var/log/celery/*.log
     #- /var/log/postgresql/*.log
     - /var/log/app/*.log*
+    - /var/log/mysql/mysql.log*
+    - /var/log/mysql/mysql-slow.log*
 
 processors:
   - dissect:
@@ -80,7 +82,7 @@ filebeat.modules:
 - module: mysql
   error:
     enabled: true
-    var.paths: ["/var/log/mysql/error.log*"]
+    var.paths: ["/var/log/mysql/mysql.log*"]
   slowlog:
     enabled: true
-    var.paths: ["/var/log/mysql-slow.log*"]
+    var.paths: ["/var/log/mysql/mysql-slow.log*"]
