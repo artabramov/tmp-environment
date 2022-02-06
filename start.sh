@@ -1,5 +1,5 @@
 docker build -t app ./app/
-docker build -t app/nginx ./nginx/
+#docker build -t app/nginx ./nginx/
 docker-compose up -d
 
 docker exec -d nginx rm /var/log/nginx/error.log
