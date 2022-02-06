@@ -1,13 +1,13 @@
 FROM python:3.10
 RUN apt-get update
-RUN mkdir /app
-WORKDIR /app
+RUN mkdir /echidna
+WORKDIR /echidna
 
 RUN mkdir /var/log/celery
 RUN chown -R www-data /var/log/celery
 
-RUN mkdir /var/log/app
-RUN chown -R www-data /var/log/app
+RUN mkdir /var/log/echidna
+RUN chown -R www-data /var/log/echidna
 
 # apache
 RUN apt-get install -y apache2 apache2-dev
@@ -20,7 +20,7 @@ RUN mv --force ./000-default.conf /etc/apache2/sites-available/000-default.conf
 # venv & requirements
 RUN python3.10 -m venv ./venv
 RUN ./venv/bin/pip3.10 install mod_wsgi
-RUN ln -s /app/venv/lib/python3.10/site-packages/mod_wsgi/server/mod_wsgi-*.so /app/venv/lib/python3.10/site-packages/mod_wsgi/server/mod_wsgi.so
+RUN ln -s /echidna/venv/lib/python3.10/site-packages/mod_wsgi/server/mod_wsgi-*.so /echidna/venv/lib/python3.10/site-packages/mod_wsgi/server/mod_wsgi.so
 #COPY ./src/requirements.txt ./
 #RUN ./venv/bin/pip3.10 install --no-cache-dir -r ./requirements.txt
 RUN ./venv/bin/pip3.10 install Flask==2.0.2
@@ -33,8 +33,8 @@ RUN ./venv/bin/pip3.10 install mysql-connector-python==8.0.28
 #RUN ./venv/bin/pip3.10 install psycopg2==2.9.2
 RUN ./venv/bin/pip3.10 install -U "celery[redis]"
 
-# app
-COPY ./app/ ./
+# echidna
+COPY ./echidna/ ./
 EXPOSE 80
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 

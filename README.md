@@ -36,9 +36,9 @@ celery -A app.workers.worker_user control shutdown
 celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --uid=www-data --loglevel=info
 celery -A app.core.app_worker worker -n flask_worker.%n -Q app -f /var/log/celery/celery.log --loglevel=info
 
-source /app/venv/bin/activate && celery -A app.workers.user_worker worker -n flask_worker.%n -Q user -f /var/log/celery/celery.log --loglevel=info
+source /echidna/venv/bin/activate && celery -A app.workers.user_worker worker -n flask_worker.%n -Q user -f /var/log/celery/celery.log --loglevel=info
 
-source /app/venv/bin/activate && cd /app && clear && python3 -m unittest -v app.tests.user_tests
+source /echidna/venv/bin/activate && cd /echidna && clear && python3 -m unittest -v app.tests.user_tests
 
 ps aux|grep 'celery worker'
 sudo kill -9 process_id

@@ -1,4 +1,4 @@
-docker build -t app ./app/
+docker build -t echidna ./echidna/
 #docker build -t app/nginx ./nginx/
 docker-compose up -d
 

@@ -9,16 +9,16 @@ filebeat.inputs:
     - /var/log/rabbitmq/*.log*
     - /var/log/celery/*.log
     #- /var/log/postgresql/*.log
-    - /var/log/app/*.log*
+    - /var/log/echidna/*.log*
     - /var/log/mysql/mysql.log*
     - /var/log/mysql/mysql-slow.log*
 
 processors:
   - dissect:
       when.contains:
-        log.file.path: "/var/log/app/"
+        log.file.path: "/var/log/echidna/"
       tokenizer: '[%{asctime}] %{request.method} [%{request.url}] %{levelname} [%{name} in %{filename}, line %{lineno}: "%{message}"]'
-      target_prefix: "app"
+      target_prefix: "echidna"
       field: "message"
       
 #output.console:
@@ -48,9 +48,9 @@ output.elasticsearch:
   - index: "celery-%{+yyyy.MM.dd}"
     when.contains:
       log.file.path: "/var/log/celery/"
-  - index: "app-%{+yyyy.MM.dd}"
+  - index: "echidna-%{+yyyy.MM.dd}"
     when.contains:
-      log.file.path: "/var/log/app/"
+      log.file.path: "/var/log/echidna/"
 
 filebeat.modules:
 - module: nginx
