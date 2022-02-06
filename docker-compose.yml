@@ -144,7 +144,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: "app"
+      MYSQL_DATABASE: "echidna"
       MYSQL_USER: "admin"
       MYSQL_PASSWORD: "admin"
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
@@ -162,7 +162,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: user
       MONGO_INITDB_ROOT_PASSWORD: pass
-      MONGO_INITDB_DATABASE: db
+      MONGO_INITDB_DATABASE: echidna
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
     volumes:
