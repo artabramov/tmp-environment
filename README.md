@@ -42,3 +42,9 @@ source /app/venv/bin/activate && cd /app && clear && python3 -m unittest -v app.
 
 ps aux|grep 'celery worker'
 sudo kill -9 process_id
+
+# remove all volumes
+docker volume rm $(docker volume ls -q)
+
+# kill vmmem
+wsl --shutdown

@@ -60,3 +60,22 @@ def user_get(user_id):
 
     return response_format(result)
 
+
+@app.route('/api/v1/document/', methods=['POST'])
+def document_post():
+    
+    from flask_pymongo import PyMongo
+    mongo = PyMongo(app)
+    db = mongo.db
+
+    document = {
+        'status': 'todo',
+        'content': 'document content'
+    }
+    db.documents.insert_one(document)
+
+    return response_format({
+        'code': 200, 
+        'error': 'OK',
+        'data': {},
+    })

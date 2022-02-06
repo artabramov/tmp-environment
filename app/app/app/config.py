@@ -11,6 +11,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://admin:admin@host.docker.internal:3306/app'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    MONGO_URI = 'mongodb://user:pass@host.docker.internal:27017/db?authSource=admin'
+
     CELERY_BROKER_URL = 'amqp://guest:guest@host.docker.internal:5672//'
     CELERY_RESULT_BACKEND = 'redis://host.docker.internal:6379/0'
     CELERY_TASK_LIST = ['app.tasks']
