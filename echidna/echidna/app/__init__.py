@@ -84,4 +84,4 @@ from app.routes import hello
 from app.routes import migrate
 from app.routes import user_routes
 from app.routes import post_routes
-
+from app.routes import group_routes
