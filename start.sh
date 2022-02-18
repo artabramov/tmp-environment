@@ -1,10 +1,11 @@
 docker build -t echidna ./echidna/
-#docker build -t app/nginx ./nginx/
 docker-compose up -d
 
 docker exec -d nginx rm /var/log/nginx/error.log
 docker exec -d nginx rm /var/log/nginx/access.log
 docker restart nginx
+
+docker exec -d celery bash -c "source /echidna/venv/bin/activate && celery -A app.workers.user_worker worker -n flask_worker.%n -Q user -f /var/log/celery/celery.log --loglevel=info"
 
 #docker exec -d mysql touch /var/log/mysql/mysql.log
 #docker exec -d mysql chown mysql:mysql /var/log/mysql/mysql.log
