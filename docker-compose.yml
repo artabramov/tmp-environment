@@ -91,7 +91,6 @@ services:
       - rabbit
       - redis
 
-
   rabbit:
     image: rabbitmq:3-management
     container_name: rabbit
@@ -181,19 +180,6 @@ services:
       - mongo_config:/data/configdb
     ports:
       - "27017:27017"
-
-    #docker exec -d mysql touch /var/log/mysql/mysql.log
-    #docker exec -d mysql chown mysql:mysql /var/log/mysql/mysql.log
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL general_log='ON';"
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL general_log_file='/var/log/mysql/mysql.log';"
-    #docker exec -d mysql touch /var/log/mysql/mysql-slow.log
-    #docker exec -d mysql chown mysql:mysql /var/log/mysql/mysql-slow.log
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL slow_query_log=1;"
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL slow_query_log_file='/var/log/mysql/mysql-slow.log';"
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL long_query_time=1;"
-    #docker exec -d mysql mysql -u root -padmin -e "SET GLOBAL log_queries_not_using_indexes=0;"
-
-
 volumes:
   #postgres_data:
   mysql_data:
