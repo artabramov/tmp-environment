@@ -1,4 +1,4 @@
-docker build -t echidna ./echidna/
+docker build --no-cache -t echidna ./echidna/
 docker-compose up -d
 
 docker exec -d nginx rm /var/log/nginx/error.log
