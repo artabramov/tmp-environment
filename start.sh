@@ -1,3 +1,4 @@
+docker rmi echidna
 docker build --no-cache -t echidna ./echidna/
 docker-compose up -d
 
