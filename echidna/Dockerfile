@@ -35,10 +35,7 @@ RUN ./venv/bin/pip3.10 install --no-cache-dir -r ./requirements.txt
 #RUN ./venv/bin/pip3.10 install psycopg2==2.9.2
 #RUN ./venv/bin/pip3.10 install -U "celery[redis]"
 
-# echidna
-#COPY ./echidna/ ./
+# apache
 EXPOSE 80
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-
-# celery
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
