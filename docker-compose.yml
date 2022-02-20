@@ -78,7 +78,7 @@ services:
           memory: 1G
 
   mongo:
-    image: mongo
+    image: mongo:5.0.6
     container_name: mongo
     depends_on:
       - filebeat
@@ -100,7 +100,7 @@ services:
           memory: 1G
 
   redis:
-    image: bitnami/redis
+    image: bitnami/redis:6.2.6
     container_name: redis
     depends_on:
       - filebeat
@@ -115,7 +115,7 @@ services:
           memory: 500M
 
   rabbit:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.9.13-management
     container_name: rabbit
     depends_on:
       - mysql
@@ -156,7 +156,7 @@ services:
           memory: 500M
 
   flower:
-    image: mher/flower
+    image: mher/flower:0.9.7
     container_name: flower
     depends_on:
       - celery
