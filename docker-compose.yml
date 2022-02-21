@@ -148,6 +148,7 @@ services:
     restart: always
     volumes:
     - celery_log:/var/log/celery
+    - echidna_log:/var/log/echidna
     ports:
     - "8082:80"
     deploy:
