@@ -3,7 +3,7 @@ RUN apt-get update
 
 # echidna
 RUN mkdir /echidna
-RUN git clone https://github.com/artabramov/echidna-app.git /echidna
+RUN git clone https://github.com/artabramov/echidna.git /echidna
 WORKDIR /echidna
 
 RUN mkdir /var/log/celery

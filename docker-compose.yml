@@ -11,11 +11,11 @@ services:
       - 9200:9200
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    deploy:
-      resources:
-        limits:
-          cpus: 0.50
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: 0.50
+    #      memory: 1G
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.6.2
@@ -33,10 +33,10 @@ services:
       - mysql_log:/var/log/mysql:ro
       - echidna_log:/var/log/echidna:ro
     command: ["filebeat", "-e", "-strict.perms=false"]
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 500M
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
@@ -48,10 +48,10 @@ services:
       - 5601:5601
     links:
       - elasticsearch
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 1G
 
   mysql:
     image: mysql:8.0.28
@@ -72,10 +72,10 @@ services:
       - mysql_log:/var/log/mysql
     ports:
       - "3306:3306"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 1G
 
   mongo:
     image: mongo:5.0.6
@@ -94,10 +94,10 @@ services:
       - mongo_config:/data/configdb
     ports:
       - "27017:27017"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 1G
 
   redis:
     image: bitnami/redis:6.2.6
@@ -109,10 +109,10 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - "6379:6379"
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 500M
 
   rabbit:
     image: rabbitmq:3.9.13-management
@@ -135,10 +135,10 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 1G
 
   celery:
     image: echidna
@@ -151,10 +151,10 @@ services:
     - echidna_log:/var/log/echidna
     ports:
     - "8082:80"
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 500M
 
   flower:
     image: mher/flower:0.9.7
@@ -167,10 +167,10 @@ services:
     environment:
       CELERY_BROKER_URL: amqp://guest:guest@host.docker.internal:5672//
       CELERY_RESULT_BACKEND: redis://host.docker.internal:6379/0
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 500M
 
   echidna:
     image: echidna
@@ -183,10 +183,10 @@ services:
     - echidna_log:/var/log/echidna
     ports:
     - "8081:80"
-    deploy:
-      resources:
-        limits:
-          memory: 1G
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 1G
 
   nginx:
     image: nginx:1.21.6
@@ -202,10 +202,10 @@ services:
     volumes:
     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     - nginx_log:/var/log/nginx
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    #deploy:
+    #  resources:
+    #    limits:
+    #      memory: 500M
 
   #postgres:
   #  image: postgres:13.3
