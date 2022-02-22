@@ -1,4 +1,4 @@
-version: '3.2'
+version: "3.2"
 services:
 
   elasticsearch:
@@ -11,11 +11,10 @@ services:
       - 9200:9200
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    #deploy:
-    #  resources:
-    #    limits:
-    #      cpus: 0.50
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.6.2
@@ -33,10 +32,10 @@ services:
       - mysql_log:/var/log/mysql:ro
       - echidna_log:/var/log/echidna:ro
     command: ["filebeat", "-e", "-strict.perms=false"]
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 500M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
@@ -48,10 +47,10 @@ services:
       - 5601:5601
     links:
       - elasticsearch
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   mysql:
     image: mysql:8.0.28
@@ -61,21 +60,21 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: "echidna"
-      MYSQL_USER: "admin"
-      MYSQL_PASSWORD: "admin"
-      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "${MYSQL_ALLOW_EMPTY_PASSWORD}"
     volumes:
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - mysql_data:/var/lib/mysql
       - mysql_log:/var/log/mysql
     ports:
       - "3306:3306"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   mongo:
     image: mongo:5.0.6
@@ -84,20 +83,20 @@ services:
       - filebeat
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: user
-      MONGO_INITDB_ROOT_PASSWORD: pass
-      MONGO_INITDB_DATABASE: echidna
-      MONGODB_DATA_DIR: /data/db
-      MONDODB_LOG_DIR: /dev/null
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGODB_DATA_DIR: ${MONGODB_DATA_DIR}
+      MONDODB_LOG_DIR: ${MONDODB_LOG_DIR}
     volumes:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
     ports:
       - "27017:27017"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   redis:
     image: bitnami/redis:6.2.6
@@ -109,10 +108,10 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - "6379:6379"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 500M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   rabbit:
     image: rabbitmq:3.9.13-management
@@ -123,22 +122,22 @@ services:
       - redis
     restart: always
     environment:
-      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-      RABBITMQ_DEFAULT_VHOST: /
-      RABBITMQ_LOG_BASE: /var/log/rabbitmq/
-      RABBITMQ_LOGS: rabbit.log
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+      RABBITMQ_LOG_BASE: ${RABBITMQ_LOG_BASE}
+      RABBITMQ_LOGS: ${RABBITMQ_LOGS}
     volumes:
       - rabbit_data:/var/lib/rabbitmq
       - rabbit_log:/var/log/rabbitmq
     ports:
       - "15672:15672"
       - "5672:5672"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   celery:
     image: echidna
@@ -151,10 +150,10 @@ services:
     - echidna_log:/var/log/echidna
     ports:
     - "8082:80"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 500M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   flower:
     image: mher/flower:0.9.7
@@ -167,10 +166,13 @@ services:
     environment:
       CELERY_BROKER_URL: amqp://guest:guest@host.docker.internal:5672//
       CELERY_RESULT_BACKEND: redis://host.docker.internal:6379/0
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 500M
+    volumes:
+    - flower_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    
 
   echidna:
     image: echidna
@@ -183,10 +185,10 @@ services:
     - echidna_log:/var/log/echidna
     ports:
     - "8081:80"
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 1G
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   nginx:
     image: nginx:1.21.6
@@ -202,10 +204,10 @@ services:
     volumes:
     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     - nginx_log:/var/log/nginx
-    #deploy:
-    #  resources:
-    #    limits:
-    #      memory: 500M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   #postgres:
   #  image: postgres:13.3
@@ -248,3 +250,4 @@ volumes:
   echidna_log:
   mongo_data:
   mongo_config:
+  flower_data:

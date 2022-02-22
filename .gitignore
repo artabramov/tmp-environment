@@ -1,3 +1,4 @@
+.env.dev
 app/app/app/__pycache__/
 app/app/app/core/__pycache__/
 app/app/app/models/__pycache__/
