@@ -13,7 +13,16 @@ global:
 
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: "prometheus"
     scrape_interval: 10s
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ["localhost:9090"]
+
+  #- job_name: "nginx"
+  #  scrape_interval: 10s
+  #  static_configs:
+  #  - targets: ["host.docker.internal:9113"]
+
+  - job_name: "node"
+    static_configs:
+    - targets: ["node-exporter:9100"]
