@@ -1,5 +1,6 @@
 docker rmi echidna
 docker build --no-cache -t echidna ./echidna/
+cp -n ./.env.tmp ./.env.dev
 docker-compose --env-file ./.env.dev up -d
 
 docker exec -d nginx rm /var/log/nginx/error.log
